@@ -4,8 +4,8 @@ echo 'PHP !!!';
 
 $servername = "localhost";
 $username = "root";
-$passeword = "root";
-$database = "myDB";
+$passeword = "";
+$database = "0e5lu_a2mi_extranet";
 
 try{
     $connection = new PDO("mysql:host=$servername;dbname=$database", $username, $passeword);
