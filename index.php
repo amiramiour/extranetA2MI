@@ -1,6 +1,16 @@
 <?php
+<<<<<<< HEAD
 session_start();
 header('Content-type: text/html; charset=utf-8');
+=======
+try {
+    $pdo = new PDO('mysql:host=127.0.0.1;port=3307;dbname=stage', 'root', '');
+    // Configure PDO to throw exceptions on errors
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Set character set to UTF-8
+    $pdo->exec("SET CHARACTER SET utf8");
+    echo "Connected successfully to the database!";
+>>>>>>> ba4ef69435d99e2fd6291649920de1b8ed846ad5
 
 /********Inclusion du fichier de connexion à la base de données**********/
 include ('connexionBD.php')
