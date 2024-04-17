@@ -1,25 +1,7 @@
 <?php
-<<<<<<< HEAD
 session_start();
 header('Content-type: text/html; charset=utf-8');
-=======
-try {
-    $pdo = new PDO('mysql:host=127.0.0.1;port=3307;dbname=stage', 'root', '');
-    // Configure PDO to throw exceptions on errors
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    // Set character set to UTF-8
-    $pdo->exec("SET CHARACTER SET utf8");
-    echo "Connected successfully to the database!";
->>>>>>> ba4ef69435d99e2fd6291649920de1b8ed846ad5
-
-/********Inclusion du fichier de connexion à la base de données**********/
-include ('connexionBD.php')
-/********Fin inclusion du fichier de connexion à la base de données**********/
-
-/********Actualisation de la session...**********/
-// Supprimez cette ligne car la connexion PDO est déjà gérée dans connexionbdd.php
-// actualiser_session($db);
-/********Fin actualisation de session...**********/
+include ('connexionBD.php');
 ?>
 
 <!DOCTYPE html>
@@ -30,8 +12,13 @@ include ('connexionBD.php')
     <title>Inscription</title>
     <!-- Inclure le fichier CSS de Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Inclure le fichier CSS personnalisé -->
+    <link href="styles.css" rel="stylesheet">
 </head>
 <body>
+
+<!-- Inclure le navbar -->
+<?php include('navbar.php'); ?>
 
 <div class="container">
     <div class="row">
@@ -52,7 +39,3 @@ include ('connexionBD.php')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-<?php
-// Vous n'avez pas besoin de fermer la connexion $db dans ce fichier, car vous n'avez pas de traitement SQL ici.
-?>
