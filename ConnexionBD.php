@@ -1,18 +1,14 @@
 <?php
-/*
-* Change the value of $password if you have set a password on the root userid
-* Change NULL to port number to use DBMS other than the default using port 3306
-*
-*/
-$user = 'root';
-$password = ''; //To be completed if you have set a password to root
-$database = '0e5lu_a2mi_extranet'; //To be completed to connect to a database. The database must exist.
-$port = 3307; //Default must be NULL to use default port
-$mysqli = new mysqli('127.0.0.1', $user, $password, $database, $port);
+try {
+    $pdo = new PDO('mysql:host=127.0.0.1;port=3307;dbname=stageA2MIdb', 'root', '');
+    // Configure PDO to throw exceptions on errors
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Set character set to UTF-8
+    $pdo->exec("SET CHARACTER SET utf8");
+    echo "Connected successfully to the database!";
 
-if ($mysqli->connect_error) {
-    die('Connect Error (' . $mysqli->connect_errno . ') '
-            . $mysqli->connect_error);
+} catch (PDOException $e) {
+    echo "Connection failed: " . $e->getMessage();
 }
 
 ?>
