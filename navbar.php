@@ -4,7 +4,7 @@
         <a href="index.php" class="navbar-brand">
             <img src="images/home.png" width="30" height="30" class="d-inline-block align-top" alt="">
         </a>
-        <a class="navbar-brand" href="#">A2MI - EXTRANET</a>
+        <a class="navbar-brand" href="index.php">A2MI - EXTRANET</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -27,7 +27,7 @@
                     <a class="nav-link" href="#">Devis</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Bons d'intervention</a>
+                    <a class="nav-link" href="liste_interventions.php">Bons d'intervention</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">SAV</a>
