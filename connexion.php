@@ -1,17 +1,23 @@
 <?php
+include('connexionBD.php');
+
 session_start();
 
 // Vérifier si l'utilisateur est déjà connecté
 if (isset($_SESSION['membre_id']) && isset($_SESSION['membre_mail'])) {
-    echo "Connexion réussie en tant que " . $_SESSION['membre_mail'];
-    echo "<br><a href='deconnexion.php'>Se déconnecter</a>";
-    exit();
+    // Redirection en fonction du type de membre
+    if ($_SESSION['membre_type'] === 'client') {
+        header('Location: profile_client.php');
+        exit();
+    } elseif ($_SESSION['membre_type'] === 'admin' || $_SESSION['membre_type'] === 'sous-admin') {
+        header('Location: profile_admin.php');
+        exit();
+    }
 }
 
 // Vérifier si le formulaire a été soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['validate']) && $_POST['validate'] === 'ok') {
     // Inclure le fichier de connexion à la base de données
-    include('connexionBD.php');
 
     try {
         $db = connexionbdd();
@@ -27,9 +33,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['validate']) && $_POST
                 $_SESSION['membre_mdp'] = $result['membre_mdp'];
                 $_SESSION['membre_type'] = $result['membre_type'];
 
-                // Rediriger l'utilisateur vers la page d'accueil après la connexion réussie
-                header('Location: connexion.php');
-                exit();
+                // Redirection en fonction du rôle de l'utilisateur
+                if ($_SESSION['membre_type'] === 'client') {
+                    // Redirection vers le profil du client
+                    header('Location: profile_client.php');
+                    exit();
+                } elseif ($_SESSION['membre_type'] === 'admin' || $_SESSION['membre_type'] === 'sous-admin') {
+                    // Redirection vers le profil de l'administrateur ou du sous-administrateur
+                    header('Location: profile_admin.php');
+                    exit();
+                }
             } else {
                 $error_message = "Mot de passe incorrect.";
             }
@@ -64,11 +77,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['validate']) && $_POST
                             <input type="email" class="form-control" id="mail" name="mail" required>
                         </div>
                         <div class="form-group">
-                            <label for="mdp">Passe :</label>
+                            <label for="mdp">Mot de Passe :</label>
                             <input type="password" class="form-control" id="mdp" name="mdp" required>
                         </div>
                         <input type="hidden" name="validate" value="ok">
                         <button type="submit" class="btn btn-primary">Connexion</button>
+                        <a href="mot_de_passe_oublie.php" class="btn btn-link">Mot de passe oublié ?</a>
                     </form>
                     <?php
                     // Afficher un message d'erreur s'il y a lieu
@@ -87,4 +101,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['validate']) && $_POST
 
 </body>
 </html>
+
 
