@@ -32,42 +32,41 @@ $interventions = $query->fetchAll();
     <!-- Inclure le fichier CSS de Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Inclure le fichier CSS personnalisé -->
-    <link href="css/styles.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 </head>
 <body>
 
 <!-- Inclure le navbar -->
 <?php include('navbar.php'); ?>
 
-<h1 class="text-center mt-3">Liste des interventions</h1>
-
-<div class="container">
+<div class="container mt-3">
     <!-- Boutons de tri -->
-    <div class="d-flex justify-content-between mb-3">
+    <div class="d-flex justify-content-between centered-buttons">
         <a href="?sort=date" class="btn btn-primary" style="background-color: #C8356C;">Trier par date croissante</a>
-        <a href="#" class="btn btn-primary" style="background-color: #C8356C;">Créer un bon d'intervention</a>
+        <a href="bi_form.php" class="btn btn-primary" style="background-color: #C8356C;">Créer un bon d'intervention</a>
         <a href="?sort=name" class="btn btn-primary" style="background-color: #C8356C;">Trier par nom croissant</a>
     </div>
 
+    <!-- Nombre d'interventions -->
+    <div class="text-center mt-3">
+        <p style="color: #C8356C; font-size: larger; font-weight: bold; text-decoration: underline;">Il y a : <?php echo count($interventions); ?> intervention(s) </p>
+    </div>
 
     <!-- Liste des interventions -->
-    <?php foreach($interventions as $intervention): ?>
-        <div class="intervention text-center">
-            <a href="#" style="color: #C8356C;"><?php echo $intervention['membre_nom'] . ' ' . $intervention['membre_prenom']; ?></a>
-            <span style="color: #C8356C;">→</span>
-            <a href="#" style="color: #C8356C;">
-                <?php
-                if (isset($intervention['formatted_date'])) {
-                    echo $intervention['formatted_date'];
-                } else {
-                    echo date('d/m/Y', strtotime($intervention['bi_datein']));
-                }
-                ?>
-            </a>
-        </div>
-    <?php endforeach; ?>
-
+    <div class="d-flex flex-wrap justify-content-center mt-3">
+        <?php foreach($interventions as $intervention): ?>
+            <div class="client-card">
+                <a href="#" class="client-link">
+                    <img src="images/icon.png" style="width: 50px; height: 50px; alt="Icon" class="icon-size" >
+                    <h3><?php echo $intervention['membre_nom']; ?></h3>
+                    <p><?php echo $intervention['membre_prenom']; ?></p>
+                    <p><?php echo date('d/m/Y', strtotime($intervention['bi_datein'])); ?></p>
+                </a>
+            </div>
+        <?php endforeach; ?>
+    </div>
 </div>
+
 
 <!-- Inclure le fichier JavaScript de Bootstrap à la fin du corps -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>

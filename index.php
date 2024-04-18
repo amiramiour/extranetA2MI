@@ -45,7 +45,7 @@ include ('connexionBD.php');
                     <a class="nav-link" href="#">Devis</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Bons d'intervention</a>
+                    <a class="nav-link" href="liste_interventions.php">Bons d'intervention</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">SAV</a>
