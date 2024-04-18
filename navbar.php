@@ -2,7 +2,7 @@
     <div class="container-fluid">
         <!-- Marque et bascule pour mobile -->
         <a href="index.php" class="navbar-brand">
-            <img src="home.png" width="30" height="30" class="d-inline-block align-top" alt="">
+            <img src="images/home.png" width="30" height="30" class="d-inline-block align-top" alt="">
         </a>
         <a class="navbar-brand" href="#">A2MI - EXTRANET</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
