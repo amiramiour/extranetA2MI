@@ -36,7 +36,7 @@ if(isset($_POST['submit'])) {
 
             // Insérer les informations du client dans la base de données
             $query = $pdo->prepare("INSERT INTO membres (membre_entreprise,membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_inscription, membre_mail, membre_type) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, ?)");
-            $query->execute([$entreprise,$nom, $prenom, password_hash($password, PASSWORD_DEFAULT), $adresse, $adresse_comp, $cp, $ville, $tel, $mail, $type]);
+            $query->execute([$entreprise,$nom, $prenom, password_hash($password, PASSWORD_BCRYPT), $adresse, $adresse_comp, $cp, $ville, $tel, $mail, $type]);
 
             // Envoi de l'email au client
             sendEmailToClient($mail, $prenom,$password);
@@ -101,52 +101,52 @@ function generateRandomString($length = 8) {
         <form action="create_account.php" method="post">
             <div id="message" class="mt-3"></div>
             <div class="form-group">
-                <label for="entreprise">Entreprise :</label>
+                <label for="entreprise">Entreprise </label>
                 <input type="text" id="entreprise" name="entreprise" class="form-control">
             </div>
 
             <div class="form-group">
-                <label for="nom">Nom :</label>
+                <label for="nom">Nom *</label>
                 <input type="text" id="nom" name="nom" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label for="prenom">Prénom :</label>
+                <label for="prenom">Prénom *</label>
                 <input type="text" id="prenom" name="prenom" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label for="adresse">Adresse :</label>
+                <label for="adresse">Adresse *</label>
                 <input type="text" id="adresse" name="adresse" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label for="adresse_comp">Complément d'adresse :</label>
+                <label for="adresse_comp">Complément d'adresse </label>
                 <input type="text" id="adresse_comp" name="adresse_comp" class="form-control">
             </div>
 
             <div class="form-group">
-                <label for="cp">Code postal :</label>
+                <label for="cp">Code postal *</label>
                 <input type="text" id="cp" name="cp" class="form-control" pattern="\d{5}" title="Veuillez entrer un code postal valide à 5 chiffres" required>
             </div>
 
             <div class="form-group">
-                <label for="ville">Ville :</label>
+                <label for="ville">Ville *</label>
                 <input type="text" id="ville" name="ville" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label for="tel">Téléphone :</label>
+                <label for="tel">Téléphone *</label>
                 <input type="text" id="tel" name="tel" class="form-control" pattern="[0-9]{10}" required>
             </div>
 
             <div class="form-group">
-                <label for="mail">Email :</label>
+                <label for="mail">Email *</label>
                 <input type="email" id="mail" name="mail" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label for="type">Type de compte :</label>
+                <label for="type">Type de compte </label>
                 <select id="type" name="type" class="form-control" required>
                     <option value="client">Client</option>
                     <option value="sousadmin">Sous-administrateur</option>
