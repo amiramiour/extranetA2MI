@@ -10,6 +10,7 @@ include 'ConnexionBD.php'; // Fichier de configuration de la connexion PDO
 
 if(isset($_POST['submit'])) {
     // Récupérer les données du formulaire
+    $entreprise = $_POST['entreprise'];
     $nom = $_POST['nom'];
     $prenom = $_POST['prenom'];
     $adresse = $_POST['adresse'];
@@ -18,31 +19,35 @@ if(isset($_POST['submit'])) {
     $ville = $_POST['ville'];
     $tel = $_POST['tel'];
     $mail = $_POST['mail'];
+    $type = $_POST['type'];
 
-    // Vérifier si un compte avec la même adresse e-mail existe déjà
-    $query = $pdo->prepare("SELECT * FROM membres WHERE membre_mail = ?");
-    $query->execute([$mail]);
-    $existing_account = $query->fetch();
-
-    if(!$existing_account) {
-        // Générer automatiquement un mot de passe
-        $password = generateRandomString(10);
-
-        // Insérer les informations du client dans la base de données
-        $query = $pdo->prepare("INSERT INTO membres (membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_inscription, membre_mail, membre_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, 'client')");
-        $query->execute([$nom, $prenom, password_hash($password, PASSWORD_DEFAULT), $adresse, $adresse_comp, $cp, $ville, $tel, $mail]);
-
-        // Envoi de l'email au client
-        sendEmailToClient($mail, $prenom,$password);
-
-        $message = 'Compte créé avec succès. Un email de vérification a été envoyé au client.';
-        $type = 'success';
-    } else {
-        $message = 'Un compte avec cette adresse e-mail existe déjà.';
+    if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
+        $message = 'L\'adresse email n\'est pas valide.';
         $type = 'danger';
+    } else {
+        // Vérifier si un compte avec la même adresse e-mail existe déjà
+        $query = $pdo->prepare("SELECT * FROM membres WHERE membre_mail = ?");
+        $query->execute([$mail]);
+        $existing_account = $query->fetch();
+
+        if(!$existing_account) {
+            // Générer automatiquement un mot de passe
+            $password = generateRandomString(10);
+
+            // Insérer les informations du client dans la base de données
+            $query = $pdo->prepare("INSERT INTO membres (membre_entreprise,membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_inscription, membre_mail, membre_type) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, ?)");
+            $query->execute([$entreprise,$nom, $prenom, password_hash($password, PASSWORD_DEFAULT), $adresse, $adresse_comp, $cp, $ville, $tel, $mail, $type]);
+
+            // Envoi de l'email au client
+            sendEmailToClient($mail, $prenom,$password);
+
+            $message = 'Compte créé avec succès. Un email de vérification a été envoyé au client.';
+            $type = 'success';
+        } else {
+            $message = 'Un compte avec cette adresse e-mail existe déjà.';
+            $type = 'danger';
+        }
     }
-    // Appel de la fonction showMessage pour afficher le message
-//echo '<script>showMessage("' . $message . '", "' . $type . '");</script>';
 }
 
 // Fonction pour envoyer un email au client avec les informations de connexion
@@ -62,7 +67,7 @@ function sendEmailToClient($email, $prenom, $password) {
         $mail->addAddress($email, $prenom);   // Destinataire et prénom du client
         $mail->isHTML(true);
         $mail->Subject = 'Creation de compte reussie';
-        $mail->Body = 'Bonjour ' . $prenom . ',<br><br>Votre compte a été créé avec succès. Voici vos informations de connexion :<br><br>Nom d\'utilisateur : ' . $email . '<br>Mot de passe : ' . $password . '<br><br>Merci de votre confiance.<br>L\'équipe de notre site.';
+        $mail->Body = 'Bonjour ' . $prenom . ',<br><br>Votre compte a été créé avec succès. Voici vos informations de connexion :<br><br>Nom d\'utilisateur : ' . $email . '<br>Mot de passe : ' . $password . '<br><br>Vous pouvez vous connecter à votre compte en utilisant le lien suivant : <a href="#">Se connecter</a><br><br>Merci de votre confiance.<br>L\'équipe de notre site.';
         $mail->send();
         
         $_SESSION['message'] = 'Email envoyé avec succès.';
@@ -94,6 +99,12 @@ function generateRandomString($length = 8) {
     <div class="container">
         <h2>Création de compte client</h2>
         <form action="create_account.php" method="post">
+            <div id="message" class="mt-3"></div>
+            <div class="form-group">
+                <label for="entreprise">Entreprise :</label>
+                <input type="text" id="entreprise" name="entreprise" class="form-control">
+            </div>
+
             <div class="form-group">
                 <label for="nom">Nom :</label>
                 <input type="text" id="nom" name="nom" class="form-control" required>
@@ -116,7 +127,7 @@ function generateRandomString($length = 8) {
 
             <div class="form-group">
                 <label for="cp">Code postal :</label>
-                <input type="text" id="cp" name="cp" class="form-control" required>
+                <input type="text" id="cp" name="cp" class="form-control" pattern="\d{5}" title="Veuillez entrer un code postal valide à 5 chiffres" required>
             </div>
 
             <div class="form-group">
@@ -126,7 +137,7 @@ function generateRandomString($length = 8) {
 
             <div class="form-group">
                 <label for="tel">Téléphone :</label>
-                <input type="text" id="tel" name="tel" class="form-control" required>
+                <input type="text" id="tel" name="tel" class="form-control" pattern="[0-9]{10}" required>
             </div>
 
             <div class="form-group">
@@ -134,10 +145,18 @@ function generateRandomString($length = 8) {
                 <input type="email" id="mail" name="mail" class="form-control" required>
             </div>
 
+            <div class="form-group">
+                <label for="type">Type de compte :</label>
+                <select id="type" name="type" class="form-control" required>
+                    <option value="client">Client</option>
+                    <option value="sousadmin">Sous-administrateur</option>
+                </select>
+            </div>
+
             <button type="submit" name="submit" class="btn btn-primary">Créer le compte</button>
         </form>
     </div>
-    <div id="message" class="mt-3"></div>
+    
 
     <!-- Ajout du script Bootstrap (facultatif si vous n'utilisez pas des fonctionnalités JavaScript de Bootstrap) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
