@@ -1,7 +1,5 @@
 <?php
-require 'Exception.php';
-require 'PHPMailer.php';
-require 'SMTP.php';
+require 'C:\wamp64\www\stageA2MI\extranetA2MI\vendor\autoload.php';
 
 // Utilisation de la classe PHPMailer
 use PHPMailer\PHPMailer\PHPMailer;
@@ -27,8 +25,7 @@ if(isset($_POST['submit'])) {
     $existing_account = $query->fetch();
 
     if(!$existing_account) {
-        // Générer automatiquement un nom d'utilisateur et un mot de passe
-        $username = generateRandomString(8);
+        // Générer automatiquement un mot de passe
         $password = generateRandomString(10);
 
         // Insérer les informations du client dans la base de données
@@ -36,32 +33,36 @@ if(isset($_POST['submit'])) {
         $query->execute([$nom, $prenom, password_hash($password, PASSWORD_DEFAULT), $adresse, $adresse_comp, $cp, $ville, $tel, $mail]);
 
         // Envoi de l'email au client
-        sendEmailToClient($mail, $prenom, $username, $password);
+        sendEmailToClient($mail, $prenom,$password);
 
-        echo 'Compte créé avec succès. Un email de vérification a été envoyé au client.';
+        $message = 'Compte créé avec succès. Un email de vérification a été envoyé au client.';
+        $type = 'success';
     } else {
-        echo 'Un compte avec cette adresse e-mail existe déjà.';
+        $message = 'Un compte avec cette adresse e-mail existe déjà.';
+        $type = 'danger';
     }
+    // Appel de la fonction showMessage pour afficher le message
+//echo '<script>showMessage("' . $message . '", "' . $type . '");</script>';
 }
 
 // Fonction pour envoyer un email au client avec les informations de connexion
-function sendEmailToClient($email, $prenom, $username, $password) {
+function sendEmailToClient($email, $prenom, $password) {
     $mail = new PHPMailer(true);
 
     try {
         // Paramètres du serveur SMTP
         $mail->isSMTP();
-        $mail->Host = 'localhost';
+        $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'rania.masdoua@gmail.com';  // Adresse email de l'expéditeur
-        $mail->Password = 'Rania2001*';           // Mot de passe de l'expéditeur
+        $mail->Username = 'masdouarania02@gmail.com';  // Adresse email de l'expéditeur
+        $mail->Password = 'wmeffiafffoqvkvl';           // Mot de passe de l'expéditeur
         $mail->SMTPSecure = 'tls';
-        $mail->Port = 25;
-        $mail->setFrom('','');
+        $mail->Port = 587;
+        $mail->setFrom('masdouarania02@gmail.com','Masdoua');
         $mail->addAddress($email, $prenom);   // Destinataire et prénom du client
         $mail->isHTML(true);
-        $mail->Subject = 'Création de compte réussie';
-        $mail->Body = 'Bonjour ' . $prenom . ',<br><br>Votre compte a été créé avec succès. Voici vos informations de connexion :<br><br>Nom d\'utilisateur : ' . $username . '<br>Mot de passe : ' . $password . '<br><br>Merci de votre confiance.<br>L\'équipe de notre site.';
+        $mail->Subject = 'Creation de compte reussie';
+        $mail->Body = 'Bonjour ' . $prenom . ',<br><br>Votre compte a été créé avec succès. Voici vos informations de connexion :<br><br>Nom d\'utilisateur : ' . $email . '<br>Mot de passe : ' . $password . '<br><br>Merci de votre confiance.<br>L\'équipe de notre site.';
         $mail->send();
         
         $_SESSION['message'] = 'Email envoyé avec succès.';
@@ -86,35 +87,75 @@ function generateRandomString($length = 8) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Création de compte client</title>
+    <!-- Ajout du lien vers Bootstrap -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <h2>Création de compte client</h2>
-    <form action="create_account.php" method="post">
-        <label for="nom">Nom :</label>
-        <input type="text" id="nom" name="nom" required><br>
+    <div class="container">
+        <h2>Création de compte client</h2>
+        <form action="create_account.php" method="post">
+            <div class="form-group">
+                <label for="nom">Nom :</label>
+                <input type="text" id="nom" name="nom" class="form-control" required>
+            </div>
 
-        <label for="prenom">Prénom :</label>
-        <input type="text" id="prenom" name="prenom" required><br>
+            <div class="form-group">
+                <label for="prenom">Prénom :</label>
+                <input type="text" id="prenom" name="prenom" class="form-control" required>
+            </div>
 
-        <label for="adresse">Adresse :</label>
-        <input type="text" id="adresse" name="adresse" required><br>
+            <div class="form-group">
+                <label for="adresse">Adresse :</label>
+                <input type="text" id="adresse" name="adresse" class="form-control" required>
+            </div>
 
-        <label for="adresse_comp">Complément d'adresse :</label>
-        <input type="text" id="adresse_comp" name="adresse_comp"><br>
+            <div class="form-group">
+                <label for="adresse_comp">Complément d'adresse :</label>
+                <input type="text" id="adresse_comp" name="adresse_comp" class="form-control">
+            </div>
 
-        <label for="cp">Code postal :</label>
-        <input type="text" id="cp" name="cp" required><br>
+            <div class="form-group">
+                <label for="cp">Code postal :</label>
+                <input type="text" id="cp" name="cp" class="form-control" required>
+            </div>
 
-        <label for="ville">Ville :</label>
-        <input type="text" id="ville" name="ville" required><br>
+            <div class="form-group">
+                <label for="ville">Ville :</label>
+                <input type="text" id="ville" name="ville" class="form-control" required>
+            </div>
 
-        <label for="tel">Téléphone :</label>
-        <input type="text" id="tel" name="tel" required><br>
+            <div class="form-group">
+                <label for="tel">Téléphone :</label>
+                <input type="text" id="tel" name="tel" class="form-control" required>
+            </div>
 
-        <label for="mail">Email :</label>
-        <input type="email" id="mail" name="mail" required><br>
+            <div class="form-group">
+                <label for="mail">Email :</label>
+                <input type="email" id="mail" name="mail" class="form-control" required>
+            </div>
 
-        <input type="submit" name="submit" value="Créer le compte">
-    </form>
+            <button type="submit" name="submit" class="btn btn-primary">Créer le compte</button>
+        </form>
+    </div>
+    <div id="message" class="mt-3"></div>
+
+    <!-- Ajout du script Bootstrap (facultatif si vous n'utilisez pas des fonctionnalités JavaScript de Bootstrap) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Fonction pour afficher un message dans la zone de message
+        function showMessage(message, type) {
+            var messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = '<div class="alert alert-' + type + '">' + message + '</div>';
+        }
+    </script>
+    <?php
+    // Appel de la fonction showMessage pour afficher le message PHP
+    if(isset($message) && isset($type)) {
+        echo '<script>showMessage("' . $message . '", "' . $type . '");</script>';
+    }
+    ?>
 </body>
 </html>
