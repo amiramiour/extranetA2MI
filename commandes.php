@@ -27,11 +27,66 @@ CREATE TABLE IF NOT EXISTS `commande` (
 // Connexion à la base de données
 include 'ConnexionBD.php'; // Fichier de configuration de la connexion PDO
 
-//récupérer les clients qui ont des commandes avec l'etat de la commande sachant que membre_id pointe sur la table membres
-$query = $pdo->query("SELECT cmd_reference FROM commande");
+$query = $pdo->query("SELECT c.membre_id, m.membre_nom AS nom_client , 
+                      m.membre_prenom, c.cmd_id, c.cmd_reference, c.cmd_designation, 
+                      c.cmd_prixachat, c.cmd_prixvente, c.cmd_datein, c.cmd_dateout, c.cmd_prixventettc, 
+                      l.membre_nom AS nom_livreur, 
+                      c.cmd_dateSouhait, e.commande_etat, c.cmd_fournisseur, f.nomFournisseur, m.membre_nom 
+                      FROM commande c JOIN membres m ON m.membre_id = c.membre_id 
+                      JOIN membres l ON c.cmd_livreur = l.membre_id 
+                      JOIN fournisseur f ON c.cmd_fournisseur = f.idFournisseur 
+                      JOIN commande_etats e ON c.cmd_etat = e.id_etat_cmd 
+                      ORDER BY c.cmd_datein ASC");
 $query->execute();
 $clients = $query->fetchAll();
 
 //verifier la variable clients
-var_dump($clients);
+//var_dump($clients);
 ?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Commandes</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Liste des commandes</h2>
+        <a href="ajouter_commande.php" class="btn btn-primary mb-3">Ajouter une commande</a>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Référence</th>
+                    <th>Désignation</th>
+                    <th>Prix d'achat</th>
+                    <th>Prix de vente</th>
+                    <th>Date d'entrée</th>
+                    <th>Date de sortie</th>
+                    <th>Prix de vente TTC</th>
+                    <th>Livreur</th>
+                    <th>Date de livraison souhaitée</th>
+                    <th>Etat</th>
+                    <th>Fournisseur</th>
+                    <th>Client</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($clients as $client): ?>
+                    <tr>
+                        <td><?= $client['cmd_reference'] ?></td>
+                        <td><?= $client['cmd_designation'] ?></td>
+                        <td><?= $client['cmd_prixachat'] ?></td>
+                        <td><?= $client['cmd_prixvente'] ?></td>
+                        <td><?= date('d/m/Y H:i:s', $client['cmd_datein']) ?></td>
+                        <td><?= date('d/m/Y H:i:s', $client['cmd_dateout']) ?></td>
+                        <td><?= $client['cmd_prixventettc'] ?></td>
+                        <td><?= $client['nom_livreur'] ?></td>
+                        <td><?= date('d/m/Y H:i:s', $client['cmd_dateSouhait']) ?></td>
+                        <td><?= $client['commande_etat'] ?></td>
+                        <td><?= $client['nomFournisseur'] ?></td>
+                        <td><?= $client['nom_client'] ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+    </div>
