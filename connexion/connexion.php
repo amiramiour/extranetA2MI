@@ -1,5 +1,5 @@
 <?php
-include('connexionBD.php');
+include('../connexionBD.php');
 
 session_start();
 
@@ -7,10 +7,10 @@ session_start();
 if (isset($_SESSION['membre_id']) && isset($_SESSION['membre_mail'])) {
     // Redirection en fonction du type de membre
     if ($_SESSION['membre_type'] === 'client') {
-        header('Location: profile_client.php');
+        header('Location: ../profile/profile_client.php');
         exit();
     } elseif ($_SESSION['membre_type'] === 'admin' || $_SESSION['membre_type'] === 'sous-admin') {
-        header('Location: profile_admin.php');
+        header('Location: ../profile/profile_admin.php');
         exit();
     }
 }

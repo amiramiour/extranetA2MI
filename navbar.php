@@ -30,7 +30,7 @@
                     <a class="nav-link" href="#">Bons d'intervention</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="sav.php">SAV</a>
+                    <a class="nav-link" href="SAV/sav-formulaire.php">SAV</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Prêts</a>
@@ -41,7 +41,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#">Liste d'administrateurs</a>
                 </li>
-                <a href="deconnexion.php">Se déconnecter</a>
+                <a href="connexion/deconnexion.php">Se déconnecter</a>
 
             </ul>
         </div>
