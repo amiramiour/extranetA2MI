@@ -47,7 +47,7 @@ include('connexionBD.php');
                         <option value="Forfait 2H supplémentaires">Forfait 2H supplémentaires</option>
                     </select>
                     <label for="nbpiece_1" style="margin-right: 5px;">/ Pièces *</label>
-                    <input class="field" type="number" name="dynamic[1][]" id="nbpiece_1" size="5" placeholder="Pièces" pattern="\d+" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" style="width: 100px; margin-right: 5px;" required/>
+                    <input class="field" type="number" name="dynamic[1][]" id="nbpiece_1" size="5" placeholder="Pièces" pattern="\d+" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" style="width: 100px; margin-right: 5px;" required min="0"/>
                     <label for="prixunit_1" style="margin-right: 5px;">/ Prix unitaire HT *</label>
                     <input class="field" type="text" name="dynamic[1][]" id="prixunit_1" size="9" placeholder="Prix" pattern="[0-9]+([\.,][0-9]+)?" onkeypress="return event.charCode >= 48 && event.charCode <= 57 || event.charCode == 44 || event.charCode == 46" style="width: 150px;" required/>
                     <button type="button" class="btn btn-danger" onclick="supprimerChamp(this)">X</button>
@@ -76,6 +76,7 @@ include('connexionBD.php');
 
 
             <label>Type de paiement *</label><br/>
+            <input type="radio" name="paiement" value="payplug" required> PayPlug<br/>
             <input type="radio" name="paiement" value="cb" required> CB<br/>
             <input type="radio" name="paiement" value="cheque" required> Chèque<br/>
             <input type="radio" name="paiement" value="espece" required> Espèces<br/>
@@ -113,6 +114,14 @@ include('connexionBD.php');
         var regle = document.querySelector('input[name="regle"]:checked') ? "oui" : "non";
         var envoieCourrier = document.querySelector('input[name="envoie_courrier"]:checked') ? "courrier" : "";
         var envoieMail = document.querySelector('input[name="envoie_mail"]:checked') ? "mail" : "";
+        var envoiePar = "";
+
+        if (envoieCourrier && envoieMail) {
+            envoiePar = "Courrier et Mail";
+        } else {
+            envoiePar = envoieCourrier || envoieMail;
+        }
+
         var facturation = document.querySelector('input[name="facturation"]:checked').value;
         var dateFacturation = document.getElementById("date_differee").value;
         var paiement = document.querySelector('input[name="paiement"]:checked').value;
@@ -120,12 +129,13 @@ include('connexionBD.php');
         var heureDepart = document.getElementsByName("heure_depart")[0].value;
         var commentaire = document.getElementsByName("commentaire")[0].value;
 
+        console.log("BI n° unique : " + generateUniqueID());
         console.log("Facturer : " + facturer);
         console.log("Garantie : " + garantie);
         console.log("Contrat/Pack : " + contrat);
         console.log("Service à la personne : " + servicePersonne);
         console.log("Facture réglée : " + regle);
-        console.log("Envoyer facture par : " + (envoieCourrier || envoieMail));
+        console.log("Envoyer facture par : " + envoiePar);
         console.log("Facturation : " + facturation);
         console.log("Date de facturation : " + dateFacturation);
         console.log("Type de paiement : " + paiement);
@@ -134,24 +144,46 @@ include('connexionBD.php');
         console.log("Commentaire : " + commentaire);
 
         var interventions = document.querySelectorAll('.intervention');
-        var totalPrix = 0;
+        var totalPrixHT = 0;
         var totalPieces = 0;
 
         interventions.forEach(function(intervention, index) {
-            var selectedIntervention = intervention.querySelector('select').value;
-            var nbPieces = parseInt(intervention.querySelector('input:nth-of-type(2)').value);
-            var prixUnitaire = parseFloat(intervention.querySelector('input:nth-of-type(3)').value);
-            var prixTotal = nbPieces * prixUnitaire;
+            var nbPiecesInput = intervention.querySelector('[name="dynamic[' + (index + 1) + '][]"]');
+            var prixUnitaireInput = intervention.querySelector('[name="dynamic[' + (index + 1) + '][]"]');
 
-            console.log("\nIntervention : " + selectedIntervention);
-            console.log("Nb pièces : " + nbPieces + " | Prix/pièce : " + prixUnitaire.toFixed(2) + "€ | Prix total : " + prixTotal.toFixed(2) + "€");
+            if (nbPiecesInput && prixUnitaireInput) {
+                var nbPieces = parseInt(nbPiecesInput.value);
+                var prixUnitaire = parseFloat(prixUnitaireInput.value);
+                var prixTotal = nbPieces * prixUnitaire;
 
-            totalPrix += prixTotal;
-            totalPieces += nbPieces;
+                console.log("\nIntervention : " + intervention.querySelector('select').value);
+                console.log("Nb pièces : " + nbPieces + " | Prix/pièce : " + prixUnitaire.toFixed(2) + "€ | Prix total : " + prixTotal.toFixed(2) + "€");
+
+                totalPieces += nbPieces;
+                totalPrixHT += prixTotal;
+            }
         });
 
+        var tauxTVA = 0.20; // Supposons une TVA de 20%
+        var montantTVA = totalPrixHT * tauxTVA;
+        var totalPrixTTC = totalPrixHT + montantTVA;
+
         console.log("\nTotal des pièces : " + totalPieces);
-        console.log("Total des prix : " + totalPrix.toFixed(2) + "€");
+        console.log("Coût total HT : " + totalPrixHT.toFixed(2) + "€");
+        console.log("Montant de la TVA : " + montantTVA.toFixed(2) + "€");
+        console.log("Coût total TTC : " + totalPrixTTC.toFixed(2) + "€");
+    }
+
+    // Ajouter un écouteur d'événement pour le bouton "Ajouter"
+    document.getElementById('btnAjouter').addEventListener('click', function() {
+        // Appeler la fonction afficherResultat pour inclure les nouvelles interventions
+        afficherResultat();
+    });
+
+
+    // Fonction pour générer un ID unique pour chaque Bon d'Intervention
+    function generateUniqueID() {
+        return Math.floor(Math.random() * 1000); // Génère un nombre aléatoire entre 0 et 999
     }
 
     // Fonction appelée lorsque le formulaire est soumis
@@ -206,6 +238,17 @@ include('connexionBD.php');
         });
         // Ajouter le champ cloné à la liste des interventions
         document.getElementById('interventions').appendChild(clone);
+
+        // Ajouter un écouteur d'événements sur le bouton "Supprimer" du champ ajouté
+        var supprimerBtn = clone.querySelector('.btn-danger');
+        supprimerBtn.addEventListener('click', function() {
+            supprimerChamp(this);
+            // Mettre à jour les informations et effectuer les calculs
+            afficherResultat();
+        });
+
+        // Mettre à jour les informations et effectuer les calculs
+        afficherResultat();
     }
     // Supprimer un champ d'intervention
     function supprimerChamp(button) {
@@ -236,6 +279,7 @@ include('connexionBD.php');
     function toggleDateField() {
         var champDate = document.getElementById("date_differee");
         var facturationType = document.querySelector('input[name="facturation"]:checked').value;
+        var differeeCheckbox = document.querySelector('input[name="facturation"][value="differee"]');
 
         if (facturationType === "differee") {
             champDate.style.display = "block";
@@ -243,7 +287,7 @@ include('connexionBD.php');
         } else {
             champDate.style.display = "none";
             champDate.required = false;
-            if (facturationType === "immediate") {
+            if (differeeCheckbox.checked) {
                 // Remplir automatiquement le champ de la date avec la date d'aujourd'hui
                 var today = new Date();
                 var formattedDate = today.toISOString().substr(0, 10);
