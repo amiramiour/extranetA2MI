@@ -4,19 +4,19 @@ global $db;
 include 'connexionBD.php';
 
 // Définir la requête SQL par défaut
-$query = $db->prepare("SELECT membres.membre_nom, membres.membre_prenom, bi.bi_datein FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id");
+$query = $db->prepare("SELECT membres.membre_id, membres.membre_nom, membres.membre_prenom, bi.bi_datein FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id");
 
 // Vérifier le paramètre de tri
 $sort = $_GET['sort'] ?? '';
 
 // Préparer la requête SQL en fonction du paramètre de tri
 if ($sort === 'date') {
-    $query = $db->prepare("SELECT membres.membre_nom, membres.membre_prenom, bi.bi_datein, DATE_FORMAT(bi.bi_datein, '%d/%m/%Y') AS formatted_date FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id ORDER BY bi.bi_datein ASC");
+    $query = $db->prepare("SELECT membres.membre_id, membres.membre_nom, membres.membre_prenom, bi.bi_datein, DATE_FORMAT(bi.bi_datein, '%d/%m/%Y') AS formatted_date FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id ORDER BY bi.bi_datein ASC");
 } elseif ($sort === 'name') {
-    $query = $db->prepare("SELECT membres.membre_nom, membres.membre_prenom, bi.bi_datein FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id ORDER BY membres.membre_nom ASC");
+    $query = $db->prepare("SELECT membres.membre_id, membres.membre_nom, membres.membre_prenom, bi.bi_datein FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id ORDER BY membres.membre_nom ASC");
 } else {
     // Si aucun tri spécifique n'est demandé, sélectionnez toutes les colonnes
-    $query = $db->prepare("SELECT membres.membre_nom, membres.membre_prenom, bi.bi_datein FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id");
+    $query = $db->prepare("SELECT membres.membre_id, membres.membre_nom, membres.membre_prenom, bi.bi_datein FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id");
 }
 
 $query->execute();
@@ -56,11 +56,11 @@ $interventions = $query->fetchAll();
     <div class="d-flex flex-wrap justify-content-center mt-3">
         <?php foreach($interventions as $intervention): ?>
             <div class="client-card">
-                <a href="#" class="client-link">
+                <a href="bi_details.php?membre_id=<?php echo $intervention['membre_id']; ?>" class="client-link">
                     <img src="images/icon.png" style="width: 50px; height: 50px; alt="Icon" class="icon-size" >
                     <h3><?php echo $intervention['membre_nom']; ?></h3>
                     <p><?php echo $intervention['membre_prenom']; ?></p>
-                    <p><?php echo date('d/m/Y', strtotime($intervention['bi_datein'])); ?></p>
+                    <p><?php echo date('d/m/Y', $intervention['bi_datein']); ?></p>
                 </a>
             </div>
         <?php endforeach; ?>

@@ -1,9 +1,7 @@
 <?php
 global $db;
 session_start();
-header('Content-type: text/html; charset=utf-8');
-include('connexionBD.php');
-
+include 'connexionBD.php';
 
 
 ?>
@@ -49,7 +47,7 @@ include('connexionBD.php');
                     <label for="nbpiece_1" style="margin-right: 5px;">/ Pièces *</label>
                     <input class="field" type="number" name="dynamic[1][]" id="nbpiece_1" size="5" placeholder="Pièces" pattern="\d+" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" style="width: 100px; margin-right: 5px;" required min="0"/>
                     <label for="prixunit_1" style="margin-right: 5px;">/ Prix unitaire HT *</label>
-                    <input class="field" type="text" name="dynamic[1][]" id="prixunit_1" size="9" placeholder="Prix" pattern="[0-9]+([\.,][0-9]+)?" onkeypress="return event.charCode >= 48 && event.charCode <= 57 || event.charCode == 44 || event.charCode == 46" style="width: 150px;" required/>
+                    <input class="field prix-unitaire" type="text" name="dynamic[1][]" id="prixunit_1" size="9" placeholder="Prix" pattern="[0-9]+([\.,][0-9]+)?" onkeypress="return event.charCode >= 48 && event.charCode <= 57 || event.charCode == 44 || event.charCode == 46" style="width: 150px;" required/>
                     <button type="button" class="btn btn-danger" onclick="supprimerChamp(this)">X</button>
                 </div>
             </div>
@@ -91,7 +89,7 @@ include('connexionBD.php');
             <label for="commentaire">Laisser un commentaire</label><br/>
             <textarea name="commentaire" rows="4" cols="50"></textarea><br/><br/>
             <div id="alerteChampsVides" style="color: red;"></div>
-            <input class="createButton btn btn-primary custom-btn" type="submit" value="Créer" />
+            <input class="createButton btn btn-primary custom-btn" type="submit" value="Créer"/>
         </fieldset>
     </form>
 
@@ -147,16 +145,17 @@ include('connexionBD.php');
         var totalPrixHT = 0;
         var totalPieces = 0;
 
-        interventions.forEach(function(intervention, index) {
-            var nbPiecesInput = intervention.querySelector('[name="dynamic[' + (index + 1) + '][]"]');
-            var prixUnitaireInput = intervention.querySelector('[name="dynamic[' + (index + 1) + '][]"]');
+        interventions.forEach(function(intervention) {
+            var selectedIntervention = intervention.querySelector('select');
+            var nbPiecesInput = intervention.querySelector('[name^="dynamic"]');
+            var prixUnitaireInput = intervention.querySelector('.prix-unitaire');
 
-            if (nbPiecesInput && prixUnitaireInput) {
+            if (selectedIntervention && nbPiecesInput && prixUnitaireInput) {
                 var nbPieces = parseInt(nbPiecesInput.value);
                 var prixUnitaire = parseFloat(prixUnitaireInput.value);
                 var prixTotal = nbPieces * prixUnitaire;
 
-                console.log("\nIntervention : " + intervention.querySelector('select').value);
+                console.log("\nIntervention : " + selectedIntervention.value);
                 console.log("Nb pièces : " + nbPieces + " | Prix/pièce : " + prixUnitaire.toFixed(2) + "€ | Prix total : " + prixTotal.toFixed(2) + "€");
 
                 totalPieces += nbPieces;
@@ -180,7 +179,6 @@ include('connexionBD.php');
         afficherResultat();
     });
 
-
     // Fonction pour générer un ID unique pour chaque Bon d'Intervention
     function generateUniqueID() {
         return Math.floor(Math.random() * 1000); // Génère un nombre aléatoire entre 0 et 999
@@ -193,6 +191,8 @@ include('connexionBD.php');
 
         // Afficher le résultat dans la console
         afficherResultat();
+        // Rediriger vers la page bi_details.php
+        window.location.href = "liste_interventions.php";
     }
 
     // Ajout d'un écouteur d'événement pour le formulaire
@@ -279,7 +279,6 @@ include('connexionBD.php');
     function toggleDateField() {
         var champDate = document.getElementById("date_differee");
         var facturationType = document.querySelector('input[name="facturation"]:checked').value;
-        var differeeCheckbox = document.querySelector('input[name="facturation"][value="differee"]');
 
         if (facturationType === "differee") {
             champDate.style.display = "block";
@@ -287,14 +286,16 @@ include('connexionBD.php');
         } else {
             champDate.style.display = "none";
             champDate.required = false;
-            if (differeeCheckbox.checked) {
-                // Remplir automatiquement le champ de la date avec la date d'aujourd'hui
+            // Si l'option immédiate est sélectionnée, remplissez automatiquement le champ de la date avec la date d'aujourd'hui
+            if (facturationType === "immediate") {
                 var today = new Date();
                 var formattedDate = today.toISOString().substr(0, 10);
                 champDate.value = formattedDate;
             }
         }
     }
+
+
 
 
 </script>
