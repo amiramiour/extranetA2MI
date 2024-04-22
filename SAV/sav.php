@@ -1,4 +1,38 @@
 <?php
+/*
+ * prtie recuperation des ids
+
+require_once 'connexionBD.php';
+
+session_start(); // Démarrez la session si ce n'est pas déjà fait
+
+// Vérifiez si un membre est connecté
+if (!isset($_SESSION['membre_id'])) {
+    header('Location: index.php');
+    exit();
+}
+
+// Vérifiez si le membre connecté est un client
+if ($_SESSION['membre_type'] == 'client') {
+    header('Location: index.php');
+    exit();
+}
+
+// Stockez l'ID de l'admin connecté dans une variable de session
+$_SESSION['id_admin_connecte'] = $_SESSION['membre_id'];
+
+$id_admin_connecte = $_SESSION['membre_id'];
+
+// Récupérez la liste des clients depuis la base de données
+$clients = obtenirClients();
+
+// Vérifiez si un client a été sélectionné
+if (isset($_GET['client_id'])) {
+    $client_id = $_GET['client_id']; // Récupérez l'ID du client depuis l'URL
+} else {
+    $client_id = ""; // Si aucun client n'est sélectionné, initialisez à une chaîne vide
+}
+*/
 include('../connexionBD.php');
 
 // Vérification de la valeur du paramètre de tri
@@ -138,7 +172,7 @@ LEFT JOIN
     <?php foreach ($results as $row) : ?>
         <tr>
             <td><?= $row['sav_id'] ?></td>
-            <td><a href="fiche_client.php?id=<?= $row['membre_id'] ?>"><?= $row['client_nom'] . ' ' . $row['client_prenom'] ?></a></td>
+            <td><a href="../profile/profile_client.php?id=<?= $row['membre_id'] ?>"><?= $row['client_nom'] . ' ' . $row['client_prenom'] ?></a></td>
             <td><?= $row['client_entreprise'] ?></td>
             <td><?= $row['sav_accessoire'] ?></td>
             <td><?= $row['sav_avancement'] ?></td>
