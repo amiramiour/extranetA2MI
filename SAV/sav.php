@@ -127,22 +127,22 @@ LEFT JOIN
 <body>
 <h2>Résultats de la table SAV</h2>
 <div>
-<form action="" method="GET">
-    <select name="tri">
-        <option value="membre_nom" <?php echo ($tri == 'membre_nom') ? 'selected' : ''; ?>>Trier par nom de client</option>
-        <option value="membre_entreprise" <?php echo ($tri == 'membre_entreprise') ? 'selected' : ''; ?>>Trier par entreprise</option>
-    </select>
-    <button type="submit">Trier</button>
-    <select name="etat" id="etat_select">
-        <option value="">Tous les états</option>
-        <option value="Réceptionné" <?php echo ($etat == 'Réceptionné') ? 'selected' : ''; ?>>Réceptionné</option>
-        <option value="en cours" <?php echo ($etat == 'En cours') ? 'selected' : ''; ?>>En cours</option>
-        <option value="En attente" <?php echo ($etat == 'En attente') ? 'selected' : ''; ?>>En attente</option>
-        <option value="Terminé" <?php echo ($etat == 'Terminé') ? 'selected' : ''; ?>>Terminé</option>
-        <option value="Rendu au client" <?php echo ($etat == 'Rendu au client') ? 'selected' : ''; ?>>Rendu au client</option>
-    </select>
-    <button type="submit">Filtrer par état</button>
-</form>
+    <form action="" method="GET">
+        <select name="tri">
+            <option value="membre_nom" <?php echo ($tri == 'membre_nom') ? 'selected' : ''; ?>>Trier par nom de client</option>
+            <option value="membre_entreprise" <?php echo ($tri == 'membre_entreprise') ? 'selected' : ''; ?>>Trier par entreprise</option>
+        </select>
+        <button type="submit">Trier</button>
+        <select name="etat" id="etat_select">
+            <option value="">Tous les états</option>
+            <option value="Réceptionné" <?php echo ($etat == 'Réceptionné') ? 'selected' : ''; ?>>Réceptionné</option>
+            <option value="en cours" <?php echo ($etat == 'En cours') ? 'selected' : ''; ?>>En cours</option>
+            <option value="En attente" <?php echo ($etat == 'En attente') ? 'selected' : ''; ?>>En attente</option>
+            <option value="Terminé" <?php echo ($etat == 'Terminé') ? 'selected' : ''; ?>>Terminé</option>
+            <option value="Rendu au client" <?php echo ($etat == 'Rendu au client') ? 'selected' : ''; ?>>Rendu au client</option>
+        </select>
+        <button type="submit">Filtrer par état</button>
+    </form>
 
 </div>
 <table>
@@ -155,7 +155,6 @@ LEFT JOIN
         <th>Date de réception</th>
         <th>Date de livraison</th>
         <th>Envoi</th>
-        <th>Etat</th>
         <th>Forfait</th>
         <th>Garantie</th>
         <th>Main d'œuvre HT</th>
@@ -179,7 +178,6 @@ LEFT JOIN
             <td><?= date('d/m/Y H:i:s', strtotime($row['sav_datein'])) ?></td>
             <td><?= date('d/m/Y H:i:s', strtotime($row['sav_dateout'])) ?></td>
             <td><?= $row['sav_envoi'] ?></td>
-            <td><?= $row['sav_etat'] ?></td>
             <td><?= $row['sav_forfait'] ?></td>
             <td><?= $row['sav_garantie'] ?></td>
             <td><?= $row['sav_maindoeuvreht'] ?></td>

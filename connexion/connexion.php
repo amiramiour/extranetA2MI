@@ -60,7 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['validate']) && $_POST
 <head>
     <meta charset="UTF-8">
     <title>Connexion</title>
-    <!-- Link Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -85,7 +84,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['validate']) && $_POST
                         <a href="mot_de_passe_oublie.php" class="btn btn-link">Mot de passe oublié ?</a>
                     </form>
                     <?php
-                    // Afficher un message d'erreur s'il y a lieu
                     if (isset($error_message)) {
                         echo "<p class='mt-3 text-danger'>$error_message</p>";
                     }
@@ -96,7 +94,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['validate']) && $_POST
     </div>
 </div>
 
-<!-- Link Bootstrap JS -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>

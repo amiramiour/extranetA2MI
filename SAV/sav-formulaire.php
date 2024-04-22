@@ -176,7 +176,6 @@ $client_id = $_GET['client_id'];
             <label for="etat">État* :</label>
             <select name="etat" id="etat" class="form-control" required>
                 <option value="receptionne">Réceptionné</option>
-                <option value="atelier">En atelier</option>
                 <option value="termine">Terminé</option>
             </select>
         </div>

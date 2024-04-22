@@ -41,22 +41,30 @@ if (isset($_POST['delete']) && $_POST['delete'] === 'delete') {
 // Vérifier si le formulaire de modification a été soumis
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Récupérer les données du formulaire
-    $nouvel_etat = $_POST['nouvel_etat'];
+    $nouvel_etat = $_POST['nouvel_etat']; // Maintenant c'est le libellé de l'état
     $nouvel_avancement = $_POST['nouvel_avancement'];
 
     try {
         // Connexion à la base de données en utilisant la fonction connexionbdd()
         $db = connexionbdd();
 
+        // Récupérer l'ID de l'état actuel
+        $query_etat = "SELECT id_etat_sav FROM sav_etats WHERE etat_intitule = :nouvel_etat";
+        $stmt_etat = $db->prepare($query_etat);
+        $stmt_etat->bindValue(':nouvel_etat', $nouvel_etat, PDO::PARAM_STR);
+        $stmt_etat->execute();
+        $etat_row = $stmt_etat->fetch(PDO::FETCH_ASSOC);
+        $nouvel_etat_id = $etat_row['id_etat_sav'];
+
         // Préparer la requête SQL pour mettre à jour le SAV
-        $query = "UPDATE sav SET sav_avancement = :nouvel_avancement, sav_etat = :nouvel_etat WHERE sav_id = :sav_id";
+        $query = "UPDATE sav SET sav_avancement = :nouvel_avancement, sav_etats = :nouvel_etat_id WHERE sav_id = :sav_id";
 
         // Préparation de la requête SQL
         $stmt = $db->prepare($query);
 
         // Liaison des valeurs des paramètres de requête
         $stmt->bindValue(':nouvel_avancement', $nouvel_avancement, PDO::PARAM_STR);
-        $stmt->bindValue(':nouvel_etat', $nouvel_etat, PDO::PARAM_STR);
+        $stmt->bindValue(':nouvel_etat_id', $nouvel_etat_id, PDO::PARAM_INT); // Utilisation de l'ID de l'état
         $stmt->bindValue(':sav_id', $sav_id, PDO::PARAM_INT);
 
         // Exécution de la requête
@@ -126,11 +134,11 @@ try {
         <div class="mb-3">
             <label for="nouvel_etat" class="form-label">Nouvel état :</label>
             <select name="nouvel_etat" id="nouvel_etat" class="form-select" required>
-                <option value="Réceptionné" <?= ($sav['sav_etat'] === 'Réceptionné') ? 'selected' : ''; ?>>Réceptionné</option>
-                <option value="En cours" <?= ($sav['sav_etat'] === 'En cours') ? 'selected' : ''; ?>>En cours</option>
-                <option value="En attente" <?= ($sav['sav_etat'] === 'En attente') ? 'selected' : ''; ?>>En attente</option>
-                <option value="Terminé" <?= ($sav['sav_etat'] === 'Terminé') ? 'selected' : ''; ?>>Terminé</option>
-                <option value="Rendu au client" <?= ($sav['sav_etat'] === 'Rendu au client') ? 'selected' : ''; ?>>Rendu au client</option>
+                <option value="Réceptionné" <?= ($sav['sav_etats'] == 'Réceptionné') ? 'selected' : ''; ?>>Réceptionné</option>
+                <option value="En cours" <?= ($sav['sav_etats'] == 'En cours') ? 'selected' : ''; ?>>En cours</option>
+                <option value="En attente" <?= ($sav['sav_etats'] == 'En attente') ? 'selected' : ''; ?>>En attente</option>
+                <option value="Terminé" <?= ($sav['sav_etats'] == 'Terminé') ? 'selected' : ''; ?>>Terminé</option>
+                <option value="Rendu au client" <?= ($sav['sav_etats'] == 'Rendu au client') ? 'selected' : ''; ?>>Rendu au client</option>
                 <!-- Ajoutez d'autres états si nécessaire -->
             </select>
         </div>
