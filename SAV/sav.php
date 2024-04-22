@@ -192,6 +192,8 @@ LEFT JOIN
             <td><?= $row['sav_technicien'] ?></td>
             <td><?= $row['sav_typemateriel'] ?></td>
             <td><?= $row['etat_intitule'] ?></td>
+            <td><a href="modifier-sav.php?sav_id=<?= $row['sav_id'] ?>" class="btn btn-primary">Modifier</a></td>
+
         </tr>
     <?php endforeach; ?>
 </table>
