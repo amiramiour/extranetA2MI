@@ -3,10 +3,8 @@
 include 'ConnexionBD.php'; // Fichier de configuration de la connexion PDO
 
 //requete pour récupérer les fournisseurs
-$fournisseur = $pdo->query("SELECT * FROM fournisseur");
-
 $fournisseurs = $pdo->query("SELECT * FROM fournisseur");
-
+$fournisseur = $pdo->query("SELECT * FROM fournisseur");
 ?>
 <html>
 <head>
@@ -30,7 +28,7 @@ $fournisseurs = $pdo->query("SELECT * FROM fournisseur");
                         <select name="dynamic['0'][]" required>
                             <option value="sans Fournisseur">------</option>
                             <?php
-                            while ($unfournisseur = $fournisseur->fetch(PDO::FETCH_ASSOC)) 
+                            while ($unfournisseur = $fournisseurs->fetch(PDO::FETCH_ASSOC)) 
                             {
                                 
                                 ?>
@@ -66,7 +64,7 @@ $fournisseurs = $pdo->query("SELECT * FROM fournisseur");
                 </div>
             </fieldset>
             <button type="button" onclick="ajouterProduit()">Ajouter un produit à la commande</button>
-            <button type="button" onclick="enleverProduit()">Enlever un produit à la commande</button>
+            <!-- <button type="button" onclick="enleverProduit()">Enlever un produit à la commande</button> -->
             
             
             <label for="reference" class="float" >Nom de la commande* </label>
@@ -174,34 +172,32 @@ $fournisseurs = $pdo->query("SELECT * FROM fournisseur");
             document.getElementById("pvTTCT").value=totalTTC;
             
         }
+        
+        var i = document.querySelectorAll('.materiel').length;
 
         function ajouterProduit(){
-            var i = document.querySelectorAll('.materiel').length + 1;
             i++;
+
             var html = '<div class="materiel"><hr>';
             html += '<br><b>' + i + 'e produit de la commande</b><br>';
+           
             html += '<label for="reference">Référence* </label> ';
             html += '<input type="text" name="dynamic[' + i + '][]" id="reference' + i + '" required autofocus/>&nbsp;&nbsp;|&nbsp;&nbsp;';
             html += '<label for="designation">Désignation* </label>';
-            html += '<input type="text" name="dynamic[' + i + '][]" id="designation" required>&nbsp;&nbsp;|&nbsp;&nbsp;';
+            html += '<input type="text" name="dynamic[' + i + '][]" id="designation' + i + '" required>&nbsp;&nbsp;|&nbsp;&nbsp;';
 
             html += '<label for="fournisseur">Fournisseur* </label>';
             html += '<select name="dynamic[' + i + '][]" required>';
             html += '<option value="sans Fournisseur">------</option>';
-            <?php
-            while ($unfournisseur = $fournisseurs->fetch(PDO::FETCH_ASSOC)) 
-            {
-                ?>
-                html += '<option value="<?php echo $unfournisseur['nomFournisseur'] ?>"><?php echo $unfournisseur['nomFournisseur'] ?></option>';
-                <?php
-            }
-            ?>
+            html += '<?php while ($unfournisseur = $fournisseur->fetch(PDO::FETCH_ASSOC)) { ?>';
+            html += '<option value="<?php echo $unfournisseur['nomFournisseur'] ?>"><?php echo $unfournisseur['nomFournisseur'] ?></option>';
+            html += '<?php } ?>';
             html += '</select>';
             html += '<br><br>';
             html += '<label >Pa HT* </label>';
-            html += '<input type="text" SIZE="2" name="dynamic[' + i + '][]" id="paHTs' + i + '" onblur="calculerenplus(' + i + ')"  required autofocus> € &nbsp;&nbsp;|&nbsp;&nbsp;';
+            html += '<input type="text" SIZE="2" name="dynamic[' + i + '][]" id="paHTs' + i + '" onblur="calculerenplus()"  required autofocus> € &nbsp;&nbsp;|&nbsp;&nbsp;';
             html += '<label>Marge* </label>';
-            html += '<input type="text" SIZE="2" name="dynamic[' + i + '][]" id="marges' + i + '" onblur="calculerenplus(' + i + ')"  required autofocus> % &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;';
+            html += '<input type="text" SIZE="2" name="dynamic[' + i + '][]" id="marges' + i + '" onblur="calculerenplus()"  required autofocus> % &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;';
             html += '<label>Pv HT* </label>';
             html += '<input type="text"  name="dynamic[' + i + '][]" id="pvHTs' + i + '" SIZE="2" required autofocus readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;';
             html += '<label>Pv TTC* </label>';
@@ -209,19 +205,32 @@ $fournisseurs = $pdo->query("SELECT * FROM fournisseur");
             html += '<label>Montant marge </label>';
             html += '<input type="text" name="dynamic[' + i + '][]" id="margeM' + i + '" SIZE="2" readonly> € <br />';
             html += '<div id="choixArrondi' + i + '"></div>';
-            html += '<label for="etat" class="float">Statut produit* </label><select name="dynamic[' + i + '][]" required><option value="commande">Commandé</option><option value="recu">Reçu</option></fieldset><br>';
+            html += '<label for="etat" class="float">Statut produit* </label><select name="dynamic[' + i + '][]" required><option value="commande">Commandé</option><option value="recu">Reçu</option>';
+            html += '</select><br>';
+            html += '<button type="button" onclick = "supprimerProduit(this)">Supprimer</button>';
             html += '</div>';
+        
+            document.getElementById('materiels').insertAdjacentHTML('beforeend', html);
 
-            document.getElementById('materiels').innerHTML += html;
+            
         }
-
-        function calculerenplus(i) {
+         
+        function calculerenplus() {
             var paHTs = "paHTs" + i;
             var marges = "marges" + i;
             var pvHTs = "pvHTs" + i;
             var pvTTCs = "pvTTCs" + i;
             var margeM = "margeM" + i;
             var multiplier = 100;
+
+            var totalMarge = document.getElementById("margeT").value;
+            var totalMarge = Math.round(totalMarge * multiplier) / multiplier;  
+        
+            var totalHT = document.getElementById("pHTT").value;
+            var totalHT = Math.round(totalHT * multiplier) / multiplier;
+        
+            var totalTTC = document.getElementById("pvTTCT").value;
+            var totalTTC = Math.round(totalTTC * multiplier) / multiplier;
 
             var paHT = Number(document.getElementById(paHTs).value);
             var marge = Number(document.getElementById(marges).value);
@@ -244,7 +253,7 @@ $fournisseurs = $pdo->query("SELECT * FROM fournisseur");
                 var arrondiBas = Math.floor(pvHT);
             }
             var html = '<div id="choixArrondi' + i + '">Choisir l\'arrondi du PvHT ';
-            html += '<select name="arrondi" onchange="choixArrondiPlus('+ i +')" id="choixArrondiSelect' + i + '" required>';
+            html += '<select name="arrondi" onchange="choixArrondiPlus()" id="choixArrondiSelect' + i + '" required>';
             html += '<option value="' + pvHT + '">' + pvHT + '</option>';
             html += '<option value="' + (arrondiBas + 5) + '">' + (arrondiBas + 5) + '</option>';
             html += '<option value="' + (arrondiBas + 10) + '">' + (arrondiBas + 10) + '</option>';
@@ -252,9 +261,17 @@ $fournisseurs = $pdo->query("SELECT * FROM fournisseur");
             html += '<option value="' + (arrondiBas + 20) + '">' + (arrondiBas + 20) + '</option>';
             html += '</select> €</div>';
             document.getElementById('choixArrondi' + i).innerHTML = html;
+
+            totalMarge += margeMt;
+            totalHT += pvHT;
+            totalTTC += pvTTC;
+
+            document.getElementById('margeT').value = Math.round(totalMarge * multiplier) / multiplier;
+            document.getElementById('pHTT').value = Math.round(totalHT * multiplier) / multiplier;
+            document.getElementById('pvTTCT').value = Math.round(totalTTC * multiplier) / multiplier;
         }
 
-        function choixArrondiPlus(i){
+        function choixArrondiPlus(){
             var multiplier = 100;
             var choix = document.getElementById("choixArrondiSelect" + i).value;
             choix = Number(choix);
@@ -265,10 +282,78 @@ $fournisseurs = $pdo->query("SELECT * FROM fournisseur");
             document.getElementById("pvTTCs" + i).value = pvTTC;
 
             var paHT = document.getElementById("paHTs" + i).value;
+
             var margeM = Number(choix - paHT);
             document.getElementById("margeM" + i).value = margeM;
 
+            var totalMarge = document.getElementById("margeM").value;
+            var totalMarge = Math.round(totalMarge * multiplier) / multiplier;  
+        
+            var totalHT = document.getElementById("pvHT").value;
+            var totalHT = Math.round(totalHT * multiplier) / multiplier;
+        
+            var totalTTC = document.getElementById("pvTTC").value;
+            var totalTTC = Math.round(totalTTC * multiplier) / multiplier;
+
+            totalMarge += margeM;
+            totalHT += paHT;
+            totalTTC += pvTTC;
+
+            document.getElementById("margeT").value = totalMarge;
+            document.getElementById("pHTT").value = totalHT;
+            document.getElementById("pvTTCT").value = totalTTC;
         }
+
+        function supprimerProduit(element) {
+            element.parentNode.remove(); // Supprimer le produit dont le bouton "Supprimer" est cliqué
+            mettreAJourNumerosProduits(); // Mettre à jour les numéros des produits après la suppression
+            recalculerTotaux(); // Recalculer les totaux après la suppression du produit
+        }
+
+        // Fonction pour recalculer les totaux après suppression d'un produit
+        function recalculerTotaux() {
+            var produits = document.querySelectorAll('.materiel');
+            
+            var totalMarge = document.getElementById('margeM').value;
+            var totalHT = document.getElementById('pvHT').value;
+            var totalTTC = document.getElementById('pvTTC').value;
+            var multiplier = 100;
+            if (produits.length < 0) {
+                totalMarge = 0;
+                totalHT = 0;
+                totalTTC = 0;
+            } else {
+                produits.forEach(function(produit) {
+                    var paHT = Number(produit.querySelector('input[name="dynamic[\'0\'][]"]').value);
+                    var marge = Number(produit.querySelector('input[name="dynamic[\'0\'][]"]').value);
+                    var pvHT = Number(paHT + (paHT * (marge / 100)));
+                    pvHT = Math.round(pvHT * multiplier) / multiplier;
+                    var pvTTC = Number(pvHT + (pvHT * (20 / 100)));
+                    pvTTC = Math.round(pvTTC * multiplier) / multiplier;
+                    var margeM = Number(pvHT - paHT);
+                    margeM = Math.round(margeM * multiplier) / multiplier;
+                    totalMarge += margeM;
+                    totalHT += pvHT;
+                    totalTTC += pvTTC;
+                });
+            }
+
+            document.getElementById('margeT').value = Math.round(totalMarge * multiplier) / multiplier;
+            document.getElementById('pHTT').value = Math.round(totalHT * multiplier) / multiplier;
+            document.getElementById('pvTTCT').value = Math.round(totalTTC * multiplier) / multiplier;
+        }
+
+
+        function mettreAJourNumerosProduits() {
+            var produits = document.querySelectorAll('.materiel');
+            produits.forEach(function(produit, index) {
+                var numeroProduit = (index + 2); 
+                produit.querySelector('b').textContent = numeroProduit + "e produit de la commande";
+            });
+        }
+
+
+
 
     </script>
 </body>
