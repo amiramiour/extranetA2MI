@@ -54,13 +54,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Message de succès
         $_SESSION['success_message'] = "Les données ont été ajoutées avec succès dans la base de données.";
+
+        // Redirection vers bonIntervention.php après traitement
+        header("Location: bonIntervention.php");
+        exit;
     } catch (PDOException $e) {
         // Message d'erreur en cas d'échec
         $_SESSION['error_message'] = "Erreur lors de l'insertion des données : " . $e->getMessage();
     }
 }
 
-// Redirection vers bi_form.php après traitement
+// Redirection vers bi_form.php en cas de méthode de requête incorrecte
 header("Location: bi_form.php");
 exit;
 ?>

@@ -1,7 +1,8 @@
 <?php
 // Récupération des interventions depuis la base de données
-global $db;
 include 'connexionBD.php';
+
+$db = connexionbdd();
 
 // Définir la requête SQL par défaut
 $query = $db->prepare("SELECT membres.membre_id, membres.membre_nom, membres.membre_prenom, bi.bi_datein FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id");

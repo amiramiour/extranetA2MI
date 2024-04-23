@@ -1,7 +1,7 @@
 <?php
-// Récupération des noms et prénoms des membres depuis la base de données
-global $db;
 include 'connexionBD.php';
+// Récupération des noms et prénoms des membres depuis la base de données
+$db = connexionbdd();
 $query = $db->prepare("SELECT membre_nom, membre_prenom FROM membres WHERE membre_type='client'");
 $query->execute();
 $membres = $query->fetchAll();
