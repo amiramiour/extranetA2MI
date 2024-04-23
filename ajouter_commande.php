@@ -3,8 +3,13 @@
 include 'ConnexionBD.php'; // Fichier de configuration de la connexion PDO
 
 //requete pour récupérer les fournisseurs
-$fournisseurs = $pdo->query("SELECT * FROM fournisseur");
-$fournisseur = $pdo->query("SELECT * FROM fournisseur");
+$req = $pdo->query("SELECT * FROM fournisseur");
+$fournisseurs = $req->fetchAll(PDO::FETCH_ASSOC);
+
+$jsonFournisseurs = json_encode($fournisseurs);
+
+file_put_contents('fournisseurs.json', $jsonFournisseurs);
+
 ?>
 <html>
 <head>
@@ -26,17 +31,22 @@ $fournisseur = $pdo->query("SELECT * FROM fournisseur");
                         <input type="text" name="dynamic['0'][]" id="designation" required>&nbsp;&nbsp;|&nbsp;&nbsp;
                         <label for="fournisseur">Fournisseur* </label>
                         <select name="dynamic['0'][]" required>
-                            <option value="sans Fournisseur">------</option>
-                            <?php
-                            while ($unfournisseur = $fournisseurs->fetch(PDO::FETCH_ASSOC)) 
-                            {
-                                
-                                ?>
-                            <option value="<?php echo $unfournisseur['nomFournisseur'] ?>"><?php echo $unfournisseur['nomFournisseur'] ?></option>
-                            <?php
-                            }
-                            ?>
-                        </select>
+    <option value="sans Fournisseur">------</option>
+    <?php
+    // Lire le contenu du fichier JSON
+    $jsonData = file_get_contents('fournisseurs.json');
+
+    // Décoder le JSON en un tableau PHP
+    $fournisseurs = json_decode($jsonData, true);
+
+    // Parcourir le tableau des fournisseurs et afficher chaque fournisseur dans la liste déroulante
+    foreach ($fournisseurs as $fournisseur) {
+        ?>
+        <option value="<?php echo $fournisseur['nomFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>
+        <?php
+    }
+    ?>
+</select>
                         <br>
                         <br>
                         <label >Pa HT* </label>
@@ -215,11 +225,16 @@ $fournisseur = $pdo->query("SELECT * FROM fournisseur");
             html += '<label for="fournisseur">Fournisseur* </label>';
             html += '<select name="dynamic[' + i + '][]" required>';
             html += '<option value="sans Fournisseur">------</option>';
-            html += '<?php while ($unfournisseur = $fournisseur->fetch(PDO::FETCH_ASSOC)) { ?>';
-            html += '<option value="<?php echo $unfournisseur['nomFournisseur'] ?>"><?php echo $unfournisseur['nomFournisseur'] ?></option>';
-            html += '<?php } ?>';
+            <?php
+            // Lire le contenu du fichier JSON et l'afficher dans un tableau HTML
+            $jsonData = file_get_contents('fournisseurs.json');
+            $fournisseurs = json_decode($jsonData, true);
+            foreach ($fournisseurs as $fournisseur) { ?>
+                html += '<option value="<?php echo $fournisseur['nomFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>';
+            <?php } ?>
             html += '</select>';
             html += '<br><br>';
+
             html += '<label >Pa HT* </label>';
             html += '<input type="text" SIZE="2" name="dynamic[' + i + '][]" id="paHTs' + i + '" onblur="calculerenplus(' + i + ')"  required autofocus> € &nbsp;&nbsp;|&nbsp;&nbsp;';
             html += '<label>Marge* </label>';
