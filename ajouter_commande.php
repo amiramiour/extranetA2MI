@@ -10,6 +10,8 @@ $jsonFournisseurs = json_encode($fournisseurs);
 
 file_put_contents('fournisseurs.json', $jsonFournisseurs);
 
+$id = $_GET['id'];
+
 ?>
 <html>
 <head>
@@ -20,7 +22,7 @@ file_put_contents('fournisseurs.json', $jsonFournisseurs);
 <body>
     <div class="container">
         <h2>Ajouter une commande</h2>
-        <form action="trait-commande.php" method="post" name="commande">
+        <form action="traitement_commande.php?id=<?php echo $id; ?>" method="post" name="commande">
             <fieldset><legend>Produit <small>* champs obligatoires</small></legend>
                 <div id="materiels">
                     <div id="materiel">
@@ -31,24 +33,16 @@ file_put_contents('fournisseurs.json', $jsonFournisseurs);
                         <input type="text" name="dynamic['0'][]" id="designation" required>&nbsp;&nbsp;|&nbsp;&nbsp;
                         <label for="fournisseur">Fournisseur* </label>
                         <select name="dynamic['0'][]" required>
-    <option value="sans Fournisseur">------</option>
-    <?php
-    // Lire le contenu du fichier JSON
-    $jsonData = file_get_contents('fournisseurs.json');
-
-    // Décoder le JSON en un tableau PHP
-    $fournisseurs = json_decode($jsonData, true);
-
-    // Parcourir le tableau des fournisseurs et afficher chaque fournisseur dans la liste déroulante
-    foreach ($fournisseurs as $fournisseur) {
-        ?>
-        <option value="<?php echo $fournisseur['nomFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>
-        <?php
-    }
-    ?>
-</select>
-                        <br>
-                        <br>
+                            <option value="sans Fournisseur">------</option>
+                            <?php
+                            $jsonData = file_get_contents('fournisseurs.json');
+                            $fournisseurs = json_decode($jsonData, true);
+                            foreach ($fournisseurs as $fournisseur) {?>
+                                <option value="<?php echo $fournisseur['nomFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>
+                                <?php
+                            }?>
+                        </select>
+                        <br><br>
                         <label >Pa HT* </label>
                         <input type="text" SIZE="2" name="dynamic['0'][]" id="paHT" onblur="calcul()"  required autofocus> € &nbsp;&nbsp;|&nbsp;&nbsp;
                         <label>Marge* </label>
@@ -76,7 +70,6 @@ file_put_contents('fournisseurs.json', $jsonFournisseurs);
             <button type="button" onclick="ajouterProduit()">Ajouter un produit à la commande</button>
             <!-- <button type="button" onclick="enleverProduit()">Enlever un produit à la commande</button> -->
             
-            
             <label for="reference" class="float" >Nom de la commande* </label>
             <input type="text" name="nomC" id="reference" required autofocus/><br>
 
@@ -100,6 +93,8 @@ file_put_contents('fournisseurs.json', $jsonFournisseurs);
             
             <label for="reference" class="float">Total marge </label>
             <input type="text" name="totalMarge" id="margeT" readonly/><br>
+
+            <div class="center"><input class="createButton" type="submit" value="Créer" /></div>
         </form>
     </div>
     <script>
@@ -226,7 +221,6 @@ file_put_contents('fournisseurs.json', $jsonFournisseurs);
             html += '<select name="dynamic[' + i + '][]" required>';
             html += '<option value="sans Fournisseur">------</option>';
             <?php
-            // Lire le contenu du fichier JSON et l'afficher dans un tableau HTML
             $jsonData = file_get_contents('fournisseurs.json');
             $fournisseurs = json_decode($jsonData, true);
             foreach ($fournisseurs as $fournisseur) { ?>
@@ -263,8 +257,6 @@ file_put_contents('fournisseurs.json', $jsonFournisseurs);
             var pvTTCs = "pvTTCs" + i;
             var margeM = "margeM" + i;
             var multiplier = 100;
-
-            
 
             /**var totalMarge = document.getElementById("margeT").value;
             var totalMarge = Math.round(totalMarge * multiplier) / multiplier;  
