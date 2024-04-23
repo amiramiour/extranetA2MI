@@ -138,13 +138,9 @@ $client_id = $_GET['client_id'];
         <div id="materiels">
             <div class="materiel">
                 <label for="tarif">Tarif matériel HT :</label>
-
-                <input size="30"  type="text" name="materiel[]" placeholder="Nom du matériel" required/>
-
-                <input size="5" type="text" name="nombre[]" placeholder="Nombre" required/>
-
-                <input  size="9" type="text" name="prix_unité[]" placeholder="Prix unitaire" required/>
-
+                <input size="30" type="text" name="materiel[]" placeholder="Nom du matériel" >
+                <input size="5" type="text" name="nombre[]" placeholder="Nombre" >
+                <input size="9" type="text" name="prix_unité[]" placeholder="Prix unitaire" >
                 <!-- Champ pour afficher le total de ce matériel -->
                 <div class="form-group">
                     <label>Prix Total HT Matériel : </label>
@@ -216,7 +212,6 @@ $client_id = $_GET['client_id'];
         var i = $('.service').length;
 
         $('#add_service').click(function() {
-
             var $html = '<div class="service">';
             $html += '<label for="tarif_service">Tarif service HT :</label>';
 
@@ -228,22 +223,20 @@ $client_id = $_GET['client_id'];
             $html += '<option value="Format_reinstallation sans sauvgarde">Format Reinstallation sans sauvgarde</option>';
             $html += '<option value="Main doeuvre atelier 1h">Main doeuvre atelier 1h</option>';
             $html += '<option value="Diagnostic">Diagnostic</option>';
-
             $html += '</select>';
 
             $html += '<input size="5" type="text" name="nombre_heures[]" placeholder="Nombre d\'heures" required/>';
-
             $html += '<input size="9" type="text" name="prix_unité_service[]" placeholder="Prix unitaire" required/>';
             // Champ pour afficher le total de ce service
             $html += '<div class="form-group">';
             $html += '<label>Prix Total HT Service : </label>';
             $html += '<input type="text" class="form-control total_service_ht" value="0" readonly>';
             $html += '</div>';
-
             $html += '</div>';
 
             $($html).fadeIn('slow').appendTo('#services');
             i++;
+            updateTotal(); // Appel de la fonction updateTotal() après avoir ajouté un service
         });
 
         // enleve un service sauf si il n'en reste qu'un
@@ -251,6 +244,7 @@ $client_id = $_GET['client_id'];
             if( i >= 2 ) {
                 $('.service').last().remove();
                 i--;
+                updateTotal(); // Appel de la fonction updateTotal() après avoir supprimé un service
             }
         });
 
@@ -258,15 +252,12 @@ $client_id = $_GET['client_id'];
         var j = $('.materiel').length;
 
         $('#add_materiel').click(function() {
-
             var $html = '<div class="materiel">';
-            $html += '<label for="tarif">Tarif matériel HT </label>';
-
-            $html += '<input size="30"  type="text" name="materiel[]" placeholder="Nom du matériel" required/>';
-
-            $html += '<input size="5" type="text" name="nombre[]" placeholder="Nombre" required/>';
-
-            $html += '<input  size="9" type="text" name="prix_unité[]" placeholder="Prix unitaire" required/>';
+            $html += '<label for="tarif">Tarif matériel HT :</label>';
+            $html += '<input size="30" type="text" name="materiel[]" placeholder="Nom du matériel">';
+            $html += '<input size="5" type="text" name="nombre[]" placeholder="Nombre">';
+            $html += '<input size="9" type="text" name="prix_unité[]" placeholder="Prix unitaire">';
+            // Champ pour afficher le total de ce matériel
             $html += '<div class="form-group">';
             $html += '<label>Prix Total HT Matériel : </label>';
             $html += '<input type="text" class="form-control total_materiel_ht" value="0" readonly>';
@@ -275,6 +266,7 @@ $client_id = $_GET['client_id'];
 
             $($html).fadeIn('slow').appendTo('#materiels');
             j++;
+            updateTotal(); // Appel de la fonction updateTotal() après avoir ajouté un matériel
         });
 
         // enleve un matériel sauf si il n'en reste qu'un
@@ -282,6 +274,7 @@ $client_id = $_GET['client_id'];
             if( j >= 2 ) {
                 $('.materiel').last().remove();
                 j--;
+                updateTotal(); // Appel de la fonction updateTotal() après avoir supprimé un matériel
             }
         });
 
@@ -291,11 +284,10 @@ $client_id = $_GET['client_id'];
             var total_ht_materiel = 0;
             var total_ht_service = 0;
 
-
             // Calcul du total pour les services
             $('.service').each(function() {
-                var nombre_heures = parseFloat($(this).find('input[name^="nombre_heures"]').val());
-                var prix_unitaire_service = parseFloat($(this).find('input[name^="prix_unité_service"]').val());
+                var nombre_heures = parseFloat($(this).find('input[name^="nombre_heures"]').val() || 0);
+                var prix_unitaire_service = parseFloat($(this).find('input[name^="prix_unité_service"]').val() || 0);
                 var total_service = nombre_heures * prix_unitaire_service;
                 total_ht += total_service;
                 total_ht_service += total_service; // Ajoutez ceci pour le total des services
@@ -305,15 +297,14 @@ $client_id = $_GET['client_id'];
 
             // Calcul du total pour le matériel
             $('.materiel').each(function() {
-                var nombre = parseFloat($(this).find('input[name^="nombre"]').val());
-                var prix_unitaire = parseFloat($(this).find('input[name^="prix_unité"]').val());
+                var nombre = parseFloat($(this).find('input[name^="nombre"]').val() || 0);
+                var prix_unitaire = parseFloat($(this).find('input[name^="prix_unité"]').val() || 0);
                 var total_materiel = nombre * prix_unitaire;
                 total_ht += total_materiel;
                 total_ht_materiel += total_materiel; // Ajoutez ceci pour le total du matériel
                 $(this).find('.total_materiel_ht').val(total_materiel.toFixed(2));
             });
             $('#total_materiel_ht').val(total_ht_materiel.toFixed(2)); // Mettez à jour le total HT du matériel
-
             var tva = total_ht * 0.2;
             var prix_total_ttc = total_ht + tva;
 
@@ -330,6 +321,7 @@ $client_id = $_GET['client_id'];
         $(document).on('change', 'input[name^="nombre_heures"], input[name^="prix_unité_service"], input[name^="nombre"], input[name^="prix_unité"]', function() {
             updateTotal();
         });
+
         function checkDates() {
             var date_recu = new Date($('#date_recu').val());
             var date_livraison = new Date($('#date_livraison').val());
@@ -342,7 +334,6 @@ $client_id = $_GET['client_id'];
             }
         }
 
-
         // Ajoutez un écouteur d'événements pour vérifier les dates lorsqu'elles changent
         $('#date_recu, #date_livraison').change(function() {
             checkDates();
@@ -353,6 +344,7 @@ $client_id = $_GET['client_id'];
             return checkDates();
         });
     });
+
 </script>
 
 <!-- Inclure Bootstrap JS -->

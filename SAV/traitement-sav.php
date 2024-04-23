@@ -63,8 +63,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $etat_id = $etat_row['id_etat_sav'];
 
         // Enregistrement dans la base de données
-        $sql = "INSERT INTO sav (membre_id, sav_accessoire, sav_avancement, sav_datein, sav_dateout, sav_envoi, sav_etat, sav_etats, sav_forfait, sav_garantie, sav_maindoeuvreht, sav_maindoeuvrettc, sav_mdpclient, sav_probleme, sav_regle, sav_tarifmaterielht, sav_tarifmaterielttc, sav_typemateriel, sav_technicien) 
-        VALUES (:membre_id, :accessoires, :avancement, :date_recu, :date_livraison, :envoi_facture, 1, :etat_id, :forfait, :garantie, :maindoeuvreht, :maindoeuvrettc, :mdpclient, :probleme, :facture_reglee, :tarifmaterielht, :tarifmaterielttc, :typemateriel, :sav_technicien)";
+        $sql = "INSERT INTO sav (membre_id, sav_accessoire, sav_datein, sav_dateout, sav_envoi, sav_etat, sav_etats, sav_forfait, sav_garantie, sav_maindoeuvreht, sav_maindoeuvrettc, sav_mdpclient, sav_probleme, sav_regle, sav_tarifmaterielht, sav_tarifmaterielttc, sav_typemateriel, sav_technicien) 
+        VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, 1, :etat_id, :forfait, :garantie, :maindoeuvreht, :maindoeuvrettc, :mdpclient, :probleme, :facture_reglee, :tarifmaterielht, :tarifmaterielttc, :typemateriel, :sav_technicien)";
 
         $stmt = $connexion->prepare($sql);
         $stmt->bindParam(':membre_id', $membre_id);
@@ -72,7 +72,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bindParam(':sav_technicien', $sav_technicien);
 
         $stmt->bindParam(':accessoires', $accessoires);
-        $stmt->bindParam(':avancement', $etat_id); // Utilisation de l'ID de l'état
         $stmt->bindParam(':etat_id', $etat_id); // Utilisation de l'ID de l'état
         $stmt->bindParam(':date_recu', $date_recu);
         $stmt->bindParam(':date_livraison', $date_livraison);

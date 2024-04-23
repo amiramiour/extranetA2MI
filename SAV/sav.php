@@ -147,7 +147,6 @@ LEFT JOIN
 </div>
 <table>
     <tr>
-        <th>Sav ID</th>
         <th>Nom du membre</th>
         <th>entreprise</th>
         <th>Accessoire</th>
@@ -170,7 +169,6 @@ LEFT JOIN
     </tr>
     <?php foreach ($results as $row) : ?>
         <tr>
-            <td><?= $row['sav_id'] ?></td>
             <td><a href="../profile/profile_client.php?id=<?= $row['membre_id'] ?>"><?= $row['client_nom'] . ' ' . $row['client_prenom'] ?></a></td>
             <td><?= $row['client_entreprise'] ?></td>
             <td><?= $row['sav_accessoire'] ?></td>
