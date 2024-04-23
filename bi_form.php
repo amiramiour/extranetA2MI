@@ -1,3 +1,47 @@
+<?php
+// Inclure le fichier de connexion à la base de données
+include 'connexionBD.php';
+$db = connexionbdd();
+
+
+// Vérifier si l'ID du bon d'intervention à modifier est passé dans l'URL
+if(isset($_GET['bi_id'])) {
+    // Récupérer l'ID du bon d'intervention depuis l'URL
+    $bi_id = $_GET['bi_id'];
+
+    // Préparer la requête SQL pour récupérer les données du bon d'intervention
+    $query = $db->prepare("SELECT * FROM bi WHERE bi_id = ?");
+    $query->execute([$bi_id]);
+    $bi_data = $query->fetch(PDO::FETCH_ASSOC);
+
+    // Vérifier si des données ont été trouvées pour l'ID donné
+    if($bi_data) {
+        // Récupérer les données à pré-remplir
+        $selectedIntervention = $bi_data['selectedIntervention'];
+        $nbPieces = $bi_data['nbPieces'];
+        $prixUnitaire = $bi_data['prixUnitaire'];
+        // Répéter ce processus pour chaque champ que vous souhaitez pré-remplir
+
+        // Utiliser ces données pour pré-remplir les champs du formulaire
+        ?>
+        <!-- Votre code HTML existant jusqu'à la section du formulaire -->
+        <!-- Par exemple, pour pré-remplir le champ de l'intervention -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                // Sélectionner l'option correspondant à l'intervention dans la liste déroulante
+                document.getElementById('selectedIntervention').value = "<?php echo $selectedIntervention; ?>";
+                // Pré-remplir le nombre de pièces
+                document.getElementById('nbpiece_1').value = "<?php echo $nbPieces; ?>";
+                // Pré-remplir le prix unitaire
+                document.getElementById('prixunit_1').value = "<?php echo $prixUnitaire; ?>";
+                // Répéter ce processus pour chaque champ à pré-remplir
+            });
+        </script>
+        <?php
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -26,6 +70,7 @@
     }
     ?>
     <form method="post" action="traitement-bi.php" name="BI">
+        <input type="hidden" name="bi_id" value="<?php echo $bi_id; ?>">
         <fieldset>
             <!-- Bouton Ajouter -->
             <button type="button" class="btn btn-primary custom-btn" id="btnAjouter" onclick="ajouterChamp()">Ajouter</button>

@@ -62,10 +62,12 @@ $interventions = $query->fetchAll();
                     <h3><?php echo $intervention['membre_nom']; ?></h3>
                     <p><?php echo $intervention['membre_prenom']; ?></p>
                     <p><?php echo date('d/m/Y', $intervention['bi_datein']); ?></p>
+
                 </a>
             </div>
         <?php endforeach; ?>
     </div>
+
 </div>
 
 
