@@ -94,8 +94,29 @@ $fournisseur = $pdo->query("SELECT * FROM fournisseur");
     </div>
     <script>
         function calcul(){
+            var i = document.querySelectorAll('.materiel').length;
+
             var paHT = Number(document.getElementById("paHT").value);
             var marge = Number(document.getElementById("marge").value);
+
+            // Validation des prix avec deux chiffres après la virgule ou le point
+            if (!/^(\d+(,\d{1,2})?|\d+(\.\d{1,2})?)$/.test(paHT) || !/^(\d+(,\d{1,2})?|\d+(\.\d{1,2})?)$/.test(marge)) {
+                alert("Les prix doivent être des nombres avec au plus deux chiffres après le point, sans caractères spéciaux.");
+                return;
+            }
+
+            // Empêcher les nombres négatifs
+            if (parseFloat(paHT) < 0 || parseFloat(marge) < 0) {
+                alert("Les prix ne peuvent pas être négatifs.");
+                return;
+            }
+
+            // Empêcher les marges supérieures à 100%
+            if (parseFloat(marge) > 100) {
+                alert("La marge ne peut pas être supérieure à 100%.");
+                return;
+            }
+
             var multiplier = 100;
     
             var pvHT = Number(paHT+(paHT*(marge/100)));
@@ -143,9 +164,13 @@ $fournisseur = $pdo->query("SELECT * FROM fournisseur");
             html += '<option value="' + (arrondiBas + 20) + '">' + (arrondiBas + 20) + '</option>';
             html += '</select> €</div>';
             document.getElementById('lesChoix').innerHTML = html;
+
+            recalculerTotaux(i);
+
         }
 
         function choixArrondi() {
+            var i = document.querySelectorAll('.materiel').length;
             var multiplier = 100;
             var choix = document.getElementById("choixArrondiSelect").value;
             choix = Number(choix);
@@ -170,16 +195,17 @@ $fournisseur = $pdo->query("SELECT * FROM fournisseur");
             var totalTTC = document.getElementById("pvTTC").value;
             var totalTTC = Math.round(totalTTC * multiplier) / multiplier;
             document.getElementById("pvTTCT").value=totalTTC;
+
+            recalculerTotaux(i);
             
         }
-        
-        var i = document.querySelectorAll('.materiel').length;
 
         function ajouterProduit(){
+            var i = document.querySelectorAll('.materiel').length;
             i++;
 
             var html = '<div class="materiel"><hr>';
-            html += '<br><b>' + i + 'e produit de la commande</b><br>';
+            html += '<br><b>' + (i+1) + 'e produit de la commande</b><br>';
            
             html += '<label for="reference">Référence* </label> ';
             html += '<input type="text" name="dynamic[' + i + '][]" id="reference' + i + '" required autofocus/>&nbsp;&nbsp;|&nbsp;&nbsp;';
@@ -195,9 +221,9 @@ $fournisseur = $pdo->query("SELECT * FROM fournisseur");
             html += '</select>';
             html += '<br><br>';
             html += '<label >Pa HT* </label>';
-            html += '<input type="text" SIZE="2" name="dynamic[' + i + '][]" id="paHTs' + i + '" onblur="calculerenplus()"  required autofocus> € &nbsp;&nbsp;|&nbsp;&nbsp;';
+            html += '<input type="text" SIZE="2" name="dynamic[' + i + '][]" id="paHTs' + i + '" onblur="calculerenplus(' + i + ')"  required autofocus> € &nbsp;&nbsp;|&nbsp;&nbsp;';
             html += '<label>Marge* </label>';
-            html += '<input type="text" SIZE="2" name="dynamic[' + i + '][]" id="marges' + i + '" onblur="calculerenplus()"  required autofocus> % &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;';
+            html += '<input type="text" SIZE="2" name="dynamic[' + i + '][]" id="marges' + i + '" onblur="calculerenplus(' + i + ')"  required autofocus> % &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;';
             html += '<label>Pv HT* </label>';
             html += '<input type="text"  name="dynamic[' + i + '][]" id="pvHTs' + i + '" SIZE="2" required autofocus readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;';
             html += '<label>Pv TTC* </label>';
@@ -207,7 +233,7 @@ $fournisseur = $pdo->query("SELECT * FROM fournisseur");
             html += '<div id="choixArrondi' + i + '"></div>';
             html += '<label for="etat" class="float">Statut produit* </label><select name="dynamic[' + i + '][]" required><option value="commande">Commandé</option><option value="recu">Reçu</option>';
             html += '</select><br>';
-            html += '<button type="button" onclick = "supprimerProduit(this)">Supprimer</button>';
+            html += '<button type="button" onclick = "supprimerProduit(this,'+i+')">Supprimer</button>';
             html += '</div>';
         
             document.getElementById('materiels').insertAdjacentHTML('beforeend', html);
@@ -215,7 +241,7 @@ $fournisseur = $pdo->query("SELECT * FROM fournisseur");
             
         }
          
-        function calculerenplus() {
+        function calculerenplus(i) {
             var paHTs = "paHTs" + i;
             var marges = "marges" + i;
             var pvHTs = "pvHTs" + i;
@@ -223,17 +249,37 @@ $fournisseur = $pdo->query("SELECT * FROM fournisseur");
             var margeM = "margeM" + i;
             var multiplier = 100;
 
-            var totalMarge = document.getElementById("margeT").value;
+            
+
+            /**var totalMarge = document.getElementById("margeT").value;
             var totalMarge = Math.round(totalMarge * multiplier) / multiplier;  
         
             var totalHT = document.getElementById("pHTT").value;
             var totalHT = Math.round(totalHT * multiplier) / multiplier;
         
             var totalTTC = document.getElementById("pvTTCT").value;
-            var totalTTC = Math.round(totalTTC * multiplier) / multiplier;
+            var totalTTC = Math.round(totalTTC * multiplier) / multiplier;**/
 
             var paHT = Number(document.getElementById(paHTs).value);
             var marge = Number(document.getElementById(marges).value);
+
+            // Validation des prix avec deux chiffres après la virgule ou le point
+            if (!/^(\d+(,\d{1,2})?|\d+(\.\d{1,2})?)$/.test(paHT) || !/^(\d+(,\d{1,2})?|\d+(\.\d{1,2})?)$/.test(marge)) {
+                alert("Les prix doivent être des nombres avec au plus deux chiffres après le point, sans caractères spéciaux.");
+                return;
+            }
+
+            // Empêcher les nombres négatifs
+            if (parseFloat(paHT) < 0 || parseFloat(marge) < 0) {
+                alert("Les prix ne peuvent pas être négatifs.");
+                return;
+            }
+
+            // Empêcher les marges supérieures à 100%
+            if (parseFloat(marge) > 100) {
+                alert("La marge ne peut pas être supérieure à 100%.");
+                return;
+            }
 
             var pvHT = Number(paHT + (paHT * (marge / 100)));
             pvHT = Math.round(pvHT * multiplier) / multiplier;
@@ -253,7 +299,7 @@ $fournisseur = $pdo->query("SELECT * FROM fournisseur");
                 var arrondiBas = Math.floor(pvHT);
             }
             var html = '<div id="choixArrondi' + i + '">Choisir l\'arrondi du PvHT ';
-            html += '<select name="arrondi" onchange="choixArrondiPlus()" id="choixArrondiSelect' + i + '" required>';
+            html += '<select name="arrondi" onchange="choixArrondiPlus(' + i + ')" id="choixArrondiSelect' + i + '" required>';
             html += '<option value="' + pvHT + '">' + pvHT + '</option>';
             html += '<option value="' + (arrondiBas + 5) + '">' + (arrondiBas + 5) + '</option>';
             html += '<option value="' + (arrondiBas + 10) + '">' + (arrondiBas + 10) + '</option>';
@@ -262,16 +308,18 @@ $fournisseur = $pdo->query("SELECT * FROM fournisseur");
             html += '</select> €</div>';
             document.getElementById('choixArrondi' + i).innerHTML = html;
 
-            totalMarge += margeMt;
+            recalculerTotaux(i);
+            /*totalMarge += margeMt;
             totalHT += pvHT;
             totalTTC += pvTTC;
 
             document.getElementById('margeT').value = Math.round(totalMarge * multiplier) / multiplier;
             document.getElementById('pHTT').value = Math.round(totalHT * multiplier) / multiplier;
-            document.getElementById('pvTTCT').value = Math.round(totalTTC * multiplier) / multiplier;
+            document.getElementById('pvTTCT').value = Math.round(totalTTC * multiplier) / multiplier;*/
+
         }
 
-        function choixArrondiPlus(){
+        function choixArrondiPlus(i){
             var multiplier = 100;
             var choix = document.getElementById("choixArrondiSelect" + i).value;
             choix = Number(choix);
@@ -286,7 +334,7 @@ $fournisseur = $pdo->query("SELECT * FROM fournisseur");
             var margeM = Number(choix - paHT);
             document.getElementById("margeM" + i).value = margeM;
 
-            var totalMarge = document.getElementById("margeM").value;
+            /*var totalMarge = document.getElementById("margeM").value;
             var totalMarge = Math.round(totalMarge * multiplier) / multiplier;  
         
             var totalHT = document.getElementById("pvHT").value;
@@ -301,60 +349,79 @@ $fournisseur = $pdo->query("SELECT * FROM fournisseur");
 
             document.getElementById("margeT").value = totalMarge;
             document.getElementById("pHTT").value = totalHT;
-            document.getElementById("pvTTCT").value = totalTTC;
-        }
+            document.getElementById("pvTTCT").value = totalTTC;*/
 
-        function supprimerProduit(element) {
-            element.parentNode.remove(); // Supprimer le produit dont le bouton "Supprimer" est cliqué
-            mettreAJourNumerosProduits(); // Mettre à jour les numéros des produits après la suppression
-            recalculerTotaux(); // Recalculer les totaux après la suppression du produit
+            recalculerTotaux(i);
         }
 
         // Fonction pour recalculer les totaux après suppression d'un produit
-        function recalculerTotaux() {
-            var produits = document.querySelectorAll('.materiel');
+        function recalculerTotaux(i) {
             
-            var totalMarge = document.getElementById('margeM').value;
-            var totalHT = document.getElementById('pvHT').value;
-            var totalTTC = document.getElementById('pvTTC').value;
             var multiplier = 100;
-            if (produits.length < 0) {
-                totalMarge = 0;
-                totalHT = 0;
-                totalTTC = 0;
-            } else {
-                produits.forEach(function(produit) {
-                    var paHT = Number(produit.querySelector('input[name="dynamic[\'0\'][]"]').value);
-                    var marge = Number(produit.querySelector('input[name="dynamic[\'0\'][]"]').value);
-                    var pvHT = Number(paHT + (paHT * (marge / 100)));
-                    pvHT = Math.round(pvHT * multiplier) / multiplier;
-                    var pvTTC = Number(pvHT + (pvHT * (20 / 100)));
-                    pvTTC = Math.round(pvTTC * multiplier) / multiplier;
-                    var margeM = Number(pvHT - paHT);
-                    margeM = Math.round(margeM * multiplier) / multiplier;
-                    totalMarge += margeM;
-                    totalHT += pvHT;
-                    totalTTC += pvTTC;
-                });
+            if (document.getElementById("margeM") && !isNaN(parseFloat(document.getElementById("margeM").value))) {
+                var totalMarge = parseFloat(document.getElementById("margeM").value);
+            }else 
+            {
+                var totalMarge = 0;
+            }
+            var totalMarge = Math.round(totalMarge * multiplier) / multiplier;
+        
+            var totalHT = document.getElementById("pvHT").value;
+            var totalHT = Math.round(totalHT * multiplier) / multiplier;
+        
+            var totalTTC = document.getElementById("pvTTC").value;
+            var totalTTC = Math.round(totalTTC * multiplier) / multiplier;
+
+            console.log("La fonction recalculerTotaux est en train d'être exécutée.");
+    
+            for (j = 1; j <= i; j++) {
+                //CALCULE TOTAL DE LA MARGE
+                var margeTotal = "margeM" + j;
+                var sommeHT = document.getElementById(margeTotal);
+                if (sommeHT && !isNaN(parseFloat(sommeHT.value))) {
+                    totalMarge += parseFloat(sommeHT.value);
+                }
+
+                //CALCULE TOTAL DE LA HT
+                var horstaxeTotal = "pvHTs" + j;
+                var horstaxeSomme = document.getElementById(horstaxeTotal);
+                console.log(parseFloat(horstaxeSomme.value));
+                if (horstaxeSomme && !isNaN(parseFloat(horstaxeSomme.value))) {
+                    totalHT += parseFloat(horstaxeSomme.value);
+                }
+
+                //CALCULE TOTAL DE LA TTC
+                var ttcTotal = "pvTTCs" + j;
+                var ttcSomme = document.getElementById(ttcTotal);
+                if (ttcSomme && !isNaN(parseFloat(ttcSomme.value))) {
+                    totalTTC += parseFloat(ttcSomme.value);
+                }
+                //simplification au centième près
+                totalMarge = Math.round(totalMarge * multiplier) / multiplier;
+                totalHT = Math.round(totalHT * multiplier) / multiplier;
+                totalTTC = Math.round(totalTTC * multiplier) / multiplier;
             }
 
-            document.getElementById('margeT').value = Math.round(totalMarge * multiplier) / multiplier;
-            document.getElementById('pHTT').value = Math.round(totalHT * multiplier) / multiplier;
-            document.getElementById('pvTTCT').value = Math.round(totalTTC * multiplier) / multiplier;
+            document.getElementById("margeT").value = totalMarge;
+            document.getElementById("pHTT").value = totalHT;
+            document.getElementById("pvTTCT").value = totalTTC;
+            console.log("La fonction recalculerTotaux a fini d'être exécutée."); 
         }
 
+        function supprimerProduit(element,i) {
+            var parentDiv = element.parentNode;
+            parentDiv.parentNode.removeChild(parentDiv); // Supprimer le div du produit
 
-        function mettreAJourNumerosProduits() {
+            // Mettre à jour l'indice des produits restants
             var produits = document.querySelectorAll('.materiel');
+           
             produits.forEach(function(produit, index) {
-                var numeroProduit = (index + 2); 
-                produit.querySelector('b').textContent = numeroProduit + "e produit de la commande";
+                produit.querySelector('b').textContent = (index + 2) + 'e produit de la commande';
             });
+            
+            console.log("je suis dans la fonction supprimerProduit, produits.length = "+produits.length);
+            recalculerTotaux(produits.length); // Mettre à jour les totaux
         }
-
-
-
-
     </script>
 </body>
 </html>
