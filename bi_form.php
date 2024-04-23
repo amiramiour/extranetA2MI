@@ -1,63 +1,3 @@
-<?php
-global $db;
-session_start();
-include 'connexionBD.php';
-
-// Vérifier si le formulaire a été soumis
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    try {
-        // Se connecter à la base de données
-        $db = new PDO('mysql:host=127.0.0.1;port=3307;dbname=0e5lu_a2mi_extranet', 'root', '');
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        // Récupérer les données saisies dans le formulaire
-        $facturer = isset($_POST['facturer']) ? 'oui' : 'non';
-        $garantie = isset($_POST['garantie']) ? 'oui' : 'non';
-        $contrat = isset($_POST['contrat']) ? 'oui' : 'non';
-        $service = isset($_POST['service_personne']) ? 'oui' : 'non';
-        $regle = isset($_POST['regle']) ? 'oui' : 'non';
-        $envoi = isset($_POST['envoie_courrier']) ? 'courrier' : (isset($_POST['envoie_mail']) ? 'mail' : '');
-        $facturation = $_POST['facturation'];
-        $dateFacturation = ($facturation === 'differee') ? $_POST['date_differee'] : null;
-        $paiement = $_POST['paiement'];
-        $heureArrive = $_POST['heure_arrive'];
-        $heureDepart = $_POST['heure_depart'];
-        $commentaire = $_POST['commentaire'];
-
-        // Générer des données aléatoires pour chaque attribut
-        $membre_id = rand(1, 100); // Remplacez 100 par le nombre maximum d'ID de membres dans votre base de données
-        $technicien = rand(1, 10); // Remplacez 10 par le nombre maximum d'ID de techniciens dans votre base de données
-
-        // Préparer la requête SQL d'insertion
-        $query = $db->prepare("INSERT INTO bi (bi_facture, bi_garantie, bi_contrat, bi_service, bi_envoi, bi_facturation, bi_datefacturation, bi_paiement, bi_datein, bi_heurearrive, bi_heuredepart, membre_id, bi_technicien, bi_commentaire, bi_regle) VALUES (:facturer, :garantie, :contrat, :service, :envoi, :facturation, :dateFacturation, :paiement, UNIX_TIMESTAMP(), :heureArrive, :heureDepart, :membre_id, :technicien, :commentaire, :regle)");
-
-        // Liaison des paramètres avec les valeurs
-        $query->bindParam(':facturer', $facturer);
-        $query->bindParam(':garantie', $garantie);
-        $query->bindParam(':contrat', $contrat);
-        $query->bindParam(':service', $service);
-        $query->bindParam(':envoi', $envoi);
-        $query->bindParam(':facturation', $facturation);
-        $query->bindParam(':dateFacturation', $dateFacturation);
-        $query->bindParam(':paiement', $paiement);
-        $query->bindParam(':heureArrive', $heureArrive);
-        $query->bindParam(':heureDepart', $heureDepart);
-        $query->bindParam(':membre_id', $membre_id);
-        $query->bindParam(':technicien', $technicien);
-        $query->bindParam(':commentaire', $commentaire);
-        $query->bindParam(':regle', $regle);
-
-        // Exécuter la requête SQL
-        $query->execute();
-
-        echo "Les données ont été ajoutées avec succès dans la base de données.";
-    } catch (PDOException $e) {
-        echo "Erreur lors de l'insertion des données : " . $e->getMessage();
-    }
-}
-
-?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -66,7 +6,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Formulaire Bon d'Intervention Client</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/style.css">
-
 </head>
 <body>
 <!-- Inclure le navbar -->
@@ -74,7 +13,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <div id="contenu" class="container mt-3">
     <h1>Formulaire de création d'un Bon d'Intervention client</h1>
-    <form method="post" name="BI">
+    <?php
+    // Affichage du message de succès
+    if (isset($_SESSION['success_message'])) {
+        echo '<div class="alert alert-success" role="alert">' . $_SESSION['success_message'] . '</div>';
+        unset($_SESSION['success_message']);
+    }
+    // Affichage du message d'erreur
+    if (isset($_SESSION['error_message'])) {
+        echo '<div class="alert alert-danger" role="alert">' . $_SESSION['error_message'] . '</div>';
+        unset($_SESSION['error_message']);
+    }
+    ?>
+    <form method="post" action="traitement-bi.php" name="BI">
         <fieldset>
             <!-- Bouton Ajouter -->
             <button type="button" class="btn btn-primary custom-btn" id="btnAjouter" onclick="ajouterChamp()">Ajouter</button>
@@ -237,21 +188,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Fonction appelée lorsque le formulaire est soumis
+    // Fonction appelée lorsque le formulaire est soumis
     function handleSubmit(event) {
         // Empêcher le comportement par défaut du formulaire
         event.preventDefault();
 
-        // Afficher le résultat dans la console
+        // Effectuer les actions et les calculs
         afficherResultat();
-        // Rediriger vers la page bi_details.php
-        //window.location.href = "liste_interventions.php";
+        // Soumettre le formulaire
+        document.forms["BI"].submit();
     }
 
     // Ajout d'un écouteur d'événement pour le formulaire
     document.addEventListener("DOMContentLoaded", function() {
         var form = document.querySelector('form[name="BI"]');
         form.addEventListener("submit", handleSubmit);
-    })
+    });
+
+
+
 </script>
 
 <script>
@@ -265,7 +220,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         dropdownMenu.style.left = rect.left + "px";
         dropdownMenu.style.display = "block";
     }
-// selection de la liste déroulante
+    // selection de la liste déroulante
     function selectIntervention(intervention) {
         var inputField = document.getElementById("selectedIntervention");
         inputField.value = intervention;
@@ -279,7 +234,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             dropdownMenu.style.display = "none";
         }
     });
-// Ajouter un champ d'intervention
+    // Ajouter un champ d'intervention
     var compteurChamps = 1; // Initialiser le compteur de champs
 
     function ajouterChamp() {
