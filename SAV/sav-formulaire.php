@@ -44,6 +44,7 @@ $client_id = $_GET['client_id'];
     <form action="traitement-sav.php" method="post">
         <!-- Champ caché pour passer l'ID du client -->
         <input type="hidden" name="client_id" value="<?php echo $client_id; ?>">
+        <input type="hidden" name="client_id" value="<?php echo $client_id; ?>">
 
         <div class="form-group">
             <label for="probleme">Problème* :</label>

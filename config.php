@@ -9,7 +9,7 @@ $password = ''; */
 
 //connexion.php
 /*
-    $_SESSION['membre_id'] : Identifiant de session de l'utilisateur.
+    $membre_id = $_SESSION['membre_id']  // Identifiant de session de l'utilisateur.
     $_SESSION['membre_mail'] : Adresse email de session de l'utilisateur.
     $_SESSION['membre_mdp'] : Mot de passe de session de l'utilisateur.
     $_SESSION['membre_type'] : Type de membre (client, admin, etc.) de session de l'utilisateur.

@@ -54,7 +54,7 @@ SELECT
     membres.membre_prenom AS client_prenom,
     membres.membre_entreprise AS client_entreprise,
     sav.sav_accessoire, 
-    sav.sav_avancement, 
+    sei.sauvgarde_avancement,
     sav.sav_datein,
     sav.sav_dateout,
     sav.sav_envoi, 
@@ -76,7 +76,11 @@ FROM
 LEFT JOIN 
     sav_etats ON sav.sav_etats = sav_etats.id_etat_sav
 LEFT JOIN
-    membres ON sav.membre_id = membres.membre_id";
+    membres ON sav.membre_id = membres.membre_id
+LEFT JOIN
+    sauvgarde_etat_info sei ON sav.sav_avancement = sei.id_sauvgarde_etat
+WHERE
+    sav.active = 1";
 
     // Clause WHERE conditionnelle pour filtrer par état si un état est sélectionné
     if (!empty($etat)) {
@@ -172,7 +176,7 @@ LEFT JOIN
             <td><a href="../profile/profile_client.php?id=<?= $row['membre_id'] ?>"><?= $row['client_nom'] . ' ' . $row['client_prenom'] ?></a></td>
             <td><?= $row['client_entreprise'] ?></td>
             <td><?= $row['sav_accessoire'] ?></td>
-            <td><?= $row['sav_avancement'] ?></td>
+            <td><?= $row['sauvgarde_avancement'] ?></td>
             <td><?= date('d/m/Y H:i:s', strtotime($row['sav_datein'])) ?></td>
             <td><?= date('d/m/Y H:i:s', strtotime($row['sav_dateout'])) ?></td>
             <td><?= $row['sav_envoi'] ?></td>
