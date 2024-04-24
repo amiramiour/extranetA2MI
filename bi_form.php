@@ -95,9 +95,9 @@ $membre_id = $_GET['membre_id'];
                         <option value="Forfait 2H supplémentaires">Forfait 2H supplémentaires</option>
                     </select>
                     <label for="nbpiece_1" style="margin-right: 5px;">/ Pièces *</label>
-                    <input class="field" type="number" name="dynamic[1][]" id="nbpiece_1" size="5" placeholder="Pièces" pattern="\d+" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" style="width: 100px; margin-right: 5px;" required min="0"/>
+                    <input class="field" type="number" name="nb_pieces" id="nbpiece_1" size="5" placeholder="Pièces" pattern="\d+" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" style="width: 100px; margin-right: 5px;" required min="0"/>
                     <label for="prixunit_1" style="margin-right: 5px;">/ Prix unitaire HT *</label>
-                    <input class="field prix-unitaire" type="text" name="dynamic[1][]" id="prixunit_1" size="9" placeholder="Prix" pattern="[0-9]+([\.,][0-9]+)?" onkeypress="return event.charCode >= 48 && event.charCode <= 57 || event.charCode == 44 || event.charCode == 46" style="width: 150px;" required/>
+                    <input class="field prix-unitaire" type="text" name="prixUn" id="prixunit_1" size="9" placeholder="Prix" pattern="[0-9]+([\.,][0-9]+)?" onkeypress="return event.charCode >= 48 && event.charCode <= 57 || event.charCode == 44 || event.charCode == 46" style="width: 150px;" required/>
                     <button type="button" class="btn btn-danger" onclick="supprimerChamp(this)">X</button>
                 </div>
             </div>
