@@ -3,7 +3,6 @@
 include 'connexionBD.php';
 $db = connexionbdd();
 
-
 // Vérifier si l'ID du bon d'intervention à modifier est passé dans l'URL
 if(isset($_GET['bi_id'])) {
     // Récupérer l'ID du bon d'intervention depuis l'URL
@@ -17,10 +16,9 @@ if(isset($_GET['bi_id'])) {
     // Vérifier si des données ont été trouvées pour l'ID donné
     if($bi_data) {
         // Récupérer les données à pré-remplir
-        $selectedIntervention = $bi_data['selectedIntervention'];
-        $nbPieces = $bi_data['nbPieces'];
-        $prixUnitaire = $bi_data['prixUnitaire'];
-        // Répéter ce processus pour chaque champ que vous souhaitez pré-remplir
+        $selectedIntervention = $bi_data['bi_intervention']; // Changed from 'selectedIntervention'
+        $nbPieces = $bi_data['bi_nbpiece']; // Changed from 'nbPieces'
+        $prixUnitaire = $bi_data['bi_prixunit']; // Changed from 'prixUnitaire'
 
         // Utiliser ces données pour pré-remplir les champs du formulaire
         ?>
@@ -80,7 +78,7 @@ $membre_id = $_GET['membre_id'];
             <div id="interventions" style="flex-direction: column;">
                 <div class="intervention">
                     <label for="selectedIntervention" style="width: 250px;">Intervention *</label>
-                    <select id="selectedIntervention" class="form-control" onclick="showDropdown()" style="flex: 1; width: 300px;" required>
+                    <select id="selectedIntervention" name="selectedIntervention" class="form-control" onclick="showDropdown()" style="flex: 1; width: 300px;" required>
                         <option value="" disabled selected>Sélectionner une intervention</option>
                         <option value="Forfait intervention sur site PC">Forfait intervention sur site PC</option>
                         <option value="Forfait intervention sur site MAC">Forfait intervention sur site MAC</option>

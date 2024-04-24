@@ -1,9 +1,10 @@
 <?php
+
 session_start();
 include 'connexionBD.php';
 
 // Vérifier si l'ID du membre est passé dans l'URL
-if(isset($_GET['membre_id'])) {
+if (isset($_GET['membre_id'])) {
     // Récupérer l'ID du membre depuis l'URL
     $membre_id = $_GET['membre_id'];
 
@@ -55,8 +56,35 @@ if(isset($_GET['membre_id'])) {
 
             $query->execute();
 
-            // Message de succès
-            $_SESSION['success_message'] = "Les données ont été ajoutées avec succès dans la base de données.";
+            // Récupérer l'ID du bon d'intervention inséré
+            $bi_id = $db->lastInsertId();
+
+            // Maintenant, insérons les données dans la table `intervention`
+            $selectedIntervention = $_POST['selectedIntervention'];
+            $nbPieces = $_POST['nb_pieces'];
+            $prixUnitaire = $_POST['prixUn'];
+
+            $total = $nbPieces * $prixUnitaire; // Calculer le total
+
+            $query_intervention = $db->prepare("INSERT INTO intervention (inter_intervention, inter_nbpiece, inter_prixunit, inter_total, bi_id) 
+VALUES (:selectedIntervention, :nbPieces, :prixUnitaire , :total, :bi_id)");
+
+            $query_intervention->bindParam(':selectedIntervention', $selectedIntervention);
+            $query_intervention->bindParam(':nbPieces', $nbPieces);
+            $query_intervention->bindParam(':prixUnitaire', $prixUnitaire);
+            $query_intervention->bindParam(':total', $total);
+            $query_intervention->bindParam(':bi_id', $bi_id);
+
+            $query_intervention->execute();
+
+            // Vérifier si l'insertion dans la table `intervention` s'est bien passée
+            if ($query_intervention->rowCount() > 0) {
+                // Message de succès
+                $_SESSION['success_message'] = "Les données ont été ajoutées avec succès dans la base de données.";
+            } else {
+                // Message d'erreur si l'insertion a échoué
+                $_SESSION['error_message'] = "Erreur lors de l'insertion dans la table intervention : Aucune ligne insérée.";
+            }
 
             // Redirection vers bonIntervention.php après traitement
             header("Location: bonIntervention.php");
