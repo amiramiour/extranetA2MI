@@ -53,7 +53,10 @@ if(isset($_GET['membre_id'])) {
                             <p>Heure de départ : <?php echo $bi['bi_heuredepart']; ?></p>
                             <!-- Ajoutez d'autres champs selon vos besoins -->
                             <!-- Bouton Modifier -->
+                            <button type="button" class="btn btn-danger">Supprimer</button>
                             <a href="modification_bi.php?bi_id=<?php echo $bi['bi_id']; ?>" class="btn btn-primary custom-btn">Modifier</a>
+                            <a href="bi_form.php?membre_id=<?php echo $membre_id; ?>" class="btn btn-primary custom-bleu-btn">Ajouter</a>
+
                         </div>
                     </div>
                 </div>
@@ -68,5 +71,6 @@ if(isset($_GET['membre_id'])) {
 
 <!-- Inclure le fichier JavaScript de Bootstrap à la fin du corps -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

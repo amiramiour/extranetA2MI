@@ -43,6 +43,7 @@ if(isset($_GET['bi_id'])) {
             <h5 class="card-title">Détails du bon d'intervention</h5>
             <p class="card-text">ID du bon d'intervention : <?php echo $bi_id; ?></p>
             <p class="card-text">Date du bon d'intervention : <?php echo date('d/m/Y', strtotime($date)); ?></p>
+
         </div>
     </div>
 

@@ -40,6 +40,8 @@ if(isset($_GET['bi_id'])) {
         <?php
     }
 }
+
+$membre_id = $_GET['membre_id'];
 ?>
 
 <!DOCTYPE html>
@@ -69,7 +71,7 @@ if(isset($_GET['bi_id'])) {
         unset($_SESSION['error_message']);
     }
     ?>
-    <form method="post" action="traitement-bi.php" name="BI">
+    <form method="post" action="traitement-bi.php?membre_id=<?php echo $membre_id; ?>" name="BI">
         <input type="hidden" name="bi_id" value="<?php echo $bi_id; ?>">
         <fieldset>
             <!-- Bouton Ajouter -->
