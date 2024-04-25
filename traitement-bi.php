@@ -90,12 +90,12 @@ VALUES (:selectedIntervention, :nbPieces, :prixUnitaire , :total, :bi_id)");
             $query_intervention->execute();
 
             // Envoi de l'e-mail de confirmation
-            if (sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_email, $total, $facturation)) {
+            if (sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_email, $total, $facturation,true)) {
                 $success_count++; // Incrémentez le compteur de succès
             } else {
                 $error_count++; // Incrémentez le compteur d'erreurs
             }
-            if (sendBiCreationEmail(745, $selectedIntervention, $technicien_email, $total, $facturation)) {
+            if (sendBiCreationEmail(745, $selectedIntervention, $technicien_email, $total, $facturation,false)) {
                 $success_count++; // Incrémentez le compteur de succès
             } else {
                 $error_count++; // Incrémentez le compteur d'erreurs
@@ -113,18 +113,18 @@ VALUES (:selectedIntervention, :nbPieces, :prixUnitaire , :total, :bi_id)");
             // Redirection vers bonIntervention.php après traitement
             header("Location: bonIntervention.php");
             exit;
-         } catch (PDOException $e) {
-        echo "Erreur : " . $e->getMessage();
-    } finally {
-        $connexion = null;
-    }
+        } catch (PDOException $e) {
+            echo "Erreur : " . $e->getMessage();
+        } finally {
+            $connexion = null;
+        }
     } else {
         // Redirection vers une page d'erreur si la méthode de requête n'est pas POST
         exit;
     }
 }
 
-function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_email, $total, $facturation) {
+function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_email, $total, $facturation,$is_client) {
     // Récupérer l'adresse e-mail du client depuis la base de données
     $connexion = connexionbdd();
     $query = $connexion->prepare("SELECT membre_mail, membre_prenom, membre_nom FROM membres WHERE membre_id = ?");
@@ -136,13 +136,24 @@ function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_emai
 
     // Composez le contenu de l'e-mail
     $subject = "Création d'un Bon d'intervention";
-    $body = "Bonjour $prenom $nom,\n\n";
-    $body .= "Un Bon d'intervention a été créé pour $prenom $nom :\n\n";
-    $body .= "Intervention : $selectedIntervention\n\n";
-    $body .= "Prix total : $total euros\n";
-    $body .= "Technicien en charge : $technicien_email\n";
-    $body .= "Date de facturation : $facturation\n";
-    $body .= "Cordialement,\nVotre société";
+    $body = "Bonjour,\n\n";
+    if ($is_client) {
+
+        $body .= "Un Bon d'intervention a été créé pour vous :\n\n";
+        $body .= "Intervention : $selectedIntervention\n\n";
+        $body .= "Prix total : $total euros\n";
+        $body .= "Technicien en charge : $technicien_email\n";
+        $body .= "Date de facturation : $facturation\n";
+        $body .= "Cordialement,\nVotre société";}
+    else{
+        $body .= "Un Bon d'intervention a été créé pour $prenom $nom :\n\n";
+        $body .= "Intervention : $selectedIntervention\n\n";
+        $body .= "Prix total : $total euros\n";
+        $body .= "Technicien en charge : $technicien_email\n";
+        $body .= "Date de facturation : $facturation\n";
+        $body .= "Cordialement,\nVotre société";}
+
+
 
     try {
         $mail = new PHPMailer(true);

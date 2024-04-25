@@ -4,6 +4,7 @@ global $db;
 include 'connexionBD.php';
 
 $db = connexionbdd();
+$query = $db->prepare("SELECT membres.membre_id, membres.membre_nom, membres.membre_prenom, bi.bi_datein FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id");
 
 // Vérifier si l'identifiant du membre est passé dans l'URL
 if(isset($_GET['membre_id'])) {
@@ -63,7 +64,8 @@ if(isset($_POST['action']) && $_POST['action'] === 'supprimer' && isset($_POST['
                     <div class="card mb-3">
                         <div class="card-body">
                             <h5 class="card-title">BI n° <?php echo $bi['bi_id']; ?></h5>
-                            <p>Date de création : <?php echo date('d/m/Y', strtotime($bi['bi_datein'])); ?></p>
+                            <p>Date de création : <?php echo date('d/m/Y', $bi['bi_datein']); ?></p>
+
                             <!-- Afficher d'autres détails de l'intervention ici -->
                             <p>Facturation : <?php echo $bi['bi_facturation']; ?></p>
                             <p>Heure d'arrivée : <?php echo $bi['bi_heurearrive']; ?></p>
@@ -77,6 +79,7 @@ if(isset($_POST['action']) && $_POST['action'] === 'supprimer' && isset($_POST['
                 </div>
             <?php endforeach; ?>
         </div>
+
     <?php else: ?>
         <p>Aucun bon d'intervention trouvé pour ce membre.</p>
     <?php endif; ?>
