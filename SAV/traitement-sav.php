@@ -16,11 +16,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Récupération de l'ID du client depuis le formulaire
         $membre_id = $_POST['client_id'];
+        $query_client = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :membre_id";
+        $stmt_client = $connexion->prepare($query_client);
+        $stmt_client->bindParam(':membre_id', $membre_id);
+        $stmt_client->execute();
+        $client_info = $stmt_client->fetch(PDO::FETCH_ASSOC);
+        // Récupération de l'ID du technicien en charge depuis la session
+        // À remplacer par la gestion de sessions
+        $sav_technicien_id = 744; // ID du technicien en charge (à remplacer par la gestion de sessions)
 
-        // Adresse e-mail du technicien en charge
-        $technicien_email = "malik.ouared2003@gmail.com";
+        // Récupération des informations du technicien
+        $query_technicien = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :sav_technicien_id";
+        $stmt_technicien = $connexion->prepare($query_technicien);
+        $stmt_technicien->bindParam(':sav_technicien_id', $sav_technicien_id);
+        $stmt_technicien->execute();
+        $technicien_info = $stmt_technicien->fetch(PDO::FETCH_ASSOC);
 
-        $sav_technicien = 744; // ID du technicien en charge (à remplacer par la gestion de sessions)
+        $technicien_nom = $technicien_info['membre_nom'];
+        $technicien_prenom = $technicien_info['membre_prenom'];
+        $technicien_email = $technicien_info['membre_mail'];
 
         // Récupération des données du formulaire
         $probleme = $_POST['probleme'];
@@ -42,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $tva_prix_main_oeuvre_ht = $prix_main_oeuvre_ht * 0.2;
         $prix_main_oeuvre_ttc = $prix_main_oeuvre_ht + $tva_prix_main_oeuvre_ht;
-        $prix_total_ttc=$prix_main_oeuvre_ttc+$prix_materiel_ttc;
+        $prix_total_ttc = $prix_main_oeuvre_ttc + $prix_materiel_ttc;
         //facture réglée
         // Récupération de la valeur de la case à cocher "Facture réglée"
         $facture_reglee = isset($_POST['facture_reglee']) ? 'oui' : 'non';
@@ -71,11 +85,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Enregistrement dans la base de données
         $sql = "INSERT INTO sav (membre_id, sav_accessoire, sav_datein, sav_dateout, sav_envoi, sav_etat, sav_etats, sav_forfait, sav_garantie, sav_maindoeuvreht, sav_maindoeuvrettc, sav_mdpclient, sav_probleme, sav_regle, sav_tarifmaterielht, sav_tarifmaterielttc, sav_typemateriel, sav_technicien) 
-        VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, 1, :etat_id, :forfait, :garantie, :maindoeuvreht, :maindoeuvrettc, :mdpclient, :probleme, :facture_reglee, :tarifmaterielht, :tarifmaterielttc, :typemateriel, :sav_technicien)";
+        VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, 1, :etat_id, :forfait, :garantie, :maindoeuvreht, :maindoeuvrettc, :mdpclient, :probleme, :facture_reglee, :tarifmaterielht, :tarifmaterielttc, :typemateriel, :sav_technicien_id)";
 
         $stmt = $connexion->prepare($sql);
         $stmt->bindParam(':membre_id', $membre_id);
-        $stmt->bindParam(':sav_technicien', $sav_technicien);
+        $stmt->bindParam(':sav_technicien_id', $sav_technicien_id);
         $stmt->bindParam(':accessoires', $accessoires);
         $stmt->bindParam(':etat_id', $etat_id); // Utilisation de l'ID de l'état
         $stmt->bindParam(':date_recu', $date_recu);
@@ -94,17 +108,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $stmt->execute();
 
-        // Envoi de l'e-mail de confirmation
-        if (sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $date_recu, $etat_intitule)) {
+        // Envoi de l'e-mail de confirmation au client
+        if (sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, null, null, $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, true)) {
             $success_count++; // Incrémentez le compteur de succès
         } else {
             $error_count++; // Incrémentez le compteur d'erreurs
         }
-        if (sendSAVCreationEmail(744, $prix_total_ttc, $technicien_email, $date_recu, $etat_intitule)) {
+
+// Envoi de l'e-mail de confirmation au technicien
+        if (sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, false)) {
             $success_count++; // Incrémentez le compteur de succès
         } else {
             $error_count++; // Incrémentez le compteur d'erreurs
         }
+
 
         if ($success_count > 0 && $error_count == 0) {
             echo "Enregistrement du SAV effectué avec succès. Les e-mails ont été envoyés avec succès.";
@@ -123,22 +140,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     exit();
 }
 
-// Fonction pour envoyer un e-mail de confirmation au client
-function sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $date_recu, $etat_intitule) {
+// Fonction pour envoyer un e-mail de confirmation
+function sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $client_nom, $client_prenom, $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, $is_client) {
     // Récupérer l'adresse e-mail du client depuis la base de données
     $connexion = connexionbdd();
     $query = $connexion->prepare("SELECT membre_mail FROM membres WHERE membre_id = ?");
     $query->execute([$membre_id]);
-    $client_email = $query->fetchColumn();
+    $client_info = $query->fetch(PDO::FETCH_ASSOC);
 
     // Composez le contenu de l'e-mail
     $subject = "Création d'un SAV";
     $body = "Bonjour,\n\n";
-    $body .= "Un SAV a été créé pour vous avec les détails suivants :\n\n";
-    $body .= "Prix total : $prix_total_ttc euros\n";
-    $body .= "Technicien en charge : $technicien_email\n";
-    $body .= "Date de création : $date_recu\n";
-    $body .= "État : $etat_intitule\n\n";
+    if ($is_client) {
+        $body .= "Un SAV a été créé pour vous avec les détails suivants :\n\n";
+        $body .= "Prix total : $prix_total_ttc euros\n";
+        $body .= "Technicien en charge : $technicien_nom $technicien_prenom\n";
+        $body .= "Date de création : $date_recu\n";
+        $body .= "État : $etat_intitule\n\n";
+    } else {
+        $body .= "Un SAV a été créé pour : $client_nom $client_prenom avec les détails suivants :\n\n";
+        $body .= "Prix total : $prix_total_ttc euros\n";
+        $body .= "Technicien en charge : $technicien_nom $technicien_prenom\n";
+        $body .= "Date de création : $date_recu\n";
+        $body .= "État : $etat_intitule\n\n";
+    }
     $body .= "Cordialement,\nVotre société";
 
     try {
@@ -155,7 +180,11 @@ function sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $d
 
         // Destinataires
         $mail->setFrom('masdouarania02@gmail.com', 'Votre société');
-        $mail->addAddress($client_email);    // Adresse e-mail du client
+        if ($is_client) {
+            $mail->addAddress($client_info['membre_mail']);    // Adresse e-mail du client
+        } else {
+            $mail->addAddress($technicien_email);    // Adresse e-mail du technicien
+        }
 
         // Contenu de l'e-mail
         $mail->isHTML(false);
@@ -173,4 +202,5 @@ function sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $d
         return false;
     }
 }
+
 ?>

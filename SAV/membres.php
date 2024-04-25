@@ -59,9 +59,10 @@ $membres = $query->fetchAll(PDO::FETCH_ASSOC);
             <td><?= $membre['membre_tel'] ?></td>
             <td><?= $membre['membre_mail'] ?></td>
             <td><?= $membre['membre_type'] ?></td>
-            <td><a href="sav-formulaire.php?id=<?= $membre['client_id'] ?>" class="btn btn-primary">Créer</a></td> <!-- Bouton pour créer un SAV -->
+            <td><?php $client_id = $membre['client_id']; echo "<a href='sav-formulaire.php?client_id=$client_id'>Créer SAV</a>"; ?></td>
         </tr>
     <?php endforeach; ?>
+
     </tbody>
 </table>
 </body>
