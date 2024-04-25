@@ -72,7 +72,7 @@ include ('connexionBD.php');
         </div>
         <div class="col-lg-9">
             <h1 class="mt-5">Bienvenue sur l'extranet d'a2mi !</h1>
-            <p>Pour pouvoir accéder à votre fiche client, il faut <a href="membres/connexion.php">se connecter</a> !</p>
+            <p>Pour pouvoir accéder à votre fiche client, il faut <a href="connexion.php">se connecter</a> !</p>
             <p>Si vous êtes déjà connecté, vous pouvez accéder à votre <a href="membres/user.php">fiche client</a> pour accéder à vos traitements en cours.</p>
             <p>Le Webmaster</p>
         </div>

@@ -51,6 +51,9 @@ if(isset($_POST['action']) && $_POST['action'] === 'supprimer' && isset($_POST['
     <!-- Titre de la page -->
     <h1>Détails des bons d'intervention</h1>
 
+    <!-- Afficher le bouton Ajouter -->
+    <a href="bi_form.php?membre_id=<?php echo $membre_id; ?>" class="btn btn-primary custom-bleu-btn">Ajouter</a>
+
     <!-- Vérifier si des bons d'intervention sont disponibles -->
     <?php if(isset($bons_intervention) && !empty($bons_intervention)): ?>
         <!-- Afficher les détails des bons d'intervention -->
@@ -69,17 +72,14 @@ if(isset($_POST['action']) && $_POST['action'] === 'supprimer' && isset($_POST['
                             <!-- Bouton Supprimer avec l'attribut data-bi-id -->
                             <button type="button" class="btn btn-danger btn-supprimer" data-bi-id="<?php echo $bi['bi_id']; ?>">Supprimer</button>
                             <a href="modification_bi.php?bi_id=<?php echo $bi['bi_id']; ?>" class="btn btn-primary custom-btn">Modifier</a>
-                            <a href="bi_form.php?membre_id=<?php echo $membre_id; ?>" class="btn btn-primary custom-bleu-btn">Ajouter</a>
                         </div>
                     </div>
                 </div>
             <?php endforeach; ?>
-
         </div>
     <?php else: ?>
         <p>Aucun bon d'intervention trouvé pour ce membre.</p>
     <?php endif; ?>
-
 </div>
 
 <!-- Inclure le fichier JavaScript de Bootstrap à la fin du corps -->
