@@ -10,7 +10,16 @@ $jsonFournisseurs = json_encode($fournisseurs);
 
 file_put_contents('fournisseurs.json', $jsonFournisseurs);
 
-$id = $_GET['id'];
+//vérifier si $id est récupéré
+if (isset($_GET['id'])) {
+    $id = $_GET['id'];
+} else {
+    // on fait une requete pour récupérer les clients
+    $query = $pdo->query("SELECT DISTINCT m.membre_id, m.membre_nom, m.membre_prenom
+                    FROM membres m ");
+    $query->execute();
+    $clients = $query->fetchAll();
+}
 
 ?>
 <html>
@@ -22,7 +31,16 @@ $id = $_GET['id'];
 <body>
     <div class="container">
         <h2>Ajouter une commande</h2>
-        <form action="traitement_commande.php?id=<?php echo $id; ?>" method="post" name="commande">
+        <!-- <form action="traitement_commande.php?id=<?php echo $id; ?>" method="post" name="commande">-->
+        <form action="<?php echo isset($id) ? 'traitement_commande.php?id=' . $id : 'traitement_commande.php'; ?>" method="post" name="commande">
+            <?php if (!isset($id)) { ?>
+                <label for="id">Client</label>
+                <select name="client_id" required>
+                    <?php foreach ($clients as $client) { ?>
+                        <option value="<?php echo $client['membre_id']; ?>"><?php echo $client['membre_nom'] . ' ' . $client['membre_prenom']; ?></option>
+                    <?php } ?>
+                </select>
+            <?php } ?>
             <fieldset><legend>Produit <small>* champs obligatoires</small></legend>
                 <div id="materiels">
                     <div id="materiel">
@@ -33,12 +51,11 @@ $id = $_GET['id'];
                         <input type="text" name="dynamic['0'][]" id="designation" required>&nbsp;&nbsp;|&nbsp;&nbsp;
                         <label for="fournisseur">Fournisseur* </label>
                         <select name="dynamic['0'][]" required>
-                            <option value="sans Fournisseur">------</option>
                             <?php
                             $jsonData = file_get_contents('fournisseurs.json');
                             $fournisseurs = json_decode($jsonData, true);
                             foreach ($fournisseurs as $fournisseur) {?>
-                                <option value="<?php echo $fournisseur['nomFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>
+                                <option value="<?php echo $fournisseur['idFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>
                                 <?php
                             }?>
                         </select>
@@ -67,11 +84,17 @@ $id = $_GET['id'];
                     </div>
                 </div>
             </fieldset>
+            <button type="button" onclick="supprimerProduit()">Supprimer</button>
+            <br><br>
             <button type="button" onclick="ajouterProduit()">Ajouter un produit à la commande</button>
+            <br><br>
             <!-- <button type="button" onclick="enleverProduit()">Enlever un produit à la commande</button> -->
             
             <label for="reference" class="float" >Nom de la commande* </label>
             <input type="text" name="nomC" id="reference" required autofocus/><br>
+
+            <label for="designation" class="float">Désignation* </label>
+            <input type="text" name="designation" id="designation" required autofocus/><br>
 
             <label class="float">Date de livraison prévue</label><input type="date" name="dateP" required autofocus><br>
             <label class="float">Date de livraison souhaitée</label><input type="date" name="dateS" required autofocus><br>
@@ -219,12 +242,11 @@ $id = $_GET['id'];
 
             html += '<label for="fournisseur">Fournisseur* </label>';
             html += '<select name="dynamic[' + i + '][]" required>';
-            html += '<option value="sans Fournisseur">------</option>';
             <?php
             $jsonData = file_get_contents('fournisseurs.json');
             $fournisseurs = json_decode($jsonData, true);
             foreach ($fournisseurs as $fournisseur) { ?>
-                html += '<option value="<?php echo $fournisseur['nomFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>';
+                html += '<option value="<?php echo $fournisseur['idFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>';
             <?php } ?>
             html += '</select>';
             html += '<br><br>';
@@ -242,7 +264,6 @@ $id = $_GET['id'];
             html += '<div id="choixArrondi' + i + '"></div>';
             html += '<label for="etat" class="float">Statut produit* </label><select name="dynamic[' + i + '][]" required><option value="commande">Commandé</option><option value="recu">Reçu</option>';
             html += '</select><br>';
-            html += '<button type="button" onclick = "supprimerProduit(this,'+i+')">Supprimer</button>';
             html += '</div>';
         
             document.getElementById('materiels').insertAdjacentHTML('beforeend', html);
@@ -415,19 +436,14 @@ $id = $_GET['id'];
             console.log("La fonction recalculerTotaux a fini d'être exécutée."); 
         }
 
-        function supprimerProduit(element,i) {
-            var parentDiv = element.parentNode;
-            parentDiv.parentNode.removeChild(parentDiv); // Supprimer le div du produit
-
-            // Mettre à jour l'indice des produits restants
-            var produits = document.querySelectorAll('.materiel');
-           
-            produits.forEach(function(produit, index) {
-                produit.querySelector('b').textContent = (index + 2) + 'e produit de la commande';
-            });
-            
-            console.log("je suis dans la fonction supprimerProduit, produits.length = "+produits.length);
-            recalculerTotaux(produits.length); // Mettre à jour les totaux
+        function supprimerProduit(){
+            var materiels = document.querySelectorAll('.materiel');
+            if (materiels.length > 0) {
+                materiels[materiels.length - 1].remove();
+                recalculerTotaux(materiels.length - 1);
+            }else{
+                alert("Vous ne pouvez pas supprimer le dernier produit.");
+            }
         }
     </script>
 </body>

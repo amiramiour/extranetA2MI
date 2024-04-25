@@ -20,7 +20,8 @@ $clients = $query->fetchAll();
 </head>
 <body>
     <div class="container">
-        <h2>Liste des clients avec commandes</h2>
+        <h2>Liste des clients ayant des commandes</h2>
+        <a href="ajouter_commande.php" class="btn btn-primary mb-3">Ajouter une commande</a>
         <table class="table table-striped">
             <thead>
                 <tr>
