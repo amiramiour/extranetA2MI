@@ -31,6 +31,7 @@ try {
         <tr>
             <th scope="col">ID</th>
             <th scope="col">Membre</th>
+            <th scope="col">Active</th>
             <th scope="col">Technicien</th>
             <th scope="col">Facture</th>
             <th scope="col">Garantie</th>
@@ -45,6 +46,7 @@ try {
             <th scope="col">Heure de Départ</th>
             <th scope="col">Commentaire</th>
             <th scope="col">Réglé</th>
+
         </tr>
         </thead>
         <tbody>
@@ -52,6 +54,7 @@ try {
             <tr>
                 <td><?= $bi['bi_id'] ?></td>
                 <td><?= $bi['membre_nom'] . ' ' . $bi['membre_prenom'] ?></td>
+                <td><?= $bi['bi_active'] ?></td>
                 <td><?= $bi['bi_technicien'] ?></td>
                 <td><?= $bi['bi_facture'] ?></td>
                 <td><?= $bi['bi_garantie'] ?></td>
@@ -66,6 +69,7 @@ try {
                 <td><?= $bi['bi_heuredepart'] ?></td>
                 <td><?= $bi['bi_commentaire'] ?></td>
                 <td><?= $bi['bi_regle'] ?></td>
+
             </tr>
         <?php endforeach; ?>
         </tbody>
