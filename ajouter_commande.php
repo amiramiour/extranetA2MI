@@ -1,6 +1,5 @@
 <?php
-//connexion à la base de donnée
-include 'ConnexionBD.php'; // Fichier de configuration de la connexion PDO
+include 'ConnexionBD.php'; 
 
 //requete pour récupérer les fournisseurs
 $req = $pdo->query("SELECT * FROM fournisseur");
@@ -10,13 +9,18 @@ $jsonFournisseurs = json_encode($fournisseurs);
 
 file_put_contents('fournisseurs.json', $jsonFournisseurs);
 
+$req2 = $pdo->query("SELECT * FROM commande_etats");
+$commande_etats = $req2->fetchAll(PDO::FETCH_ASSOC);
+
 //vérifier si $id est récupéré
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
 } else {
     // on fait une requete pour récupérer les clients
-    $query = $pdo->query("SELECT DISTINCT m.membre_id, m.membre_nom, m.membre_prenom
-                    FROM membres m ");
+    $query = $pdo->query("SELECT DISTINCT m.membre_id, m.membre_nom, m.membre_prenom, m.membre_entreprise
+                    FROM membres m 
+                    where m.membre_type = 'client'
+                    order by m.membre_nom, m.membre_prenom asc ");
     $query->execute();
     $clients = $query->fetchAll();
 }
@@ -35,7 +39,7 @@ if (isset($_GET['id'])) {
         <form action="<?php echo isset($id) ? 'traitement_commande.php?id=' . $id : 'traitement_commande.php'; ?>" method="post" name="commande">
             <?php if (!isset($id)) { ?>
                 <label for="id">Client</label>
-                <select name="client_id" required>
+                <select name="client_id" id="client_id" required>
                     <?php foreach ($clients as $client) { ?>
                         <option value="<?php echo $client['membre_id']; ?>"><?php echo $client['membre_nom'] . ' ' . $client['membre_prenom']; ?></option>
                     <?php } ?>
@@ -100,12 +104,17 @@ if (isset($_GET['id'])) {
             <label class="float">Date de livraison souhaitée</label><input type="date" name="dateS" required autofocus><br>
 
             <label for="etat" class="float" >Statut commande* </label>
+            <!-- <select name="etatC" required>
+                <option value="1">Commandé</option>
+                <option value="2">En attente</option>
+                <option value="3">Reçu</option>
+                <option value="4">A livrer</option>
+                <option value="5">Livrer</option>
+            </select><br> -->
             <select name="etatC" required>
-                <option value="commande">Commandé</option>
-                <option value="attente">En attente</option>
-                <option value="recu">Reçu</option>
-                <option value="alivrer">A livrer</option>
-                <option value="livrer">Livrer</option>
+                <?php foreach ($commande_etats as $etat) { ?>
+                    <option value="<?php echo $etat['id_etat_cmd']; ?>"><?php echo $etat['commande_etat']; ?></option>
+                <?php } ?>
             </select><br>
 
             <label for="reference" class="float">Total HT </label>

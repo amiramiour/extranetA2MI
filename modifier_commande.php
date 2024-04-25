@@ -1,16 +1,15 @@
 <?php
-//connexion à la base de donnée
-include 'ConnexionBD.php'; // Fichier de configuration de la connexion PDO
+include 'ConnexionBD.php'; 
 
 //requete pour récupérer les fournisseurs
 $req = $pdo->query("SELECT * FROM fournisseur");
 $fournisseurs = $req->fetchAll(PDO::FETCH_ASSOC);
 
-$jsonFournisseurs = json_encode($fournisseurs);
-
-file_put_contents('fournisseurs.json', $jsonFournisseurs);
-
 $idCommande = $_GET['id'];
+
+$req = $pdo->query("SELECT * FROM commande_etats");
+$commande_etats = $req->fetchAll(PDO::FETCH_ASSOC);
+
 
 //requete pour récupérer les informations de la commande
 $query = $pdo->prepare("SELECT c.cmd_id, c.cmd_reference, c.cmd_designation, 
@@ -35,9 +34,6 @@ $query2->execute(array(":id"=> $idCommande));
 $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
 //var_dump($produits);
 ?>
-
-
-
 <html>
 <head>
     <meta charset="UTF-8">
@@ -47,7 +43,7 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <div class="container">
         <h2>Modifier une commande</h2>
-        <form action="traitement_modification_commande.php?idcommande=<?php echo $idCommande ?>&id=<?php echo $commande['membre_id']?>" method="post">
+        <form action="traitement_modification_commande.php?idcommande=<?php echo $idCommande ?>&idclient=<?php echo $commande['membre_id']?>" method="post">
         <fieldset><legend>Produit <small></small></legend>
 
         <div id="materiels">
@@ -58,33 +54,33 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
                     <label><b>Produit n°<?php echo $i ?></b></label><br>
 
                     <label for="reference">Référence </label> 
-                    <input type="text" id="reference" value="<?php echo $unproduit['reference'] ?>" readonly>&nbsp;&nbsp;|&nbsp;&nbsp;        
+                    <input type="text" name="dynamic['<?php echo($i) ?>'][]" id="reference" value="<?php echo $unproduit['reference'] ?>" readonly>&nbsp;&nbsp;|&nbsp;&nbsp;        
                     
                     <label for="designation">Désignation </label>
-                    <input type="text" id="designation" value="<?php echo $unproduit['designation'] ?>"readonly>&nbsp;&nbsp;|&nbsp;&nbsp;
+                    <input type="text" name="dynamic['<?php echo($i) ?>'][]" id="designation" value="<?php echo $unproduit['designation'] ?>"readonly>&nbsp;&nbsp;|&nbsp;&nbsp;
                     
                     <label for="fournisseur">Fournisseur </label>
-                    <input type="text" id="fournisseur" value="<?php echo $unproduit['nomFournisseur'] ?>"readonly>
+                    <input type="text" name="dynamic['<?php echo($i) ?>'][]" id="fournisseur" value="<?php echo $unproduit['nomFournisseur'] ?>"readonly>
                     
                     <br><br>
                     
                     <label >Pa HT </label>
-                    <input type="text" SIZE="2" id="paHT<?php echo($i) ?>" value="<?php echo $unproduit['paHT'] ?>" readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <input type="text" name="dynamic['<?php echo($i) ?>'][]" SIZE="2" id="paHT<?php echo($i) ?>" value="<?php echo $unproduit['paHT'] ?>" readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
                         
                     <label>Marge </label>
-                    <input type="text" SIZE="2"  id="marge<?php echo($i) ?>" value="<?php echo $unproduit['marge'] ?>" readonly> % &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <input type="text" SIZE="2" name="dynamic['<?php echo($i) ?>'][]" id="marge<?php echo($i) ?>" value="<?php echo $unproduit['marge'] ?>" readonly> % &nbsp;&nbsp;|&nbsp;&nbsp;
                     
                     <label>Pv HT </label>
-                    <input type="text" SIZE="2"  id="pvHT<?php echo($i) ?>" value="<?php echo $unproduit['pvHT'] ?>" readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <input type="text" SIZE="2"  name="dynamic['<?php echo($i) ?>'][]" id="pvHT<?php echo($i) ?>" value="<?php echo $unproduit['pvHT'] ?>" readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
                         
                     <label>Pv TTC </label>
-                    <input type="text" SIZE="2" id="pvTTC<?php echo($i) ?>" value="<?php echo $unproduit['pvTTC'] ?>" readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <input type="text" SIZE="2" name="dynamic['<?php echo($i) ?>'][]" id="pvTTC<?php echo($i) ?>" value="<?php echo $unproduit['pvTTC'] ?>" readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
                     
                     <label>Montant marge  </label>
-                    <input type="text"  SIZE="2" id="margeM<?php echo $i ?>" value="<?php echo $unproduit['pvHT']-$unproduit['paHT'] ?>"  readonly> € <br />
+                    <input type="text"  name="dynamic['<?php echo($i) ?>'][]" SIZE="2" id="margeM<?php echo $i ?>" value="<?php echo $unproduit['pvHT']-$unproduit['paHT'] ?>"  readonly> € <br />
 
                     <label>Statut produit</label> 
-                    <select name="statut_prod" required>
+                    <select name="dynamic['<?php echo($i) ?>'][]" required>
                         <option value="commande">Commandé</option>
                         <option value="recu">Reçu</option>
                         <option value="livre">
@@ -101,107 +97,36 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
             <label for="reference" class="float" >Nom de la commande </label>
                 <input type="text" name="nomC" id="reference" value="<?php echo $commande['cmd_reference']?>" readonly/><br>
             <label for="designation" class="float">Désignation</label>
-                <input type="text" name="designation" id="designation" value="<?php echo $commande['cmd_designation']?>" readonly><br>
+                <input type="text" name="designationC" id="designation" value="<?php echo $commande['cmd_designation']?>" readonly><br>
 
             <label class="float">Date de livraison prévue</label>
-                <input type="date" name="dateP" value="<?php echo date('Y-m-d', $commande['cmd_dateout']) ?>"readonly><br>
+                <input type="date" name="dateP" value="<?php echo date('Y-m-d', $commande['cmd_dateout']) ?>"><br>
             
             <label class="float">Date de livraison souhaitée</label>
             <input type="date" name="dateS" value="<?php echo date('Y-m-d', $commande['cmd_dateSouhait']) ?>" required autofocus readonly><br>
 
-           <label for="etat" class="float" >Statut commande </label>
-                <?php
-                $mode = $commande['cmd_etat'];
-                switch ($commande['cmd_etat']) {
-                    case "2":
-                        $etatCommande="En attente";
-                        break;
-                    case "1":
-                        $etatCommande="Commandé";
-                        break;
-                    case "3":
-                        $etatCommande="Reçu";
-                        break;
-                    case "4":
-                        $etatCommande="A livrer";
-                        break;
-                    case "5":
-                        $etatCommande="Livré";
-                        break;
-                }
-                        if ($mode == "4") {
-                            ?>
-                            <SELECT type="list" name="etatCommande" title="Etat de la commande" >
-                                <option value="1">Commandé</option>
-                                <option value="2">En attente</option>
-                                <option value="3">Reçu</option>
-                                <option selected value="4">A livrer</option>
-                                <option value="5">Livré</option>
-                            </SELECT>
-                            <?php
-                        }
-                        else if ($mode == "1") {
-                            ?>
-                            <SELECT type="list" name="etatCommande" title="Etat de la commande" >
-                                <option selected value="1">Commandé</option>
-                                <option value="2">En attente</option>
-                                <option value="3">Reçu</option>
-                                <option value="4">A livrer</option>                                
-                                <option value="5">Livré</option>
-                            </SELECT>
-                        <?php
-                        }
-                        else if ($mode == "attente") {
-                           ?>
-                            <SELECT type="list" name="etatCommande" title="Etat de la commande" >
-                                <option value="1">Commandé</option>
-                                <option selected value="2">En attente</option>
-                                <option value="3">Reçu</option>
-                                <option value="4">A livrer</option>                                                          
-                                <option value="5">Livré</option>
-                            </SELECT>
-                        <?php
-                        }
-                        else if ($mode == "recu") {
-                            ?>
-                            <SELECT type="list" name="etatCommande" title="Etat de la commande" >
-                                <option value="1">Commandé</option>
-                                <option value="2">En attente</option>
-                                <option selected value="3">Reçu</option>
-                                <option value="4">A livrer</option>
-                                <option value="5">Livré</option>
-                            </SELECT>
-                            <?php
-                        }
-                        else if ($mode == "livrer") {
-                            ?>
-                            <SELECT type="list" name="etatCommande" title="Etat de la commande" >
-                                <option value="1">Commandé</option>
-                                <option value="2">En attente</option>
-                                <option value="3">Reçu</option>
-                                <option value="4">A livrer</option>  
-                                <option selected value="5">Livré</option>
-                            </SELECT>
-                        <?php
-                    }
-                     ?>
+            <label for="etat" class="float" >Statut commande </label>
+            <select name="etatC" required>
+                <?php foreach ($commande_etats as $etat) { ?>
+                    <option value="<?php echo $etat['id_etat_cmd']; ?>"><?php echo $etat['commande_etat']; ?></option>
+                <?php } ?>
+            </select>
+
             <br><br>
             <label for="reference" class="float">Total HT </label>
-                <input type="text" name="totalHT" id="pvHTT" value="<?php echo $commande['cmd_prixHT'] ?>" readonly> €<br>
+            <input type="text" name="totalHT" id="pvHTT" value="<?php echo $commande['cmd_prixHT'] ?>" readonly> €<br>
             
             <label for="reference" class="float">Total TTC </label>
-                <input type="text" name="totalTTC" id="pvTTCT" value="<?php echo $commande['cmd_prixventettc'] ?>" readonly> €<br>
+            <input type="text" name="totalTTC" id="pvTTCT" value="<?php echo $commande['cmd_prixventettc'] ?>" readonly> €<br>
             
             <label for="reference" class="float">Total marge </label>
-                <input type="text" name="totalMarge" id="margeT" value="<?php echo $commande['cmd_margeT']?>" readonly>  €  
-            
-            <br>
+            <input type="text" name="totalMarge" id="margeT" value="<?php echo $commande['cmd_margeT']?>" readonly>  €  <br>
     
-    <div class="center"><input class="createButton" type="submit" value="Créer" /></div>
-            
- </div>
- 
-</form>
+            <div class="center"><input class="createButton" type="submit" value="Modifier" /></div>
+            <br>
+            <div class="center"><input class="createButton" type="button" value="Annuler" onclick="window.history.back()"/>       
+        </div>
+    </form>
 <script>
     function ajouterProduit(){
             var i = document.querySelectorAll('.materiel').length;
@@ -219,10 +144,8 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
             html += '<label for="fournisseur">Fournisseur* </label>';
             html += '<select name="dynamic[' + i + '][]" required>';
             <?php
-            $jsonData = file_get_contents('fournisseurs.json');
-            $fournisseurs = json_decode($jsonData, true);
             foreach ($fournisseurs as $fournisseur) { ?>
-                html += '<option value="<?php echo $fournisseur['idFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>';
+                html += '<option value="<?php echo $fournisseur['nomFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>';
             <?php } ?>
             html += '</select>';
             html += '<br><br>';
@@ -251,17 +174,8 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
             var marges = "marge" + i;
             var pvHTs = "pvHT" + i;
             var pvTTCs = "pvTTC" + i;
-            var margeM = "marge" + i;
+            var margeM = "margeM" + i;
             var multiplier = 100;
-
-            /**var totalMarge = document.getElementById("margeT").value;
-            var totalMarge = Math.round(totalMarge * multiplier) / multiplier;  
-        
-            var totalHT = document.getElementById("pHTT").value;
-            var totalHT = Math.round(totalHT * multiplier) / multiplier;
-        
-            var totalTTC = document.getElementById("pvTTCT").value;
-            var totalTTC = Math.round(totalTTC * multiplier) / multiplier;**/
 
             var paHT = Number(document.getElementById(paHTs).value);
             var marge = Number(document.getElementById(marges).value);
@@ -311,13 +225,6 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
             html += '</select> €</div>';
             document.getElementById('choixArrondi' + i).innerHTML = html;
             recalculerTotaux(i);
-            /*totalMarge += margeMt;
-            totalHT += pvHT;
-            totalTTC += pvTTC;
-
-            document.getElementById('margeT').value = Math.round(totalMarge * multiplier) / multiplier;
-            document.getElementById('pHTT').value = Math.round(totalHT * multiplier) / multiplier;
-            document.getElementById('pvTTCT').value = Math.round(totalTTC * multiplier) / multiplier;*/
 
         }
 
@@ -336,23 +243,6 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
             var margeM = Number(choix - paHT);
             document.getElementById("margeM" + i).value = margeM;
 
-            /*var totalMarge = document.getElementById("margeM").value;
-            var totalMarge = Math.round(totalMarge * multiplier) / multiplier;  
-        
-            var totalHT = document.getElementById("pvHT").value;
-            var totalHT = Math.round(totalHT * multiplier) / multiplier;
-        
-            var totalTTC = document.getElementById("pvTTC").value;
-            var totalTTC = Math.round(totalTTC * multiplier) / multiplier;
-
-            totalMarge += margeM;
-            totalHT += paHT;
-            totalTTC += pvTTC;
-
-            document.getElementById("margeT").value = totalMarge;
-            document.getElementById("pHTT").value = totalHT;
-            document.getElementById("pvTTCT").value = totalTTC;*/
-
             recalculerTotaux(i);
         }
 
@@ -360,19 +250,6 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
         function recalculerTotaux(i) {
             
             var multiplier = 100;
-            /*if (document.getElementById("totalMarge") && !isNaN(parseFloat(document.getElementById("totalMarge").value))) {
-                var totalMarge = parseFloat(document.getElementById("totalMarge").value);
-            }else 
-            {
-                var totalMarge = 0;
-            }
-            var totalMarge = Math.round(totalMarge * multiplier) / multiplier;
-        
-            var totalHT = document.getElementById("totalHT").value;
-            var totalHT = Math.round(totalHT * multiplier) / multiplier;
-        
-            var totalTTC = document.getElementById("totalTTC").value;
-            var totalTTC = Math.round(totalTTC * multiplier) / multiplier;*/
             var totalMarge = 0;
             var totalHT = 0;
             var totalTTC = 0;
@@ -425,8 +302,6 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
                 alert("Vous ne pouvez pas supprimer le dernier produit.");
             }
         }
-
 </script>
-
 </body>
 </html>

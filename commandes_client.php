@@ -1,31 +1,5 @@
 <?php
-/*
-CREATE TABLE IF NOT EXISTS `commande` (
-  `cmd_id` int(11) NOT NULL AUTO_INCREMENT,
-  `cmd_reference` varchar(30) NOT NULL,
-  `cmd_designation` varchar(200) NOT NULL,
-  `cmd_prixachat` decimal(9,2) NOT NULL,
-  `cmd_prixvente` decimal(9,2) NOT NULL,
-  `cmd_datein` bigint(20) NOT NULL,
-  `cmd_dateout` bigint(20) NOT NULL,
-  `membre_id` int(11) NOT NULL,
-  `cmd_prixventettc` decimal(9,2) NOT NULL,
-  `cmd_livreur` int(11) NOT NULL,
-  `cmd_dateSouhait` bigint(20) NOT NULL,
-  `cmd_etat` int(11) DEFAULT NULL,
-  `cmd_fournisseur` int(11) NOT NULL DEFAULT 1,
-  PRIMARY KEY (`cmd_id`),
-  KEY `membre_id` (`membre_id`),
-  KEY `cmd_etat` (`cmd_etat`),
-  KEY `cmd_fournisseur` (`cmd_fournisseur`),
-  KEY `cmd_livreur` (`cmd_livreur`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-*/
-
-
-
-// Connexion à la base de données
-include 'ConnexionBD.php'; // Fichier de configuration de la connexion PDO
+include 'ConnexionBD.php'; 
 
 $id_client = $_GET['id'];
 
@@ -56,11 +30,8 @@ $commandes_client = $query->fetchAll();
 $req = $pdo->prepare("SELECT commande_etat FROM commande_etats");
 $req->execute();
 $commande_etat = $req->fetchAll();
-
-
-
-//verifier la variable clients
 //var_dump($commandes_client);
+
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -72,6 +43,8 @@ $commande_etat = $req->fetchAll();
 <body>
     <div class="container">
         <h2>Liste des commandes de <?= $client['membre_nom'] . ' ' . $client['membre_prenom'] ?></h2>
+        <a href="commandes.php" class="btn btn-primary mb-3">Retour</a>
+        <br>
         <a href="ajouter_commande.php?id=<?= $id_client ?>" class="btn btn-primary">Ajouter</a>
         <br><br>
         <div class="row">
@@ -87,7 +60,7 @@ $commande_etat = $req->fetchAll();
                         $etat_classe = 'bg-warning';
                         break;
                     case '3':
-                        $etat_classe = 'bg-light';
+                        $etat_classe = 'bg-dark';
                         break;
                     case '4':
                         $etat_classe = 'bg-danger';
@@ -112,7 +85,6 @@ $commande_etat = $req->fetchAll();
                             <p class="card-text">Etat: <?= $commande['commande_etat'] ?></p>
                             <p class="card-text">Technicien: <?= $commande['nom_livreur'] ?></p>
                             <a href="modifier_commande.php?id=<?= $commande['cmd_id'] ?>" class="btn btn-primary">Modifier</a>
-                            
                         </div>
                     </div>
                 </div>

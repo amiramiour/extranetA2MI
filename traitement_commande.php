@@ -26,16 +26,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     
     $dateActuelle = time();
-
-
-    $stmt = $pdo->prepare("SELECT id_etat_cmd FROM commande_etats WHERE commande_etat = ?");
-    $stmt->execute([$etatC]);
-    $etat = $stmt->fetch(PDO::FETCH_ASSOC);
-    $etat_cmd = $etat['id_etat_cmd'];
-
     
     $stmt = $pdo->prepare("INSERT INTO commande (cmd_reference, cmd_designation, cmd_datein, cmd_dateout, membre_id, cmd_prixventettc, cmd_dateSouhait, cmd_etat, cmd_prixHT, cmd_margeT) VALUES (?, ?, ?, ?, ?, ?, ?,?, ?, ?)");
-    $stmt->execute([$nomC, $designation, $dateActuelle, $dateP, $id_client, $totalTTC, $dateS, $etat_cmd, $totalHT, $totalMarge]);
+    $stmt->execute([$nomC, $designation, $dateActuelle, $dateP, $id_client, $totalTTC, $dateS, $etatC, $totalHT, $totalMarge]);
     
     // Récupérer l'ID de la commande nouvellement insérée
     $id_commande = $pdo->lastInsertId();
@@ -56,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     
-    header("Location: commandes.php");
+    header("Location: commandes_client.php?id=$idClient");
     
     //echo "Commande ajoutée avec succès";
 }
