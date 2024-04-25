@@ -1,6 +1,15 @@
 <?php
 require_once '../connexionBD.php';
 
+
+require 'C:\wamp64\www\A2MI2024\extranetA2MI\vendor\autoload.php';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Initialisez des variables pour compter les succès et les échecs
+$success_count = 0;
+$error_count = 0;
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         $connexion = connexionbdd();
@@ -8,12 +17,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Récupération de l'ID du client depuis le formulaire
         $membre_id = $_POST['client_id'];
 
-        // Récupération de l'ID de l'admin connecté depuis la session
-        // À traiter après
-        /* session_start();
-         $id_admin_connecte = $_SESSION['membre_id'];et on le met a la place de sav_technicien
-      */
-        $sav_technicien = 1;
+        // Adresse e-mail du technicien en charge
+        $technicien_email = "malik.ouared2003@gmail.com";
+
+        $sav_technicien = 744; // ID du technicien en charge (à remplacer par la gestion de sessions)
 
         // Récupération des données du formulaire
         $probleme = $_POST['probleme'];
@@ -35,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $tva_prix_main_oeuvre_ht = $prix_main_oeuvre_ht * 0.2;
         $prix_main_oeuvre_ttc = $prix_main_oeuvre_ht + $tva_prix_main_oeuvre_ht;
-
+        $prix_total_ttc=$prix_main_oeuvre_ttc+$prix_materiel_ttc;
         //facture réglée
         // Récupération de la valeur de la case à cocher "Facture réglée"
         $facture_reglee = isset($_POST['facture_reglee']) ? 'oui' : 'non';
@@ -68,9 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $stmt = $connexion->prepare($sql);
         $stmt->bindParam(':membre_id', $membre_id);
-        /* À traiter après $stmt->bindParam(':sav_technicien', $id_admin_connecte); */
         $stmt->bindParam(':sav_technicien', $sav_technicien);
-
         $stmt->bindParam(':accessoires', $accessoires);
         $stmt->bindParam(':etat_id', $etat_id); // Utilisation de l'ID de l'état
         $stmt->bindParam(':date_recu', $date_recu);
@@ -89,7 +94,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $stmt->execute();
 
-        echo "Enregistrement du SAV effectué avec succès.";
+        // Envoi de l'e-mail de confirmation
+        if (sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $date_recu, $etat_intitule)) {
+            $success_count++; // Incrémentez le compteur de succès
+        } else {
+            $error_count++; // Incrémentez le compteur d'erreurs
+        }
+        if (sendSAVCreationEmail(744, $prix_total_ttc, $technicien_email, $date_recu, $etat_intitule)) {
+            $success_count++; // Incrémentez le compteur de succès
+        } else {
+            $error_count++; // Incrémentez le compteur d'erreurs
+        }
+
+        if ($success_count > 0 && $error_count == 0) {
+            echo "Enregistrement du SAV effectué avec succès. Les e-mails ont été envoyés avec succès.";
+        } elseif ($success_count > 0 && $error_count > 0) {
+            echo "Enregistrement du SAV effectué avec succès. Certains e-mails ont été envoyés avec succès, mais il y a eu des erreurs lors de l'envoi de certains e-mails.";
+        } else {
+            echo "Enregistrement du SAV effectué, mais aucun e-mail n'a été envoyé. Veuillez vérifier les erreurs.";
+        }
     } catch (PDOException $e) {
         echo "Erreur : " . $e->getMessage();
     } finally {
@@ -98,5 +121,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 } else {
     header('Location: ../index.php');
     exit();
+}
+
+// Fonction pour envoyer un e-mail de confirmation au client
+function sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $date_recu, $etat_intitule) {
+    // Récupérer l'adresse e-mail du client depuis la base de données
+    $connexion = connexionbdd();
+    $query = $connexion->prepare("SELECT membre_mail FROM membres WHERE membre_id = ?");
+    $query->execute([$membre_id]);
+    $client_email = $query->fetchColumn();
+
+    // Composez le contenu de l'e-mail
+    $subject = "Création d'un SAV";
+    $body = "Bonjour,\n\n";
+    $body .= "Un SAV a été créé pour vous avec les détails suivants :\n\n";
+    $body .= "Prix total : $prix_total_ttc euros\n";
+    $body .= "Technicien en charge : $technicien_email\n";
+    $body .= "Date de création : $date_recu\n";
+    $body .= "État : $etat_intitule\n\n";
+    $body .= "Cordialement,\nVotre société";
+
+    try {
+        $mail = new PHPMailer(true);
+
+        // Paramètres du serveur SMTP
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'masdouarania02@gmail.com';  // Adresse email de l'expéditeur
+        $mail->Password = 'wmeffiafffoqvkvl';           // Mot de passe de l'expéditeur
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+
+        // Destinataires
+        $mail->setFrom('masdouarania02@gmail.com', 'Votre société');
+        $mail->addAddress($client_email);    // Adresse e-mail du client
+
+        // Contenu de l'e-mail
+        $mail->isHTML(false);
+        $mail->Subject = $subject;
+        $mail->Body = $body;
+
+        // Envoi de l'e-mail
+        $mail->send();
+
+        // Succès de l'envoi
+        return true;
+    } catch (Exception $e) {
+        // Erreur lors de l'envoi de l'e-mail
+        echo "Erreur lors de l'envoi de l'e-mail : {$mail->ErrorInfo}";
+        return false;
+    }
 }
 ?>
