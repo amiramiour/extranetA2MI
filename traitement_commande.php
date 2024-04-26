@@ -59,6 +59,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     $id_commande = $pdo->lastInsertId();
 
+    $stmt = $pdo->prepare("INSERT INTO sauvgarde_etat_info_commande 
+                           (commande_id, sauvgarde_etat, created_by, date_creation, updated_by, date_update)
+                           VALUES
+                           (:commande_id, :sauvegarde_etat, 1, NOW(), 1, NOW())");
+
+    $stmt->bindValue(':commande_id', $id_commande);
+    $stmt->bindValue(':sauvegarde_etat', $etatC);
+
+    $stmt->execute();
+
     foreach ($_POST['dynamic'] as $produit) {
         $reference = $produit[0];
         $designation = $produit[1];
@@ -78,15 +88,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     /*header("Location: commandes_client.php?id=$id_client");
     exit();*/
     
-    echo "Commande ajoutée avec succès";
+    //echo "Commande ajoutée avec succès";
 
     // Envoi de l'email au technicien 
-    if(sendEmail($client['membre_nom'], $client['membre_prenom'], $totalTTC, $technicien['membre_mail'], $technicien['membre_nom'], $technicien['membre_prenom'], $date_livraison, date('d/m/Y'), $date_souhait, $etat_commande)) {
+    if(sendEmail($client['membre_nom'], $client['membre_prenom'], $totalTTC, $technicien['membre_mail'], $technicien['membre_nom'], $technicien['membre_prenom'], date('d/m/Y',$dateP) , date('d/m/Y'), date('d/m/Y', $dateS) , $etat_commande)) {
         $success_count++;
         echo('Email envoyé avec succès');
     } else {
         $error_count++;
     }
+
+    header("Location: commandes_client.php?id=$id_client");
+    exit();
 
 }
 
@@ -95,7 +108,7 @@ function sendEmail($client_nom, $client_prenom,$pvTTC, $technicien_email,$techni
     $subject = "=?UTF-8?B?" . base64_encode("Création d'une nouvelle commande") . "?="; // Encodage du sujet
     
     $body = "Bonjour,\n\n";
-    $body .= "Une nouvelle commande a été créé pour : $client_nom $client_prenom : \n\n";
+    $body .= "Une nouvelle commande a été créé pour : $client_nom $client_prenom \n\n";
     $body .= "Prix total TTC : $pvTTC   €\n\n";
     $body .= "Technicien : $technicien_nom $technicien_prenom \n\n";
     $body .= "Date de création : $date_creation \n\n";
