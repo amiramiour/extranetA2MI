@@ -1,5 +1,5 @@
 <?php
-include 'ConnexionBD.php';
+include '../connexionBD.php';
 $pdo = connexionbdd();
 
 require 'C:\wamp64\www\stageA2MI\extranetA2MI\vendor\autoload.php';

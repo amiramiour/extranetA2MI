@@ -1,5 +1,5 @@
 <?php
-include 'ConnexionBD.php';
+include '../connexionBD.php';
 $pdo = connexionbdd();
 
 $id_client = $_GET['id'];

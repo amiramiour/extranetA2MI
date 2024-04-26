@@ -1,5 +1,5 @@
 <?php 
-include 'ConnexionBD.php';
+include '../connexionBD.php';
 $pdo = connexionbdd();
 
 
@@ -186,7 +186,7 @@ function sendEmail($idClient, $mail_client,$client_nom, $client_prenom,$pvTTC, $
         $body .= "A2MI";
 
     }else{
-        $subject = "=?UTF-8?B?" . base64_encode("Création d'une nouvelle commande") . "?="; // Encodage du sujet
+        $subject = "=?UTF-8?B?" . base64_encode("Modification de la commande") . "?="; // Encodage du sujet
         
         $body = "Bonjour,\n\n";
         $body .= "La commande de : $client_nom $client_prenom a été modifié\n\n";

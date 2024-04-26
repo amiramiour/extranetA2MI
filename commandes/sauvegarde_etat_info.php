@@ -1,5 +1,5 @@
 <?php
-include 'ConnexionBD.php';
+include '../connexionBD.php';
 $pdo = connexionbdd();
 
 $stmt = $pdo->query("SELECT * FROM sauvgarde_etat_info_commande");
