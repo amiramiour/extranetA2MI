@@ -85,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Enregistrement dans la base de données
         $sql = "INSERT INTO sav (membre_id, sav_accessoire, sav_datein, sav_dateout, sav_envoi, sav_etat, sav_etats, sav_forfait, sav_garantie, sav_maindoeuvreht, sav_maindoeuvrettc, sav_mdpclient, sav_probleme, sav_regle, sav_tarifmaterielht, sav_tarifmaterielttc, sav_typemateriel, sav_technicien) 
-        VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, 1, :etat_id, :forfait, :garantie, :maindoeuvreht, :maindoeuvrettc, :mdpclient, :probleme, :facture_reglee, :tarifmaterielht, :tarifmaterielttc, :typemateriel, :sav_technicien_id)";
+VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, 744, :etat_id, :forfait, :garantie, :maindoeuvreht, :maindoeuvrettc, :mdpclient, :probleme, :facture_reglee, :tarifmaterielht, :tarifmaterielttc, :typemateriel, :sav_technicien_id)";
 
         $stmt = $connexion->prepare($sql);
         $stmt->bindParam(':membre_id', $membre_id);
@@ -107,6 +107,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bindParam(':envoi_facture', $envoi_facture);
 
         $stmt->execute();
+
+// Récupérer l'ID du SAV nouvellement inséré
+        $sav_id = $connexion->lastInsertId();
+
+// Enregistrer l'historique de sauvegarde
+        try {
+            $query_insert_sav_history = "INSERT INTO sauvgarde_etat_info (sav_id, sauvgarde_etat, sauvgarde_avancement, date_creation, date_update, created_by, updated_by) 
+    VALUES (:sav_id, :sauvgarde_etat, 'Création de SAV', NOW(), NOW(), 1, 744)";
+            $stmt_insert_sav_history = $connexion->prepare($query_insert_sav_history);
+            $stmt_insert_sav_history->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
+            $stmt_insert_sav_history->bindParam(':sauvgarde_etat', $etat_id, PDO::PARAM_INT);
+            $stmt_insert_sav_history->execute();
+        } catch (PDOException $e) {
+            // Gérer les erreurs
+            $error = "Erreur : " . $e->getMessage();
+        }
+
 
         // Envoi de l'e-mail de confirmation au client
         if (sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, null, null, $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, true)) {
@@ -149,7 +166,7 @@ function sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $c
     $client_info = $query->fetch(PDO::FETCH_ASSOC);
 
     // Composez le contenu de l'e-mail
-    $subject = "Création d'un SAV";
+    $subject = "=?UTF-8?B?" . base64_encode("Création d'un SAV") . "?="; // Encodage du sujet
     $body = "Bonjour,\n\n";
     if ($is_client) {
         $body .= "Un SAV a été créé pour vous avec les détails suivants :\n\n";
@@ -179,7 +196,7 @@ function sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $c
         $mail->Port = 587;
 
         // Destinataires
-        $mail->setFrom('masdouarania02@gmail.com', 'Votre société');
+        $mail->setFrom('masdouarania02@gmail.com', 'A2MI informatique');
         if ($is_client) {
             $mail->addAddress($client_info['membre_mail']);    // Adresse e-mail du client
         } else {
@@ -188,6 +205,7 @@ function sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $c
 
         // Contenu de l'e-mail
         $mail->isHTML(false);
+        $mail->CharSet = 'UTF-8'; // Spécification de l'encodage
         $mail->Subject = $subject;
         $mail->Body = $body;
 

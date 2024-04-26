@@ -4,7 +4,6 @@
         <a href="index.php" class="navbar-brand">
             <img src="images/home.png" width="30" height="30" class="d-inline-block align-top" alt="">
         </a>
-        <a class="navbar-brand" href="#">A2MI - EXTRANET</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -15,7 +14,7 @@
                     <a class="nav-link" href="#">Créer un compte client</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="liste_clients.php">Liste clients</a>
+                    <a class="nav-link" href="SAV/membres.php">Liste clients</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Liste fournisseurs</a>
@@ -30,7 +29,7 @@
                     <a class="nav-link" href="#">Bons d'intervention</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="SAV/sav-formulaire.php">SAV</a>
+                    <a class="nav-link" href="SAV/sav.php">SAV</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Prêts</a>
