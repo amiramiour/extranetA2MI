@@ -50,7 +50,6 @@ $commande_etat = $req->fetchAll();
         <div class="row">
             <?php foreach ($commandes_client as $commande): ?>
                 <?php
-                // Déterminez la classe de couleur de la carte en fonction de l'état de la commande
                 $etat_classe = '';
                 switch ($commande['cmd_etat']) {
                     case '1':

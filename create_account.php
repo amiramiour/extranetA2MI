@@ -1,15 +1,13 @@
 <?php
 require 'C:\wamp64\www\stageA2MI\extranetA2MI\vendor\autoload.php';
 
-// Utilisation de la classe PHPMailer
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Connexion à la base de données
-include 'ConnexionBD.php'; // Fichier de configuration de la connexion PDO
+include 'ConnexionBD.php'; 
 
 if(isset($_POST['submit'])) {
-    // Récupérer les données du formulaire
     $entreprise = $_POST['entreprise'];
     $nom = $_POST['nom'];
     $prenom = $_POST['prenom'];
