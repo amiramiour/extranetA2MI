@@ -1,5 +1,5 @@
 <?php
-require 'C:\wamp64\www\stageA2MI\extranetA2MI\vendor\autoload.php';
+require 'C:\wamp64\www\A2MI2024\extranetA2MI\vendor\autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
