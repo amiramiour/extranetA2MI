@@ -1,7 +1,7 @@
 <?php
 
 session_start();
-include 'connexionBD.php';
+include '../connexionBD.php';
 
 require 'C:\wamp64\www\A2MI2024\extranetA2MI\vendor\autoload.php';
 
@@ -18,8 +18,14 @@ if (isset($_GET['membre_id'])) {
         try {
             $db = connexionbdd();
 
+
+            $query_client = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :membre_id";
+            $stmt_client = $db->prepare($query_client);
+            $stmt_client->bindParam(':membre_id', $membre_id);
+            $stmt_client->execute();
+            $client_info = $stmt_client->fetch(PDO::FETCH_ASSOC);
+
             $bi_technicien = 745; // Valeur statique pour le moment
-            $technicien_email = "amiouramirtahar@gmail.com";
 
             $facturer = isset($_POST['facturer']) ? 'oui' : 'non';
             $garantie = isset($_POST['garantie']) ? 'oui' : 'non';
@@ -42,6 +48,18 @@ if (isset($_GET['membre_id'])) {
             $heureArrive = $_POST['heure_arrive'];
             $heureDepart = $_POST['heure_depart'];
             $commentaire = $_POST['commentaire'];
+
+            // Récupération des informations du technicien
+            $query_technicien = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :bi_technicien";
+            $stmt_technicien = $db->prepare($query_technicien);
+            $stmt_technicien->bindParam(':bi_technicien', $bi_technicien);
+            $stmt_technicien->execute();
+            $technicien_info = $stmt_technicien->fetch(PDO::FETCH_ASSOC);
+
+            $technicien_nom = $technicien_info['membre_nom'];
+            $technicien_prenom = $technicien_info['membre_prenom'];
+            $technicien_email = $technicien_info['membre_mail'];
+
 
             // Insertion dans la table `bi` (Bon d'intervention)
             $query = $db->prepare("INSERT INTO bi (membre_id, bi_technicien, bi_facture, bi_garantie, bi_contrat, bi_service, bi_envoi, bi_facturation, bi_datefacturation, bi_paiement, bi_datein, bi_heurearrive, bi_heuredepart, bi_commentaire, bi_regle) 
@@ -90,12 +108,12 @@ VALUES (:selectedIntervention, :nbPieces, :prixUnitaire , :total, :bi_id)");
             $query_intervention->execute();
 
             // Envoi de l'e-mail de confirmation
-            if (sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_email, $total, $facturation,true)) {
+            if (sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_email, $total, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom,true)) {
                 $success_count++; // Incrémentez le compteur de succès
             } else {
                 $error_count++; // Incrémentez le compteur d'erreurs
             }
-            if (sendBiCreationEmail(745, $selectedIntervention, $technicien_email, $total, $facturation,false)) {
+            if (sendBiCreationEmail(745, $selectedIntervention, $technicien_email, $total, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom,false)) {
                 $success_count++; // Incrémentez le compteur de succès
             } else {
                 $error_count++; // Incrémentez le compteur d'erreurs
@@ -111,7 +129,7 @@ VALUES (:selectedIntervention, :nbPieces, :prixUnitaire , :total, :bi_id)");
 
 
             // Redirection vers bonIntervention.php après traitement
-            header("Location: bonIntervention.php");
+            header("Location: /bi/bonIntervention.php");
             exit;
         } catch (PDOException $e) {
             echo "Erreur : " . $e->getMessage();
@@ -124,36 +142,34 @@ VALUES (:selectedIntervention, :nbPieces, :prixUnitaire , :total, :bi_id)");
     }
 }
 
-function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_email, $total, $facturation,$is_client) {
+function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_id, $total, $client_nom, $client_prenom, $technicien_nom, $technicien_prenom, $is_client) {
     // Récupérer l'adresse e-mail du client depuis la base de données
     $connexion = connexionbdd();
-    $query = $connexion->prepare("SELECT membre_mail, membre_prenom, membre_nom FROM membres WHERE membre_id = ?");
+    $query = $connexion->prepare("SELECT membre_mail, bi_datein FROM membres INNER JOIN bi ON membres.membre_id = bi.membre_id WHERE membres.membre_id = ?");
     $query->execute([$membre_id]);
     $result = $query->fetch(PDO::FETCH_ASSOC);
+
     $client_email = $result['membre_mail'];
-    $prenom = $result['membre_prenom'];
-    $nom = $result['membre_nom'];
+    $bi_datein = date('d/m/Y');
 
     // Composez le contenu de l'e-mail
-    $subject = "Création d'un Bon d'intervention";
+    $subject = "=?UTF-8?B?" . base64_encode("Création d'un Bon d'intervention") . "?="; // Encodage du sujet
     $body = "Bonjour,\n\n";
     if ($is_client) {
-
         $body .= "Un Bon d'intervention a été créé pour vous :\n\n";
-        $body .= "Intervention : $selectedIntervention\n\n";
+        $body .= "Intervention : $selectedIntervention\n";
+        $body .= "Date de création du bon : $bi_datein\n"; // Ajout de la date de création du bon
         $body .= "Prix total : $total euros\n";
-        $body .= "Technicien en charge : $technicien_email\n";
-        $body .= "Date de facturation : $facturation\n";
-        $body .= "Cordialement,\nVotre société";}
-    else{
-        $body .= "Un Bon d'intervention a été créé pour $prenom $nom :\n\n";
+        $body .= "Technicien en charge : $technicien_prenom $technicien_nom\n";
+        $body .= "Cordialement,\nVotre société";
+    } else {
+        $body .= "Un Bon d'intervention a été créé pour $client_nom $client_prenom :\n\n";
         $body .= "Intervention : $selectedIntervention\n\n";
-        $body .= "Prix total : $total euros\n";
-        $body .= "Technicien en charge : $technicien_email\n";
-        $body .= "Date de facturation : $facturation\n";
-        $body .= "Cordialement,\nVotre société";}
-
-
+        $body .= "Date de création du bon : $bi_datein\n\n"; // Ajout de la date de création du bon
+        $body .= "Prix total : $total euros\n\n";
+        $body .= "Technicien en charge : $technicien_prenom $technicien_nom\n\n";
+        $body .= "Cordialement,\n\nVotre société";
+    }
 
     try {
         $mail = new PHPMailer(true);
@@ -173,6 +189,7 @@ function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_emai
 
         // Contenu de l'e-mail
         $mail->isHTML(false);
+        $mail->CharSet = 'UTF-8'; // Spécification de l'encodage
         $mail->Subject = $subject;
         $mail->Body = $body;
 

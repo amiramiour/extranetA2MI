@@ -2,6 +2,8 @@
 session_start();
 header('Content-type: text/html; charset=utf-8');
 include ('connexionBD.php');
+include('navbar.php');
+
 ?>
 
 <!DOCTYPE html>
@@ -16,53 +18,6 @@ include ('connexionBD.php');
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-color">
-    <div class="container-fluid">
-        <!-- Marque et bascule pour mobile -->
-        <a href="index.php" class="navbar-brand">
-            <img src="images/home.png" width="30" height="30" class="d-inline-block align-top" alt="">
-        </a>
-        <a class="navbar-brand" href="index.php">A2MI - EXTRANET</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <!-- Liens de navigation -->
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Créer un compte client</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="liste_clients.php">Liste clients</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Liste fournisseurs</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Commandes</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Devis</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="liste_interventions.php">Bons d'intervention</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">SAV</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Prêts</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Historique</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Liste d'administrateurs</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
 
 <div class="container">
     <div class="row">
@@ -72,7 +27,7 @@ include ('connexionBD.php');
         </div>
         <div class="col-lg-9">
             <h1 class="mt-5">Bienvenue sur l'extranet d'a2mi !</h1>
-            <p>Pour pouvoir accéder à votre fiche client, il faut <a href="connexion.php">se connecter</a> !</p>
+            <p>Pour pouvoir accéder à votre fiche client, il faut <a href="create_account.php">se connecter</a> !</p>
             <p>Si vous êtes déjà connecté, vous pouvez accéder à votre <a href="membres/user.php">fiche client</a> pour accéder à vos traitements en cours.</p>
             <p>Le Webmaster</p>
         </div>

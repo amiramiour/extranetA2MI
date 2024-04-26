@@ -1,7 +1,7 @@
-<?php include('navbar.php'); ?>
+<?php include('../navbar.php'); ?>
 <?php
 // Inclure le fichier de connexion à la base de données
-include 'connexionBD.php';
+include '../connexionBD.php';
 
 // Etablir la connexion à la base de données
 $db = connexionbdd();
@@ -33,7 +33,7 @@ if(isset($_GET['bi_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulaire Bon d'Intervention Client</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
 </head>
 
 <div class="container">
@@ -51,7 +51,7 @@ if(isset($_GET['bi_id'])) {
     <div class="card mt-5">
         <div class="card-body">
             <h5 class="card-title">Modifier le bon d'intervention</h5>
-            <form action="traitement_modification_bi.php" method="post">
+            <form action="../traitement/traitement_modification_bi.php" method="post">
                 <input type="hidden" name="bi_id" value="<?php echo $bi_id; ?>">
 
                 <!-- Champs de modification -->

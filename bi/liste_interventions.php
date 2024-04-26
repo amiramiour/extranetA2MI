@@ -1,6 +1,6 @@
 <?php
 // Récupération des interventions depuis la base de données
-include 'connexionBD.php';
+include '../connexionBD.php';
 
 $db = connexionbdd();
 
@@ -30,22 +30,22 @@ $membres_avec_bi = $query->fetchAll();
     <!-- Inclure le fichier CSS de Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Inclure le fichier CSS personnalisé -->
-    <link href="css/style.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
 </head>
 <body>
 
 <!-- Inclure le navbar -->
-<?php include('navbar.php'); ?>
+<?php include '../navbar.php'; ?>
 
 <div class="container mt-3">
     <!-- Boutons de tri -->
     <div class="d-flex justify-content-between centered-buttons">
         <a href="?sort=date" class="btn btn-primary" style="background-color: #C8356C;">Trier par date croissante</a>
-        <a href="bi_form.php" class="btn btn-primary" style="background-color: #C8356C;">Créer un bon d'intervention</a>
-        <a href="?sort=name" class="btn btn-primary" style="background-color: #C8356C;">Trier par nom croissant</a>
-    </div>
+        <!--  <a href="bi_form.php" class="btn btn-primary" style="background-color: #C8356C;">Créer un bon d'intervention</a> -->
+          <a href="?sort=name" class="btn btn-primary" style="background-color: #C8356C;">Trier par nom croissant</a>
+      </div>
 
-    <!-- Nombre de membres -->
+      <!-- Nombre de membres -->
     <div class="text-center mt-3">
         <p style="color: #C8356C; font-size: larger; font-weight: bold; text-decoration: underline;">Il y a : <?php echo count($membres_avec_bi); ?> membre(s) avec des bons d'interventions</p>
     </div>
@@ -55,7 +55,7 @@ $membres_avec_bi = $query->fetchAll();
         <?php foreach($membres_avec_bi as $membre): ?>
             <div class="client-card">
                 <a href="bi_details.php?membre_id=<?php echo $membre['membre_id']; ?>" class="client-link">
-                    <img src="images/icon.png" style="width: 50px; height: 50px; alt="Icon" class="icon-size" >
+                    <img src="../images/icon.png" style="width: 50px; height: 50px; alt=" Icon" class="icon-size" >
                     <h3><?php echo $membre['membre_nom']; ?></h3>
                     <p><?php echo $membre['membre_prenom']; ?></p>
                 </a>

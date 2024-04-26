@@ -1,6 +1,6 @@
 <?php
 // Inclure la connexion à la base de données
-include('connexionBD.php');
+include('../connexionBD.php');
 
 // Etablir la connexion à la base de données
 $db = connexionbdd();
@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $membre_id = $query->fetchColumn();
 
     // Rediriger vers la page des détails des bons d'intervention associés à ce membre
-    header("Location: bi_details.php?membre_id=$membre_id");
+    header("Location: /bi/bi_details.php?membre_id=$membre_id");
     exit();
 } else {
     // Si les données du formulaire n'ont pas été soumises, rediriger vers une page d'erreur

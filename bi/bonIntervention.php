@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'connexionBD.php';
+include '../connexionBD.php';
 
 try {
     $db = connexionbdd();
@@ -22,7 +22,7 @@ try {
 </head>
 <body>
 <!-- Inclure le navbar -->
-<?php include('navbar.php'); ?>
+<?php include('../navbar.php'); ?>
 
 <div class="container mt-3">
     <h1>Liste des Bons d'Intervention</h1>

@@ -1,6 +1,6 @@
 <?php
 // Inclure le fichier de connexion à la base de données
-include 'connexionBD.php';
+include '../connexionBD.php';
 $db = connexionbdd();
 
 // Vérifier si l'ID du bon d'intervention à modifier est passé dans l'URL
@@ -49,11 +49,11 @@ $membre_id = $_GET['membre_id'];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulaire Bon d'Intervention Client</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
 </head>
 <body>
 <!-- Inclure le navbar -->
-<?php include('navbar.php'); ?>
+<?php include('../navbar.php'); ?>
 
 <div id="contenu" class="container mt-3">
     <h1>Formulaire de création d'un Bon d'Intervention client</h1>
@@ -69,7 +69,7 @@ $membre_id = $_GET['membre_id'];
         unset($_SESSION['error_message']);
     }
     ?>
-    <form method="post" action="traitement-bi.php?membre_id=<?php echo $membre_id; ?>" name="BI">
+    <form method="post" action="../traitement/traitement-bi.php?membre_id=<?php echo $membre_id; ?>" name="BI">
         <input type="hidden" name="bi_id" value="<?php echo $bi_id; ?>">
         <fieldset>
             <!-- Bouton Ajouter -->

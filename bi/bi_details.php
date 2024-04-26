@@ -1,7 +1,7 @@
 <?php
 // Inclure le fichier de connexion à la base de données
 global $db;
-include 'connexionBD.php';
+include '../connexionBD.php';
 
 $db = connexionbdd();
 $query = $db->prepare("SELECT membres.membre_id, membres.membre_nom, membres.membre_prenom, bi.bi_datein FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id");
@@ -41,12 +41,12 @@ if(isset($_POST['action']) && $_POST['action'] === 'supprimer' && isset($_POST['
     <!-- Inclure le fichier CSS de Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Inclure le fichier CSS personnalisé -->
-    <link href="css/style.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
 </head>
 <body>
 
 <!-- Inclure le navbar -->
-<?php include('navbar.php'); ?>
+<?php include('../navbar.php'); ?>
 
 <div class="container mt-3">
     <!-- Titre de la page -->

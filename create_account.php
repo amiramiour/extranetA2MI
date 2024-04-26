@@ -100,7 +100,7 @@ function generateRandomString($length = 8) {
 <?php include('navbar.php'); ?>
 <div class="container">
     <h2>Création de compte client</h2>
-    <form action="connexion.php" method="post">
+    <form action="create_account.php" method="post">
         <div id="message" class="mt-3"></div>
         <div class="form-group">
             <label for="entreprise">Entreprise </label>
