@@ -27,9 +27,7 @@ include('navbar.php');
         </div>
         <div class="col-lg-9">
             <h1 class="mt-5">Bienvenue sur l'extranet d'a2mi !</h1>
-            <p>Pour pouvoir accéder à votre fiche client, il faut <a href="create_account.php">se connecter</a> !</p>
-            <p>Si vous êtes déjà connecté, vous pouvez accéder à votre <a href="membres/user.php">fiche client</a> pour accéder à vos traitements en cours.</p>
-            <p>Le Webmaster</p>
+            <p>Pour pouvoir accéder à votre fiche client, il faut <a href="connexion/connexion.php">se connecter</a> !</p>
         </div>
     </div>
 </div>
@@ -38,9 +36,3 @@ include('navbar.php');
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-<style>
-    .bg-color {
-        background-color: #C8356C !important;
-    }
-</style>
