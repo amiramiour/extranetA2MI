@@ -1,14 +1,17 @@
 <?php
-// Paramètres de connexion à la base de données
-$dsn = 'mysql:host=localhost;dbname=stageA2MIdb;port=3307';
-$username = 'root';
-$password = '';
-
-// Connexion à la base de données avec PDO
-try {
-    $pdo = new PDO($dsn, $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die('Erreur de connexion : ' . $e->getMessage());
+/*connexionBD.php*/
+function connexionbdd()
+{
+    try {
+        $db = new PDO('mysql:host=127.0.0.1;port=3307;dbname=0e5lu_a2mi_extranet', 'root', '');
+        // Configure PDO to throw exceptions on errors
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        // Set character set to UTF-8
+        $db->exec("SET CHARACTER SET utf8");
+        return $db; // Retourne la connexion PDO
+    } catch (PDOException $e) {
+        echo "Connection failed: " . $e->getMessage();
+        // Arrête l'exécution du script en cas d'erreur
+        exit();
+    }
 }
-?>

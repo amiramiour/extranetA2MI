@@ -1,5 +1,6 @@
 <?php 
 include 'ConnexionBD.php';
+$pdo = connexionbdd();
 
 $idCommande = $_GET['idcommande'];
 $idClient = $_GET['idclient'];

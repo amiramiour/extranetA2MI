@@ -1,6 +1,6 @@
 <?php
 include 'ConnexionBD.php'; 
-
+$pdo = connexionbdd();
 //requete pour récupérer les fournisseurs
 $req = $pdo->query("SELECT * FROM fournisseur");
 $fournisseurs = $req->fetchAll(PDO::FETCH_ASSOC);

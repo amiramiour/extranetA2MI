@@ -5,7 +5,8 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Connexion à la base de données
-include 'ConnexionBD.php'; 
+include 'ConnexionBD.php';
+$pdo = connexionbdd();
 
 if(isset($_POST['submit'])) {
     $entreprise = $_POST['entreprise'];
