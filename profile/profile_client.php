@@ -220,7 +220,8 @@ if(isset($_POST['action']) && $_POST['action'] === 'supprimer' && isset($_POST['
                 type: "POST",
                 data: { action: 'supprimer', bi_id: bi_id },
                 success: function(response) {
-                    alert(response); // Afficher le message de confirmation
+                    // Afficher uniquement le message de succès
+                    alert("La suppression a été un succès.");
                 }
             });
         }
