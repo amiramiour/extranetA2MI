@@ -1,5 +1,5 @@
 <?php
-/*ConnexionBD.php*/
+/*connexionBD.php*/
 function connexionbdd()
 {
     try {
