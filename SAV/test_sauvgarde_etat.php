@@ -1,8 +1,15 @@
 <?php
+session_start();
 // Inclure le fichier de connexion à la base de données
 require_once '../ConnexionBD.php';
 
 try {
+    // Vérifier si l'utilisateur est connecté et n'est pas un client
+    if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION['user_type'] === 'client') {
+        header("Location: ../connexion.php");
+        exit; // Assurez-vous de terminer le script après la redirection
+    }
+
     // Connexion à la base de données en utilisant la fonction connexionbdd()
     $db = connexionbdd();
 

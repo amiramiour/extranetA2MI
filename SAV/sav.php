@@ -1,39 +1,14 @@
 <?php
-/*
- * prtie recuperation des ids
-
-require_once 'ConnexionBD.php';
-
-session_start(); // Démarrez la session si ce n'est pas déjà fait
-
-// Vérifiez si un membre est connecté
-if (!isset($_SESSION['membre_id'])) {
-    header('Location: index.php');
-    exit();
-}
-
-// Vérifiez si le membre connecté est un client
-if ($_SESSION['membre_type'] == 'client') {
-    header('Location: index.php');
-    exit();
-}
-
-// Stockez l'ID de l'admin connecté dans une variable de session
-$_SESSION['id_admin_connecte'] = $_SESSION['membre_id'];
-
-$id_admin_connecte = $_SESSION['membre_id'];
-
-// Récupérez la liste des clients depuis la base de données
-$clients = obtenirClients();
-
-// Vérifiez si un client a été sélectionné
-if (isset($_GET['client_id'])) {
-    $client_id = $_GET['client_id']; // Récupérez l'ID du client depuis l'URL
-} else {
-    $client_id = ""; // Si aucun client n'est sélectionné, initialisez à une chaîne vide
-}
-*/
 include('../ConnexionBD.php');
+
+session_start();
+
+// Vérifier si l'utilisateur est déjà connecté
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION['user_type'] === 'client') {
+    // Rediriger vers une page d'erreur ou de connexion si l'utilisateur n'est pas connecté ou s'il est un client
+    header('Location: ../connexion.php');
+    exit();
+}
 
 // Vérification de la valeur du paramètre de tri
 $tri = isset($_GET['tri']) ? $_GET['tri'] : 'membre_nom';
@@ -84,7 +59,7 @@ WHERE
 
     // Clause WHERE conditionnelle pour filtrer par état si un état est sélectionné
     if (!empty($etat)) {
-        $query .= " WHERE sav_etats.etat_intitule = :etat";
+        $query .= " AND sav_etats.etat_intitule = :etat";
     }
 
     // Ajout de la clause ORDER BY pour trier les résultats
@@ -109,24 +84,6 @@ WHERE
 }
 ?>
 
-<title>Résultats de la table SAV</title>
-<style>
-    table {
-        border-collapse: collapse;
-        width: 100%;
-    }
-
-    th,
-    td {
-        border: 1px solid black;
-        padding: 8px;
-        text-align: left;
-    }
-
-    th {
-        background-color: #f2f2f2;
-    }
-</style>
 <!DOCTYPE html>
 <?php include('../navbar.php'); ?>
 
@@ -134,7 +91,7 @@ WHERE
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription</title>
+    <title>Résultats de la table SAV</title>
     <!-- Inclure le fichier CSS de Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Inclure le fichier CSS personnalisé -->

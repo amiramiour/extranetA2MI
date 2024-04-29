@@ -1,33 +1,16 @@
 <?php
-/*
+
 session_start();
 
-// Vérifiez si un membre est connecté
-if (!isset($_SESSION['membre_id'])) {
-    header('Location: index.php');
-    exit();
+// Vérification si l'utilisateur est connecté et si son type est différent de "client"
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION['user_type'] === 'client') {
+    // Si l'utilisateur n'est pas connecté ou est un client, redirigez-le ou affichez un message d'erreur
+    header("Location: ../connexion.php");
+    exit;
 }
 
-// Vérifiez si le membre connecté est un client
-if ($_SESSION['membre_type'] == 'client') {
-    header('Location: index.php');
-    exit();
-}
-
-// Vérifiez si l'ID du client est passé dans l'URL
-if (!isset($_GET['client_id'])) {
-    // Redirigez ou affichez un message d'erreur si l'ID du client n'est pas spécifié
-    header('Location: ../profile/profile_client.php'); // Redirigez vers la page précédente
-    exit();
-}
-
-// Stockez l'ID de l'admin connecté dans une variable de session
-$_SESSION['id_admin_connecte'] = $_SESSION['membre_id'];
-
-// Récupération de l'ID du client depuis l'URL
-
-*/
-$client_id = $_GET['client_id'];
+// Maintenant, l'utilisateur est connecté et n'est pas un client, donc affichez le formulaire
+$client_id = $_GET['client_id']; //la on recupere l'id passé dans l'url
 ?>
 <!DOCTYPE html>
 <html lang="fr">

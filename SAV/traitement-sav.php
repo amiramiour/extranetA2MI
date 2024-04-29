@@ -1,6 +1,13 @@
 <?php
 require_once '../ConnexionBD.php';
 
+session_start(); // Démarrer la session
+
+// Vérifier si l'utilisateur est connecté et n'est pas un client
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION['user_type'] === 'client') {
+    header("Location: ../connexion.php");
+    exit; // Assurez-vous de terminer le script après la redirection
+}
 
 require 'C:\wamp64\www\A2MI2024\extranetA2MI\vendor\autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
@@ -23,7 +30,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $client_info = $stmt_client->fetch(PDO::FETCH_ASSOC);
         // Récupération de l'ID du technicien en charge depuis la session
         // À remplacer par la gestion de sessions
-        $sav_technicien_id = 744; // ID du technicien en charge (à remplacer par la gestion de sessions)
+// Récupérer l'ID de l'utilisateur connecté depuis la session
+        $sav_technicien_id = $_SESSION['user_id'];
 
         // Récupération des informations du technicien
         $query_technicien = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :sav_technicien_id";
@@ -112,17 +120,24 @@ VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, 7
         $sav_id = $connexion->lastInsertId();
 
 // Enregistrer l'historique de sauvegarde
+        // Récupérer l'ID de session de l'utilisateur connecté
+        $created_by = $_SESSION['user_id'];
+
+// Enregistrer l'historique de sauvegarde
         try {
             $query_insert_sav_history = "INSERT INTO sauvgarde_etat_info (sav_id, sauvgarde_etat, sauvgarde_avancement, date_creation, date_update, created_by, updated_by) 
-    VALUES (:sav_id, :sauvgarde_etat, 'Création de SAV', NOW(), NOW(), 1, 744)";
+    VALUES (:sav_id, :sauvgarde_etat, 'Création de SAV', NOW(), NOW(), :created_by, :updated_by)";
             $stmt_insert_sav_history = $connexion->prepare($query_insert_sav_history);
             $stmt_insert_sav_history->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
             $stmt_insert_sav_history->bindParam(':sauvgarde_etat', $etat_id, PDO::PARAM_INT);
+            $stmt_insert_sav_history->bindParam(':created_by', $created_by, PDO::PARAM_INT); // Utilisation de l'ID de session
+            $stmt_insert_sav_history->bindValue(':updated_by', null, PDO::PARAM_NULL); // Mise à NULL car c'est une création
             $stmt_insert_sav_history->execute();
         } catch (PDOException $e) {
             // Gérer les erreurs
             $error = "Erreur : " . $e->getMessage();
         }
+
 
 
         // Envoi de l'e-mail de confirmation au client
