@@ -49,10 +49,10 @@ $membres_avec_bi = $query->fetchAll();
     <div class="d-flex justify-content-between centered-buttons">
         <a href="?sort=date" class="btn btn-primary" style="background-color: #C8356C;">Trier par date croissante</a>
         <!--  <a href="bi_form.php" class="btn btn-primary" style="background-color: #C8356C;">Créer un bon d'intervention</a> -->
-          <a href="?sort=name" class="btn btn-primary" style="background-color: #C8356C;">Trier par nom croissant</a>
-      </div>
+        <a href="?sort=name" class="btn btn-primary" style="background-color: #C8356C;">Trier par nom croissant</a>
+    </div>
 
-      <!-- Nombre de membres -->
+    <!-- Nombre de membres -->
     <div class="text-center mt-3">
         <p style="color: #C8356C; font-size: larger; font-weight: bold; text-decoration: underline;">Il y a : <?php echo count($membres_avec_bi); ?> membre(s) avec des bons d'interventions</p>
     </div>
