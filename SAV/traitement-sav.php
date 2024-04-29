@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION[
     exit; // Assurez-vous de terminer le script après la redirection
 }
 
-require 'C:\wamp64\www\A2MI2024\extranetA2MI\vendor\autoload.php';
+require '../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -141,27 +141,14 @@ VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, 7
 
 
         // Envoi de l'e-mail de confirmation au client
-        if (sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, null, null, $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, true)) {
-            $success_count++; // Incrémentez le compteur de succès
-        } else {
-            $error_count++; // Incrémentez le compteur d'erreurs
-        }
+        sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, null, null, $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, true);
 
 // Envoi de l'e-mail de confirmation au technicien
-        if (sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, false)) {
-            $success_count++; // Incrémentez le compteur de succès
-        } else {
-            $error_count++; // Incrémentez le compteur d'erreurs
-        }
+        sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, false);
 
+        header('Location: sav.php');
+        exit();
 
-        if ($success_count > 0 && $error_count == 0) {
-            echo "Enregistrement du SAV effectué avec succès. Les e-mails ont été envoyés avec succès.";
-        } elseif ($success_count > 0 && $error_count > 0) {
-            echo "Enregistrement du SAV effectué avec succès. Certains e-mails ont été envoyés avec succès, mais il y a eu des erreurs lors de l'envoi de certains e-mails.";
-        } else {
-            echo "Enregistrement du SAV effectué, mais aucun e-mail n'a été envoyé. Veuillez vérifier les erreurs.";
-        }
     } catch (PDOException $e) {
         echo "Erreur : " . $e->getMessage();
     } finally {

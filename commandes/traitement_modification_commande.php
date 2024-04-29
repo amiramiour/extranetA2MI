@@ -12,7 +12,7 @@ include '../ConnexionBD.php';
 $pdo = connexionbdd();
 
 
-require 'C:\wamp64\www\stageA2MI\extranetA2MI\vendor\autoload.php';
+require '../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
