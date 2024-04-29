@@ -9,6 +9,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail'])  || $_SESSION
 }
 
 include '../ConnexionBD.php';
+include('../navbar.php');
 
 
 $pdo = connexionbdd();
