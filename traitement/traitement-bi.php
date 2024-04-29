@@ -3,30 +3,40 @@
 session_start();
 include '../ConnexionBD.php';
 
+// Inclure la classe PHPMailer
 require 'C:\wamp64\www\A2MI2024\extranetA2MI\vendor\autoload.php';
-
-// Utilisation de la classe PHPMailer
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
+// Vérifier si l'utilisateur est connecté en tant qu'administrateur ou sous-administrateur
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'sousadmin')) {
+    // Redirection vers une page d'erreur si l'utilisateur n'est pas connecté en tant qu'admin ou sous-admin
+    header('Location: ../index.php');
+    exit();
+}
+
+// Récupération de l'ID et de l'adresse e-mail du technicien à partir de la session
+$technicien_id = $_SESSION['user_id'];
+$technicien_email = $_SESSION['user_mail'];
 
 // Vérifier si l'ID du membre est passé dans l'URL
 if (isset($_GET['membre_id'])) {
     // Récupérer l'ID du membre depuis l'URL
     $membre_id = $_GET['membre_id'];
 
+    // Vérifier si la méthode de requête est POST
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         try {
             $db = connexionbdd();
 
-
+            // Récupérer les informations du client
             $query_client = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :membre_id";
             $stmt_client = $db->prepare($query_client);
             $stmt_client->bindParam(':membre_id', $membre_id);
             $stmt_client->execute();
             $client_info = $stmt_client->fetch(PDO::FETCH_ASSOC);
 
-            $bi_technicien = 745; // Valeur statique pour le moment
-
+            // Traiter les données du formulaire
             $facturer = isset($_POST['facturer']) ? 'oui' : 'non';
             $garantie = isset($_POST['garantie']) ? 'oui' : 'non';
             $contrat = isset($_POST['contrat']) ? 'oui' : 'non';
@@ -49,24 +59,12 @@ if (isset($_GET['membre_id'])) {
             $heureDepart = $_POST['heure_depart'];
             $commentaire = $_POST['commentaire'];
 
-            // Récupération des informations du technicien
-            $query_technicien = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :bi_technicien";
-            $stmt_technicien = $db->prepare($query_technicien);
-            $stmt_technicien->bindParam(':bi_technicien', $bi_technicien);
-            $stmt_technicien->execute();
-            $technicien_info = $stmt_technicien->fetch(PDO::FETCH_ASSOC);
-
-            $technicien_nom = $technicien_info['membre_nom'];
-            $technicien_prenom = $technicien_info['membre_prenom'];
-            $technicien_email = $technicien_info['membre_mail'];
-
-
             // Insertion dans la table `bi` (Bon d'intervention)
             $query = $db->prepare("INSERT INTO bi (membre_id, bi_technicien, bi_facture, bi_garantie, bi_contrat, bi_service, bi_envoi, bi_facturation, bi_datefacturation, bi_paiement, bi_datein, bi_heurearrive, bi_heuredepart, bi_commentaire, bi_regle) 
             VALUES (:membre_id, :bi_technicien, :facturer, :garantie, :contrat, :service, :envoi, :facturation, :dateFacturation, :paiement, UNIX_TIMESTAMP(), :heureArrive, :heureDepart, :commentaire, :regle)");
 
             $query->bindParam(':membre_id', $membre_id);
-            $query->bindParam(':bi_technicien', $bi_technicien);
+            $query->bindParam(':bi_technicien', $technicien_id);
             $query->bindParam(':facturer', $facturer);
             $query->bindParam(':garantie', $garantie);
             $query->bindParam(':contrat', $contrat);
@@ -85,7 +83,7 @@ if (isset($_GET['membre_id'])) {
             // Récupérer l'ID du bon d'intervention inséré
             $bi_id = $db->lastInsertId();
 
-            // Maintenant, insérons les données dans la table `intervention`
+            // Insérer les données dans la table `intervention`
             $selectedIntervention = $_POST['selectedIntervention'];
             $nbPieces = $_POST['nb_pieces'];
             $prixUnitaire = $_POST['prixUn'];
@@ -94,7 +92,7 @@ if (isset($_GET['membre_id'])) {
 
             // Insertion dans la table `intervention`
             $query_intervention = $db->prepare("INSERT INTO intervention (inter_intervention, inter_nbpiece, inter_prixunit, inter_total, bi_id) 
-VALUES (:selectedIntervention, :nbPieces, :prixUnitaire , :total, :bi_id)");
+            VALUES (:selectedIntervention, :nbPieces, :prixUnitaire , :total, :bi_id)");
 
             $query_intervention->bindParam(':selectedIntervention', $selectedIntervention);
             $query_intervention->bindParam(':nbPieces', $nbPieces);
@@ -102,23 +100,25 @@ VALUES (:selectedIntervention, :nbPieces, :prixUnitaire , :total, :bi_id)");
             $query_intervention->bindParam(':total', $total);
             $query_intervention->bindParam(':bi_id', $bi_id);
 
-
-            $success_count=0; // Incrémentez le compteur de succès
-            $error_count=0;
             $query_intervention->execute();
 
-            // Envoi de l'e-mail de confirmation
-            if (sendBiCreationEmail($membre_id, $selectedIntervention,$technicien_email, $total, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, true)) {
-                $success_count++; // Incrémentez le compteur de succès
+            // Compteur de succès et d'erreurs
+            $success_count = 0;
+            $error_count = 0;
+
+            // Envoi d'e-mails de confirmation au client et au technicien
+            if (sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_email, $total, $client_info['membre_nom'], $client_info['membre_prenom'], true)) {
+                $success_count++;
             } else {
-                $error_count++; // Incrémentez le compteur d'erreurs
+                $error_count++;
             }
-            if (sendBiCreationEmail(745, $selectedIntervention,$technicien_email, $total, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, false)) {
-                $success_count++; // Incrémentez le compteur de succès
+            if (sendBiCreationEmail($technicien_id, $selectedIntervention, $technicien_email, $total, $client_info['membre_nom'], $client_info['membre_prenom'], false)) {
+                $success_count++;
             } else {
-                $error_count++; // Incrémentez le compteur d'erreurs
+                $error_count++;
             }
 
+            // Affichage du résultat
             if ($success_count > 0 && $error_count == 0) {
                 echo "Enregistrement du SAV effectué avec succès. Les e-mails ont été envoyés avec succès.";
             } elseif ($success_count > 0 && $error_count > 0) {
@@ -126,7 +126,6 @@ VALUES (:selectedIntervention, :nbPieces, :prixUnitaire , :total, :bi_id)");
             } else {
                 echo "Enregistrement du SAV effectué, mais aucun e-mail n'a été envoyé. Veuillez vérifier les erreurs.";
             }
-
 
             // Redirection vers bonIntervention.php après traitement
             header("Location: /bi/bonIntervention.php");
@@ -142,7 +141,8 @@ VALUES (:selectedIntervention, :nbPieces, :prixUnitaire , :total, :bi_id)");
     }
 }
 
-function sendBiCreationEmail($membre_id, $selectedIntervention,$technicien_email, $total, $client_nom, $client_prenom, $technicien_nom, $technicien_prenom, $is_client) {
+// Fonction pour envoyer un e-mail de création de bon d'intervention
+function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_email, $total, $client_nom, $client_prenom, $is_client) {
     // Récupérer l'adresse e-mail du client depuis la base de données
     $connexion = connexionbdd();
     $query = $connexion->prepare("SELECT membre_mail, bi_datein FROM membres INNER JOIN bi ON membres.membre_id = bi.membre_id WHERE membres.membre_id = ?");
@@ -152,22 +152,20 @@ function sendBiCreationEmail($membre_id, $selectedIntervention,$technicien_email
     $client_email = $result['membre_mail'];
     $bi_datein = date('d/m/Y');
 
-    // Composez le contenu de l'e-mail
-    $subject = "=?UTF-8?B?" . base64_encode("Création d'un Bon d'intervention") . "?="; // Encodage du sujet
+    // Composition du contenu de l'e-mail
+    $subject = "=?UTF-8?B?" . base64_encode("Création d'un Bon d'intervention") . "?=";
     $body = "Bonjour,\n\n";
     if ($is_client) {
         $body .= "Un Bon d'intervention a été créé pour vous :\n\n";
         $body .= "Intervention : $selectedIntervention\n";
-        $body .= "Date de création du bon : $bi_datein\n"; // Ajout de la date de création du bon
+        $body .= "Date de création du bon : $bi_datein\n";
         $body .= "Prix total : $total euros\n";
-        $body .= "Technicien en charge : $technicien_prenom $technicien_nom\n";
         $body .= "Cordialement,\nVotre société";
     } else {
         $body .= "Un Bon d'intervention a été créé pour $client_nom $client_prenom :\n\n";
         $body .= "Intervention : $selectedIntervention\n\n";
-        $body .= "Date de création du bon : $bi_datein\n\n"; // Ajout de la date de création du bon
+        $body .= "Date de création du bon : $bi_datein\n\n";
         $body .= "Prix total : $total euros\n\n";
-        $body .= "Technicien en charge : $technicien_prenom $technicien_nom\n\n";
         $body .= "Cordialement,\n\nVotre société";
     }
 
@@ -191,10 +189,9 @@ function sendBiCreationEmail($membre_id, $selectedIntervention,$technicien_email
             $mail->addAddress($technicien_email);    // Adresse e-mail du technicien
         }
 
-
         // Contenu de l'e-mail
         $mail->isHTML(false);
-        $mail->CharSet = 'UTF-8'; // Spécification de l'encodage
+        $mail->CharSet = 'UTF-8';
         $mail->Subject = $subject;
         $mail->Body = $body;
 
@@ -208,3 +205,4 @@ function sendBiCreationEmail($membre_id, $selectedIntervention,$technicien_email
         return false;
     }
 }
+?>

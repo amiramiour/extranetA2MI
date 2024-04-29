@@ -10,7 +10,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_mail'])) {
         header('Location: ../profile/profile_client.php');
         exit();
     } elseif ($_SESSION['user_type'] === 'admin' || $_SESSION['user_type'] === 'sousadmin') {
-        header('Location: ../profile/profile_admin.php');
+        header('Location: ../index.php');
         exit();
     }
 }
@@ -34,7 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['validate']) && $_POST
                 $_SESSION['user_mdp'] = $result['membre_mdp'];
                 $_SESSION['user_type'] = $result['membre_type'];
 
-                
                 // Redirection en fonction du rôle de l'utilisateur
                 if ($_SESSION['user_type'] === 'client') {
                     // Redirection vers le profil du client
@@ -65,6 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['validate']) && $_POST
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+<?php include('../navbar.php'); ?>
+
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -99,4 +100,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['validate']) && $_POST
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
-</html
+</html>

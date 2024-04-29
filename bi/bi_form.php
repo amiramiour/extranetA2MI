@@ -3,6 +3,13 @@
 include '../ConnexionBD.php';
 $db = connexionbdd();
 
+// Vérifier si l'utilisateur est connecté en tant qu'administrateur ou sous-administrateur
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'sousadmin')) {
+    // Redirection vers une page d'erreur si l'utilisateur n'est pas connecté en tant qu'admin ou sous-admin
+    header('Location: ../index.php');
+    exit();
+}
+
 // Vérifier si l'ID du bon d'intervention à modifier est passé dans l'URL
 if(isset($_GET['bi_id'])) {
     // Récupérer l'ID du bon d'intervention depuis l'URL
