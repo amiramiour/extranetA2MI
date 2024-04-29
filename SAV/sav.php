@@ -2,7 +2,7 @@
 /*
  * prtie recuperation des ids
 
-require_once 'connexionBD.php';
+require_once 'ConnexionBD.php';
 
 session_start(); // Démarrez la session si ce n'est pas déjà fait
 
@@ -33,7 +33,7 @@ if (isset($_GET['client_id'])) {
     $client_id = ""; // Si aucun client n'est sélectionné, initialisez à une chaîne vide
 }
 */
-include('../connexionBD.php');
+include('../ConnexionBD.php');
 
 // Vérification de la valeur du paramètre de tri
 $tri = isset($_GET['tri']) ? $_GET['tri'] : 'membre_nom';

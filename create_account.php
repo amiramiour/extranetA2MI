@@ -5,7 +5,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Connexion à la base de données
-include 'connexionBD.php';
+include 'ConnexionBD.php';
 $pdo = connexionbdd();
 
 if(isset($_POST['submit'])) {

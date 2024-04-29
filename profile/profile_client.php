@@ -1,5 +1,5 @@
 <?php
-include('../connexionBD.php');
+include('../ConnexionBD.php');
 include('../navbar.php');
 
 // Vérification de l'ID du client dans l'URL

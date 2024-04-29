@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../connexionBD.php';
+include '../ConnexionBD.php';
 
 try {
     $db = connexionbdd();

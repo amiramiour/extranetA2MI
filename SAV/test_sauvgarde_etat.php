@@ -1,6 +1,6 @@
 <?php
 // Inclure le fichier de connexion à la base de données
-require_once '../connexionBD.php';
+require_once '../ConnexionBD.php';
 
 try {
     // Connexion à la base de données en utilisant la fonction connexionbdd()

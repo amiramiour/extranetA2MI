@@ -1,7 +1,7 @@
 <?php
 // Inclure le fichier de connexion à la base de données
 global $db;
-include '../connexionBD.php';
+include '../ConnexionBD.php';
 
 $db = connexionbdd();
 
