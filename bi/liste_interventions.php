@@ -1,13 +1,13 @@
 <?php
-// Récupération des interventions depuis la base de données
-include '../ConnexionBD.php';
+session_start(); // Démarrer la session si ce n'est pas déjà fait
 
-// Vérifier si l'utilisateur est connecté en tant qu'administrateur ou sous-administrateur
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'sousadmin')) {
-    // Redirection vers une page d'erreur si l'utilisateur n'est pas connecté en tant qu'admin ou sous-admin
-    header('Location: ../index.php');
-    exit();
+// Vérifier si l'utilisateur est connecté et est un technicien
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION['user_type'] === 'client') {
+    // Si l'utilisateur n'est pas connecté ou est un client, redirigez-le ou affichez un message d'erreur
+    header("Location: ../connexion.php");
+    exit;
 }
+include '../ConnexionBD.php';
 
 $db = connexionbdd();
 

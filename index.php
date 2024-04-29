@@ -4,19 +4,12 @@ header('Content-type: text/html; charset=utf-8');
 
 include('ConnexionBD.php');
 
-<<<<<<< HEAD
-// Vérifier si l'utilisateur est connecté (variable de session définie)
-if (isset($_SESSION['connected']) && $_SESSION['connected']) {
-    $message = "Vous êtes connecté.";
-    // Une fois que le message est affiché, vous pouvez réinitialiser la variable de session
-    unset($_SESSION['connected']);
-=======
 // Vérifier si l'utilisateur est connecté
 if (isset($_SESSION['user_id'])) {
     // Si l'utilisateur est connecté, vérifier son type
     if ($_SESSION['user_type'] === 'client') {
         // Si l'utilisateur est un client, le rediriger vers la page de profil du client
-        header("Location: /profile/profile_client.php");
+        header("Location: profile/profile_client.php");
         exit;
     } else {
         // Si l'utilisateur est un administrateur ou un sous-administrateur, inclure la navbar
@@ -27,7 +20,6 @@ if (isset($_SESSION['user_id'])) {
     // Rediriger vers la page de connexion
     header("Location: connexion/connexion.php");
     exit;
->>>>>>> 9e4ea5c1e90af3d9c318d0eeae636e0326af9050
 }
 ?>
 
@@ -51,22 +43,11 @@ if (isset($_SESSION['user_id'])) {
             <!-- <?php //include ('includes/colg.php'); ?> -->
         </div>
         <div class="col-lg-9">
-<<<<<<< HEAD
-            <h1 class="mt-5">Bienvenue sur l'extranet d'a2mi !</h1>
-            <?php
-            // Afficher le message si présent
-            if (isset($message)) {
-                echo "<p>$message</p>";
-            } else {
-                // Sinon, afficher le lien de connexion
-                echo "<p>Pour pouvoir accéder à votre fiche client, il faut <a href='connexion/connexion.php'>se connecter</a> !</p>";
-=======
             <h1 class="mt-5">Bienvenue sur l'extranet d'A2MI !</h1>
             <?php
             // Afficher le lien de déconnexion si l'utilisateur est connecté
             if (isset($_SESSION['user_id'])) {
                 echo "<p><a href='connexion/deconnexion.php'>Déconnexion</a></p>";
->>>>>>> 9e4ea5c1e90af3d9c318d0eeae636e0326af9050
             }
             ?>
         </div>

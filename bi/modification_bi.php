@@ -1,14 +1,17 @@
 <?php include('../navbar.php'); ?>
 <?php
+session_start(); // Démarrer la session si ce n'est pas déjà fait
+
+// Vérifier si l'utilisateur est connecté et est un technicien
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION['user_type'] === 'client') {
+    // Si l'utilisateur n'est pas connecté ou est un client, redirigez-le ou affichez un message d'erreur
+    header("Location: ../connexion.php");
+    exit;
+}
 // Inclure le fichier de connexion à la base de données
 include '../ConnexionBD.php';
 
-// Vérifier si l'utilisateur est connecté en tant qu'administrateur ou sous-administrateur
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'sousadmin')) {
-    // Redirection vers une page d'erreur si l'utilisateur n'est pas connecté en tant qu'admin ou sous-admin
-    header('Location: ../index.php');
-    exit();
-}
+
 
 // Etablir la connexion à la base de données
 $db = connexionbdd();
@@ -58,7 +61,7 @@ if(isset($_GET['bi_id'])) {
     <div class="card mt-5">
         <div class="card-body">
             <h5 class="card-title">Modifier le bon d'intervention</h5>
-            <form action="../traitement/traitement_modification_bi.php" method="post">
+            <form action="traitement_modification_bi.php" method="post">
                 <input type="hidden" name="bi_id" value="<?php echo $bi_id; ?>">
 
                 <!-- Champs de modification -->

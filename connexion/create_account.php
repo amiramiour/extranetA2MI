@@ -8,13 +8,13 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail'])  || $_SESSION
     exit;
 }
 
-require 'C:\wamp64\www\stageA2MI\extranetA2MI\vendor\autoload.php';
+require '../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Connexion à la base de données
-include 'ConnexionBD.php';
+include '../ConnexionBD.php';
 $pdo = connexionbdd();
 
 if(isset($_POST['submit'])) {

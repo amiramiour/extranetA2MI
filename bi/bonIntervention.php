@@ -1,6 +1,5 @@
 <?php
 session_start();
-include '../ConnexionBD.php';
 
 // Vérifier si l'utilisateur est connecté en tant qu'administrateur ou sous-administrateur
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'sousadmin')) {
@@ -8,6 +7,8 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION
     header('Location: ../index.php');
     exit();
 }
+include '../ConnexionBD.php';
+
 try {
     $db = connexionbdd();
 
