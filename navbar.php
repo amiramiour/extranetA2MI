@@ -9,6 +9,9 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
+                    <a class="nav-link" href="/">Accueil</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="/create_account.php">Créer un compte client</a>
                 </li>
                 <li class="nav-item">

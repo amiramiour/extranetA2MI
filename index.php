@@ -5,6 +5,12 @@ header('Content-type: text/html; charset=utf-8');
 include('ConnexionBD.php');
 include('navbar.php');
 
+// Vérifier si l'utilisateur est connecté (variable de session définie)
+if (isset($_SESSION['connected']) && $_SESSION['connected']) {
+    $message = "Vous êtes connecté.";
+    // Une fois que le message est affiché, vous pouvez réinitialiser la variable de session
+    unset($_SESSION['connected']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -28,7 +34,15 @@ include('navbar.php');
         </div>
         <div class="col-lg-9">
             <h1 class="mt-5">Bienvenue sur l'extranet d'a2mi !</h1>
-            <p>Pour pouvoir accéder à votre fiche client, il faut <a href="connexion/connexion.php">se connecter</a> !</p>
+            <?php
+            // Afficher le message si présent
+            if (isset($message)) {
+                echo "<p>$message</p>";
+            } else {
+                // Sinon, afficher le lien de connexion
+                echo "<p>Pour pouvoir accéder à votre fiche client, il faut <a href='connexion/connexion.php'>se connecter</a> !</p>";
+            }
+            ?>
         </div>
     </div>
 </div>
