@@ -1,11 +1,23 @@
 <?php
+
+session_start();
+
 include('../ConnexionBD.php');
-include('../navbar.php');
+
+//faire apparaitre la navbar uniquement à l'admin et sousadmin
+if($_SESSION['user_type'] === 'admin' || $_SESSION['user_type'] === 'sousadmin'){
+    include('../navbar.php');
+}
 
 // Vérification de l'ID du client dans l'URL
 if(isset($_GET['id'])) {
-
     $client_id = $_GET['id'];
+} elseif(isset($_SESSION['user_id'])) { // Si l'ID n'est pas dans l'URL, on vérifie s'il est dans la session
+    $client_id = $_SESSION['user_id'];
+}else {
+    echo "ID du client non spécifié.";
+    exit();
+}
 
     try {
         // Connexion à la base de données
@@ -30,15 +42,17 @@ if(isset($_GET['id'])) {
         if($client) {
             // Affichage du nom et du prénom du client
             echo "<div class='container mt-3'>";
-            echo "<h1>Profil du client " . $client['membre_nom'] . " " . $client['membre_prenom'] . "</h1>";
+            echo "<h1>Profil de : " . $client['membre_nom'] . " " . $client['membre_prenom'] . "</h1>";
 
             // Boutons de création
-            echo "<a href='../SAV/sav-formulaire.php?client_id=$client_id' class='btn btn-primary'>Créer SAV</a>";
-            echo "<br>";
-            echo "<a href='../bi/bi_form.php?membre_id=$client_id' class='btn btn-primary'>Créer BI</a>";
-            echo "<br>";
-            echo "<a href='../commandes/ajouter_commande.php?id=$client_id' class='btn btn-primary'>Créer Commande</a>";
-            echo "<br>";
+            if($_SESSION['user_type'] === 'admin' || $_SESSION['user_type'] === 'sousadmin'){
+                echo "<a href='../SAV/sav-formulaire.php?client_id=$client_id' class='btn btn-primary'>Créer SAV</a>";
+                echo "<br>";
+                echo "<a href='../bi/bi_form.php?membre_id=$client_id' class='btn btn-primary'>Créer BI</a>";
+                echo "<br>";
+                echo "<a href='../commandes/ajouter_commande.php?id=$client_id' class='btn btn-primary'>Créer Commande</a>";
+                echo "<br>";
+            }
 
             // Requête SQL pour récupérer les SAV du client
             $query_sav = "SELECT sav_id, sav_accessoire, sav_datein, sav_dateout, sav_envoi, sav_etat, sav_forfait, sav_garantie, sav_maindoeuvreht, sav_maindoeuvrettc, sav_mdpclient, sav_probleme, sav_regle, sav_tarifmaterielht, sav_tarifmaterielttc, sav_technicien, sav_typemateriel, sav_etats.etat_intitule
@@ -65,7 +79,9 @@ if(isset($_GET['id'])) {
                     echo "<p>Date de création : " . date('d/m/Y', strtotime($sav['sav_datein'])) . "</p>";
                     echo "<p>État : " . $sav['etat_intitule'] . "</p>";
                     // Bouton pour modifier le SAV
-                    echo "<a href='../SAV/modifier-sav.php?sav_id=" . $sav['sav_id'] . "' class='btn btn-primary custom-btn'>Modifier</a>";
+                    if($_SESSION['user_type'] === 'admin' || $_SESSION['user_type'] === 'sousadmin'){
+                        echo "<a href='../SAV/modifier-sav.php?sav_id=" . $sav['sav_id'] . "' class='btn btn-primary custom-btn'>Modifier</a>";
+                    }
                     echo "</div>";
                     echo "</div>";
                     echo "</div>";
@@ -101,7 +117,9 @@ if(isset($_GET['id'])) {
                     echo "<p>Heure d'arrivée : " . $bi['bi_heurearrive'] . "</p>";
                     echo "<p>Heure de départ : " . $bi['bi_heuredepart'] . "</p>";
                     // Bouton pour modifier le bon d'intervention
-                    echo "<a href='../bi/modification_bi.php?bi_id=" . $bi['bi_id'] . "' class='btn btn-primary custom-btn'>Modifier</a>";
+                    if ($_SESSION['user_type'] === 'admin' || $_SESSION['user_type'] === 'sousadmin') { 
+                        echo "<a href='../bi/modification_bi.php?bi_id=" . $bi['bi_id'] . "' class='btn btn-primary custom-btn'>Modifier</a>";
+                    }
                     echo "</div>";
                     echo "</div>";
                     echo "</div>";
@@ -134,7 +152,9 @@ if(isset($_GET['id'])) {
                     echo "<p>Date de création : " . date('d/m/Y', strtotime($commande['cmd_datein'])) . "</p>";
                     echo "<p>État : " . $commande['commande_etat'] . "</p>";
                     // Bouton pour modifier la commande
-                    echo "<a href='../commandes/modifier_commande.php?id=" . $commande['cmd_id'] . "' class='btn btn-primary custom-btn'>Modifier</a>";
+                    if($_SESSION['user_type'] === 'admin' || $_SESSION['user_type'] === 'sousadmin'){
+                        echo "<a href='../commandes/modifier_commande.php?id=" . $commande['cmd_id'] . "' class='btn btn-primary custom-btn'>Modifier</a>";
+                    }
                     echo "</div>";
                     echo "</div>";
                     echo "</div>";
@@ -151,9 +171,6 @@ if(isset($_GET['id'])) {
     } catch (PDOException $e) {
         echo "Erreur : " . $e->getMessage();
     }
-} else {
-    echo "ID du client non spécifié.";
-}
 ?>
 
 
@@ -167,6 +184,6 @@ if(isset($_GET['id'])) {
     <link rel="stylesheet" type="text/css" href="../css/style.css">
 </head>
 <body>
-
+    <a href="../connexion/deconnexion.php" class="btn btn-danger">Déconnexion</a>  
 </body>
 </html>

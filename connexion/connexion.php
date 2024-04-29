@@ -4,12 +4,12 @@ include('../ConnexionBD.php');
 session_start();
 
 // Vérifier si l'utilisateur est déjà connecté
-if (isset($_SESSION['membre_id']) && isset($_SESSION['membre_mail'])) {
+if (isset($_SESSION['user_id']) && isset($_SESSION['user_mail'])) {
     // Redirection en fonction du type de membre
-    if ($_SESSION['membre_type'] === 'client') {
+    if ($_SESSION['user_type'] === 'client') {
         header('Location: ../profile/profile_client.php');
         exit();
-    } elseif ($_SESSION['membre_type'] === 'admin' || $_SESSION['membre_type'] === 'sous-admin') {
+    } elseif ($_SESSION['user_type'] === 'admin' || $_SESSION['user_type'] === 'sousadmin') {
         header('Location: ../profile/profile_admin.php');
         exit();
     }
@@ -28,19 +28,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['validate']) && $_POST
 
         if ($result['nbr']) {
             if (password_verify($_POST['mdp'], $result['membre_mdp'])) {
-                $_SESSION['membre_id'] = $result['membre_id'];
-                $_SESSION['membre_mail'] = $result['membre_mail'];
-                $_SESSION['membre_mdp'] = $result['membre_mdp'];
-                $_SESSION['membre_type'] = $result['membre_type'];
+                // Sauvegarde de l'ID de l'utilisateur dans la session
+                $_SESSION['user_id'] = $result['membre_id'];
+                $_SESSION['user_mail'] = $result['membre_mail'];
+                $_SESSION['user_mdp'] = $result['membre_mdp'];
+                $_SESSION['user_type'] = $result['membre_type'];
 
+                
                 // Redirection en fonction du rôle de l'utilisateur
-                if ($_SESSION['membre_type'] === 'client') {
+                if ($_SESSION['user_type'] === 'client') {
                     // Redirection vers le profil du client
-                    header('Location: profile_client.php');
+                    header('Location: ../profile/profile_client.php');
                     exit();
-                } elseif ($_SESSION['membre_type'] === 'admin' || $_SESSION['membre_type'] === 'sous-admin') {
+                } elseif ($_SESSION['user_type'] === 'admin' || $_SESSION['user_type'] === 'sousadmin') {
                     // Redirection vers le profil de l'administrateur ou du sous-administrateur
-                    header('Location: profile_admin.php');
+                    header('Location: ../index.php');
                     exit();
                 }
             } else {
@@ -97,6 +99,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['validate']) && $_POST
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
-</html>
-
-
+</html

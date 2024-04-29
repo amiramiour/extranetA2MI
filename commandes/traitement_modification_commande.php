@@ -1,4 +1,13 @@
 <?php 
+session_start();
+
+// Vérifier si l'utilisateur est connecté et est un technicien
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail'])  || $_SESSION['user_type'] === 'client') {
+    // Si l'utilisateur n'est pas connecté ou est un client, redirigez-le ou affichez un message d'erreur
+    header("Location: ../connexion.php");
+    exit;
+}
+
 include '../ConnexionBD.php';
 $pdo = connexionbdd();
 
@@ -22,7 +31,7 @@ $query->execute();
 $client = $query->fetch(PDO::FETCH_ASSOC);
 
 //récupérer les information du technicien qui a effectué la commande
-$id_technicien = 775; // à remplacer par l'id du technicien connecté (session)
+$id_technicien = $_SESSION['user_id']; // à remplacer par l'id du technicien connecté (session)
 $query = $pdo->prepare("SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :id_technicien");
 $query->bindParam(':id_technicien', $id_technicien, PDO::PARAM_INT);
 $query->execute();
@@ -52,7 +61,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                cmd_datein = :dateActuelle, 
                                cmd_dateout = :dateP, 
                                membre_id = :idClient, 
-                               cmd_prixventettc = :totalTTC, 
+                               cmd_prixventettc = :totalTTC,
+                               cmd_livreur = :id_technicien,
                                cmd_dateSouhait = :dateS, 
                                cmd_etat = :etatC, 
                                cmd_prixHT = :totalHT, 
@@ -65,6 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindValue(':dateP', $dateP);
     $stmt->bindValue(':idClient', $idClient);
     $stmt->bindValue(':totalTTC', $totalTTC);
+    $stmt->bindValue(':id_technicien', $id_technicien);
     $stmt->bindValue(':dateS', $dateS);
     $stmt->bindValue(':etatC', $etatC);
     $stmt->bindValue(':totalHT', $totalHT);

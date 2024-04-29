@@ -1,5 +1,14 @@
 <?php
-require 'C:\wamp64\www\A2MI2024\extranetA2MI\vendor\autoload.php';
+session_start();
+
+// Vérifier si l'utilisateur est connecté et est un technicien
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail'])  || $_SESSION['user_type'] === 'client') {
+    // Si l'utilisateur n'est pas connecté ou est un client, redirigez-le ou affichez un message d'erreur
+    header("Location: ../connexion.php");
+    exit;
+}
+
+require 'C:\wamp64\www\stageA2MI\extranetA2MI\vendor\autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -148,7 +157,10 @@ function generateRandomString($length = 8) {
                 <label for="type">Type de compte </label>
                 <select id="type" name="type" class="form-control" required>
                     <option value="client">Client</option>
-                    <option value="sousadmin">Sous-administrateur</option>
+                    <!-- Si c'est un administrateur qui crée le compte, il peut choisir le type de compte -->
+                    <?php if($_SESSION['user_type'] === 'admin'): ?>
+                        <option value="sousadmin">Sous-administrateur</option>
+                    <?php endif; ?>
                 </select>
             </div>
 

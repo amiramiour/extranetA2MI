@@ -1,5 +1,15 @@
 <?php
+session_start();
+
+// Vérifier si l'utilisateur est connecté et est un technicien
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail'])  || $_SESSION['user_type'] === 'client') {
+    // Si l'utilisateur n'est pas connecté ou est un client, redirigez-le ou affichez un message d'erreur
+    header("Location: ../connexion/connexion.php");
+    exit;
+}
+
 include '../ConnexionBD.php'; // Fichier de configuration de la connexion PDO
+
 $pdo = connexionbdd();
 
 $query = $pdo->query("SELECT DISTINCT m.membre_id, m.membre_nom, m.membre_prenom
