@@ -108,12 +108,12 @@ VALUES (:selectedIntervention, :nbPieces, :prixUnitaire , :total, :bi_id)");
             $query_intervention->execute();
 
             // Envoi de l'e-mail de confirmation
-            if (sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_email, $total, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom,true)) {
+            if (sendBiCreationEmail($membre_id, $selectedIntervention,$technicien_email, $total, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, true)) {
                 $success_count++; // Incrémentez le compteur de succès
             } else {
                 $error_count++; // Incrémentez le compteur d'erreurs
             }
-            if (sendBiCreationEmail(745, $selectedIntervention, $technicien_email, $total, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom,false)) {
+            if (sendBiCreationEmail(745, $selectedIntervention,$technicien_email, $total, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, false)) {
                 $success_count++; // Incrémentez le compteur de succès
             } else {
                 $error_count++; // Incrémentez le compteur d'erreurs
@@ -142,7 +142,7 @@ VALUES (:selectedIntervention, :nbPieces, :prixUnitaire , :total, :bi_id)");
     }
 }
 
-function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_id, $total, $client_nom, $client_prenom, $technicien_nom, $technicien_prenom, $is_client) {
+function sendBiCreationEmail($membre_id, $selectedIntervention,$technicien_email, $total, $client_nom, $client_prenom, $technicien_nom, $technicien_prenom, $is_client) {
     // Récupérer l'adresse e-mail du client depuis la base de données
     $connexion = connexionbdd();
     $query = $connexion->prepare("SELECT membre_mail, bi_datein FROM membres INNER JOIN bi ON membres.membre_id = bi.membre_id WHERE membres.membre_id = ?");
@@ -185,7 +185,12 @@ function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_id, 
 
         // Destinataires
         $mail->setFrom('masdouarania02@gmail.com', 'Votre société');
-        $mail->addAddress($client_email);    // Adresse e-mail du client
+        if ($is_client) {
+            $mail->addAddress($client_email);    // Adresse e-mail du client
+        } else {
+            $mail->addAddress($technicien_email);    // Adresse e-mail du technicien
+        }
+
 
         // Contenu de l'e-mail
         $mail->isHTML(false);
