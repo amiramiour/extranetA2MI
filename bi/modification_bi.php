@@ -1,7 +1,7 @@
 <?php include('../navbar.php'); ?>
 <?php
 // Inclure le fichier de connexion à la base de données
-include '../connexionBD.php';
+include '../ConnexionBD.php';
 
 // Etablir la connexion à la base de données
 $db = connexionbdd();

@@ -1,7 +1,7 @@
 <?php
 // Inclure le fichier de connexion à la base de données
 global $db;
-include '../connexionBD.php';
+include '../ConnexionBD.php';
 
 $db = connexionbdd();
 $query = $db->prepare("SELECT membres.membre_id, membres.membre_nom, membres.membre_prenom, bi.bi_datein FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id");

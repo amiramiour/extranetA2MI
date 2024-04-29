@@ -1,5 +1,5 @@
 <?php
-include('../connexionBD.php');
+include('../ConnexionBD.php');
 
 session_start();
 

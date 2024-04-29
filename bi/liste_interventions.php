@@ -1,6 +1,6 @@
 <?php
 // Récupération des interventions depuis la base de données
-include '../connexionBD.php';
+include '../ConnexionBD.php';
 
 $db = connexionbdd();
 

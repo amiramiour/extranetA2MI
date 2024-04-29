@@ -1,7 +1,7 @@
 <?php
 
 session_start();
-include '../connexionBD.php';
+include '../ConnexionBD.php';
 
 require 'C:\wamp64\www\A2MI2024\extranetA2MI\vendor\autoload.php';
 

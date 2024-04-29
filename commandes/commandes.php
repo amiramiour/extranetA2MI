@@ -1,5 +1,5 @@
 <?php
-include '../connexionBD.php'; // Fichier de configuration de la connexion PDO
+include '../ConnexionBD.php'; // Fichier de configuration de la connexion PDO
 $pdo = connexionbdd();
 
 $query = $pdo->query("SELECT DISTINCT m.membre_id, m.membre_nom, m.membre_prenom

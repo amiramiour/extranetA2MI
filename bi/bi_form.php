@@ -1,6 +1,6 @@
 <?php
 // Inclure le fichier de connexion à la base de données
-include '../connexionBD.php';
+include '../ConnexionBD.php';
 $db = connexionbdd();
 
 // Vérifier si l'ID du bon d'intervention à modifier est passé dans l'URL

@@ -1,5 +1,5 @@
 <?php
-require_once '../connexionBD.php';
+require_once '../ConnexionBD.php';
 
 
 require 'C:\wamp64\www\A2MI2024\extranetA2MI\vendor\autoload.php';
