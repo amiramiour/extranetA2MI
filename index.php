@@ -3,8 +3,24 @@ session_start();
 header('Content-type: text/html; charset=utf-8');
 
 include('ConnexionBD.php');
-include('navbar.php');
 
+// Vérifier si l'utilisateur est connecté
+if (isset($_SESSION['user_id'])) {
+    // Si l'utilisateur est connecté, vérifier son type
+    if ($_SESSION['user_type'] === 'client') {
+        // Si l'utilisateur est un client, le rediriger vers la page de profil du client
+        header("Location: /profile/profile_client.php");
+        exit;
+    } else {
+        // Si l'utilisateur est un administrateur ou un sous-administrateur, inclure la navbar
+        include('navbar.php');
+    }
+} else {
+    // Si l'utilisateur n'est pas connecté, ne pas inclure la navbar
+    // Rediriger vers la page de connexion
+    header("Location: connexion/connexion.php");
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
@@ -12,7 +28,7 @@ include('navbar.php');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription</title>
+    <title>Page d'accueil</title>
     <!-- Inclure le fichier CSS de Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Inclure le fichier CSS personnalisé -->
@@ -27,8 +43,13 @@ include('navbar.php');
             <!-- <?php //include ('includes/colg.php'); ?> -->
         </div>
         <div class="col-lg-9">
-            <h1 class="mt-5">Bienvenue sur l'extranet d'a2mi !</h1>
-            <p>Pour pouvoir accéder à votre fiche client, il faut <a href="connexion/connexion.php">se connecter</a> !</p>
+            <h1 class="mt-5">Bienvenue sur l'extranet d'A2MI !</h1>
+            <?php
+            // Afficher le lien de déconnexion si l'utilisateur est connecté
+            if (isset($_SESSION['user_id'])) {
+                echo "<p><a href='connexion/deconnexion.php'>Déconnexion</a></p>";
+            }
+            ?>
         </div>
     </div>
 </div>

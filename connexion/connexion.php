@@ -10,7 +10,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_mail'])) {
         header('Location: ../profile/profile_client.php');
         exit();
     } elseif ($_SESSION['user_type'] === 'admin' || $_SESSION['user_type'] === 'sousadmin') {
-        header('Location: ../profile/profile_admin.php');
+        header('Location: ../index.php');
         exit();
     }
 }
