@@ -119,7 +119,9 @@ try {
                 // Bouton pour modifier le bon d'intervention
                 if ($_SESSION['user_type'] === 'admin' || $_SESSION['user_type'] === 'sousadmin') {
                     echo "<a href='../bi/modification_bi.php?bi_id=" . $bi['bi_id'] . "' class='btn btn-primary custom-btn'>Modifier</a>";
+                    echo "<button type='button' class='btn btn-danger btn-supprimer' data-bi-id='" . $bi['bi_id'] . "'>Supprimer</button>"; // Correction
                 }
+
                 echo "</div>";
                 echo "</div>";
                 echo "</div>";
@@ -171,6 +173,18 @@ try {
 } catch (PDOException $e) {
     echo "Erreur : " . $e->getMessage();
 }
+if(isset($_POST['action']) && $_POST['action'] === 'supprimer' && isset($_POST['bi_id'])) {
+    // Récupérer l'ID du bon d'intervention à supprimer
+    $bi_id = $_POST['bi_id'];
+
+    // Mettre à jour l'attribut bi_active dans la base de données
+    $update_query = $db->prepare("UPDATE bi SET bi_active = 0 WHERE bi_id = ?");
+    $update_query->execute([$bi_id]);
+
+    // Répondre avec un message indiquant que la suppression a été effectuée
+    echo "Le bon d'intervention a été supprimé avec succès.";
+    exit; // Arrêter le script après la réponse AJAX
+}
 ?>
 
 
@@ -185,5 +199,33 @@ try {
 </head>
 <body>
 <a href="../connexion/deconnexion.php" class="btn btn-danger">Déconnexion</a>
+<!-- Inclure le fichier JavaScript de Bootstrap à la fin du corps -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Inclure jQuery pour les requêtes AJAX -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+    // Ecouteur d'événement sur les boutons "Supprimer"
+    $(".btn-supprimer").click(function() {
+        // Récupérer l'ID du bon d'intervention à supprimer
+        var bi_id = $(this).data("bi-id");
+        // Demander confirmation à l'utilisateur
+        if (confirm("Êtes-vous sûr de vouloir supprimer ce bon d'intervention ?")) {
+            // Supprimer l'élément de la page HTML
+            $(this).closest(".col-md-4").remove();
+            // Envoyer une requête AJAX pour supprimer le bon d'intervention de la base de données
+            $.ajax({
+                url: "",
+                type: "POST",
+                data: { action: 'supprimer', bi_id: bi_id },
+                success: function(response) {
+                    alert(response); // Afficher le message de confirmation
+                }
+            });
+        }
+    });
+</script>
+
 </body>
 </html>
