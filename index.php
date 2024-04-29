@@ -1,7 +1,7 @@
 <?php
 session_start();
 header('Content-type: text/html; charset=utf-8');
-include ('connexionBD.php');
+include('connexionBD.php');
 include('navbar.php');
 
 ?>
