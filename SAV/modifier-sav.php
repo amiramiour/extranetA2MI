@@ -30,17 +30,17 @@ if (isset($_POST['delete']) && $_POST['delete'] === 'delete') {
         $connexion = connexionbdd();
 
         // Récupérer les informations du SAV avant la désactivation
-        $query_sav_info = "SELECT s.sav_etats, e.etat_intitule, s.sav_technicien FROM sav s INNER JOIN sav_etats e ON s.sav_etats = e.id_etat_sav WHERE s.sav_id = :sav_id";
+        $query_sav_info = "SELECT s.sav_etats, s.sav_technicien, e.etat_intitule FROM sav s INNER JOIN sav_etats e ON s.sav_etats = e.id_etat_sav WHERE s.sav_id = :sav_id";
         $stmt_sav_info = $connexion->prepare($query_sav_info);
         $stmt_sav_info->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
         $stmt_sav_info->execute();
         $sav_info = $stmt_sav_info->fetch(PDO::FETCH_ASSOC);
 
+
         // Mettre à jour le champ active à 0 dans la table SAV
-        $query_delete_sav = "UPDATE sav SET active = 0, date_update = NOW(), updated_by = :updated_by WHERE sav_id = :sav_id";
+        $query_delete_sav = "UPDATE sav SET active = 0 WHERE sav_id = :sav_id";
         $stmt_delete_sav = $connexion->prepare($query_delete_sav);
         $stmt_delete_sav->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
-        $stmt_delete_sav->bindParam(':updated_by', $_SESSION['user_id'], PDO::PARAM_INT); // Utiliser l'ID de la personne connectée
         $stmt_delete_sav->execute();
 
         // Récupérer la date de création de la dernière entrée dans la table sauvgarde_etat_info
@@ -261,6 +261,18 @@ function sendSAVModificationEmail($to_email, $client_nom, $client_prenom, $techn
     <title>Modifier SAV</title>
     <!-- Inclure Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/css/bootstrap.min.css">
+    <!-- Ajouter un style personnalisé pour les boutons -->
+    <style>
+        .custom-btn {
+            background-color: #C8356C;
+            border-color: #C8356C;
+        }
+
+        .custom-btn:hover {
+            background-color: #a72a55;
+            border-color: #a72a55;
+        }
+    </style>
 </head>
 
 <body>
@@ -289,11 +301,11 @@ function sendSAVModificationEmail($to_email, $client_nom, $client_prenom, $techn
             <!-- Ajoutez l'attribut required pour obliger l'utilisateur à saisir un nouvel avancement -->
             <textarea class="form-control" name="nouvel_avancement" id="nouvel_avancement" rows="3" required></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+        <button type="submit" class="btn btn-primary custom-btn">Enregistrer les modifications</button>
     </form>
     <form action="" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer ce SAV ?');">
         <input type="hidden" name="delete" value="delete">
-        <button type="submit" class="btn btn-danger mt-3">Supprimer ce SAV</button>
+        <button type="submit" class="btn btn-danger mt-3 custom-btn">Supprimer ce SAV</button>
     </form>
     <?php if (isset($error)) : ?>
         <div class="alert alert-danger mt-3" role="alert">
