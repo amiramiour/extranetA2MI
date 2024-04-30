@@ -52,6 +52,8 @@ try {
             echo "<br>";
             echo "<a href='../commandes/ajouter_commande.php?id=$client_id' class='btn btn-primary'>Créer Commande</a>";
             echo "<br>";
+            echo "<a href='../pret/pret.php?id=$client_id'class='btn btn-primary'>Créer Pret</a>";
+            echo "<br>";
         }
 
         // Requête SQL pour récupérer les SAV du client

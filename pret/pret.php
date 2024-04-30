@@ -1,4 +1,18 @@
+<?php
+session_start();
+// Vérification si l'utilisateur est connecté et si son type est différent de "client"
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION['user_type'] === 'client') {
+    // Si l'utilisateur n'est pas connecté ou est un client, redirigez-le ou affichez un message d'erreur
+    header("Location: ../connexion.php");
+    exit;
+}
+
+// Maintenant, l'utilisateur est connecté et n'est pas un client, donc affichez le formulaire
+$client_id = $_GET['id']; //la on recupere l'id passé dans l'url
+?>
 <!DOCTYPE html>
+
+
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -14,6 +28,7 @@
 <div class="container mt-5">
     <h2>Formulaire de prêt</h2>
     <form action="traitement_pret.php" method="POST">
+        <input type="hidden" name="client_id" value="<?php echo $client_id; ?>">
         <div class="form-group">
             <label for="pret_materiel">Prêt matériel *</label>
             <input type="text" class="form-control" id="pret_materiel" name="pret_materiel" required>

@@ -24,6 +24,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Récupérer l'ID du technicien connecté
     $pret_technicien = $_SESSION['user_id'];
+    $membre_id = $_POST['client_id'];
+
 
     // Valeur par défaut pour l'attribut "rappel"
     $rappel = 1;
@@ -41,11 +43,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt = $db->prepare($sql);
 
     // Exécuter la requête avec les valeurs des paramètres
-    $stmt->execute([$pret_materiel, $pret_caution, $pret_mode, $pret_datein, $pret_dateout, $pret_technicien, $pret_technicien, $commentaire, $valeurMat, $rappel, $pret_etat]);
+    $stmt->execute([$pret_materiel, $pret_caution, $pret_mode, $pret_datein, $pret_dateout, $membre_id, $pret_technicien, $commentaire, $valeurMat, $rappel, $pret_etat]);
 
     // Rediriger ou afficher un message de succès
     // Par exemple, rediriger vers une page de succès
-    header("Location: formulaire_pret_succes.php");
+    header("Location: liste_prets.php");
     exit();
 } else {
     // Si les données du formulaire n'ont pas été soumises, rediriger vers une page d'erreur

@@ -38,7 +38,7 @@
                     <a class="nav-link" href="/bi/bonIntervention.php">Tout les bons d'interventions</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/pret/pret.php">Prêts</a>
+                    <a class="nav-link" href="/pret/liste_prets.php">Prêts</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Historique</a>
