@@ -1,6 +1,3 @@
-<?php
-?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -13,7 +10,6 @@
 </head>
 <body>
 <?php include '../navbar.php'; ?>
-
 
 <div class="container mt-5">
     <h2>Formulaire de prêt</h2>
@@ -33,11 +29,7 @@
         <div class="form-group">
             <label for="pret_mode">Mode de paiement *</label>
             <select class="form-control" id="pret_mode" name="pret_mode" required>
-                <option value="cb">CB</option>
-                <option value="payplug">PayPlug</option>
                 <option value="cheque">Chèque</option>
-                <option value="espece">Espèce</option>
-                <option value="virement">Virement</option>
             </select>
         </div>
         <div class="form-group">

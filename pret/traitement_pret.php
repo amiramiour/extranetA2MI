@@ -8,53 +8,45 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION
     exit;
 }
 
-// Inclure la connexion à la base de données
-include('../ConnexionBD.php');
-
 // Vérifier si les données du formulaire ont été soumises
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Inclure la connexion à la base de données
+    include('../ConnexionBD.php');
+
     // Récupérer les données du formulaire
     $pret_materiel = $_POST["pret_materiel"];
     $valeurMat = $_POST["valeurMat"];
-    $pret_caution = isset($_POST["pret_caution"]) ? $_POST["pret_caution"] : 0; // Par défaut, la caution est 0 si non fournie
+    $pret_caution = isset($_POST["pret_caution"]) ? $_POST["pret_caution"] : 0; // Si non défini, définir à 0
     $pret_mode = $_POST["pret_mode"];
     $pret_datein = $_POST["pret_datein"];
     $pret_dateout = $_POST["pret_dateout"];
     $commentaire = $_POST["commentaire"];
 
-    // Récupérer l'ID du technicien connecté depuis la session
-    $technicien_id = $_SESSION['user_id'];
+    // Récupérer l'ID du technicien connecté
+    $pret_technicien = $_SESSION['user_id'];
 
-    try {
-        // Établir la connexion à la base de données
-        $db = connexionbdd();
+    // Valeur par défaut pour l'attribut "rappel"
+    $rappel = 1;
 
-        // Préparer la requête SQL pour insérer les données du prêt
-        $sql = "INSERT INTO pret (pret_materiel, pret_caution, pret_mode, pret_datein, pret_dateout, pret_technicien, commentaire, valeurMat) VALUES (:pret_materiel, :pret_caution, :pret_mode, :pret_datein, :pret_dateout, :pret_technicien, :commentaire, :valeurMat)";
+    // Valeur par défaut pour l'attribut "pret_etat"
+    $pret_etat = 1;
 
-        // Préparer la déclaration SQL
-        $stmt = $db->prepare($sql);
+    // Etablir la connexion à la base de données
+    $db = connexionbdd();
 
-        // Lier les valeurs des paramètres
-        $stmt->bindParam(':pret_materiel', $pret_materiel);
-        $stmt->bindParam(':pret_caution', $pret_caution);
-        $stmt->bindParam(':pret_mode', $pret_mode);
-        $stmt->bindParam(':pret_datein', $pret_datein);
-        $stmt->bindParam(':pret_dateout', $pret_dateout);
-        $stmt->bindParam(':pret_technicien', $technicien_id);
-        $stmt->bindParam(':commentaire', $commentaire);
-        $stmt->bindParam(':valeurMat', $valeurMat);
+    // Préparer la requête SQL pour insérer les données du prêt
+    $sql = "INSERT INTO pret (pret_materiel, pret_caution, pret_mode, pret_datein, pret_dateout, membre_id, pret_technicien, commentaire, valeurMat, rappel, pret_etat) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        // Exécuter la requête
-        $stmt->execute();
+    // Préparer la déclaration SQL
+    $stmt = $db->prepare($sql);
 
-        // Rediriger vers une page de succès ou une autre page appropriée
-        header("Location: page_succes.php");
-        exit();
-    } catch (PDOException $e) {
-        // Gérer les erreurs de base de données
-        echo "Erreur: " . $e->getMessage();
-    }
+    // Exécuter la requête avec les valeurs des paramètres
+    $stmt->execute([$pret_materiel, $pret_caution, $pret_mode, $pret_datein, $pret_dateout, $pret_technicien, $pret_technicien, $commentaire, $valeurMat, $rappel, $pret_etat]);
+
+    // Rediriger ou afficher un message de succès
+    // Par exemple, rediriger vers une page de succès
+    header("Location: formulaire_pret_succes.php");
+    exit();
 } else {
     // Si les données du formulaire n'ont pas été soumises, rediriger vers une page d'erreur
     header("Location: erreur.php");

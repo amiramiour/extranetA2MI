@@ -7,47 +7,71 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION[
     header("Location: ../connexion.php");
     exit;
 }
+include '../ConnexionBD.php';
 
-// Inclure la connexion à la base de données
-include('../ConnexionBD.php');
+$db = connexionbdd();
 
-// Vérifier si les données du formulaire ont été soumises
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Récupérer les données du formulaire
-    $pret_materiel = $_POST["pret_materiel"];
-    $valeurMat = $_POST["valeurMat"];
-    $pret_caution = isset($_POST["pret_caution"]) ? $_POST["pret_caution"] : 0; // Par défaut, la caution est 0 si non fournie
-    $pret_mode = $_POST["pret_mode"];
-    $pret_datein = $_POST["pret_datein"];
-    $pret_dateout = $_POST["pret_dateout"];
-    $commentaire = $_POST["commentaire"];
+// Définir la requête SQL par défaut
+$query = $db->prepare("SELECT DISTINCT membres.membre_id, membres.membre_nom, membres.membre_prenom FROM membres INNER JOIN bi ON membres.membre_id = bi.membre_id");
 
-    // Récupérer l'ID du technicien connecté depuis la session
-    $technicien_id = $_SESSION['user_id'];
+// Vérifier le paramètre de tri
+$sort = $_GET['sort'] ?? '';
 
-    try {
-        // Établir la connexion à la base de données
-        $db = connexionbdd();
-
-        // Préparer la requête SQL pour insérer les données du prêt
-        $sql = "INSERT INTO pret (pret_materiel, pret_caution, pret_mode, pret_datein, pret_dateout, pret_technicien, commentaire, valeurMat) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
-        // Préparer la déclaration SQL
-        $stmt = $db->prepare($sql);
-
-        // Exécuter la requête avec les valeurs des paramètres
-        $stmt->execute([$pret_materiel, $pret_caution, $pret_mode, $pret_datein, $pret_dateout, $technicien_id, $commentaire, $valeurMat]);
-
-        // Rediriger vers une page de succès ou une autre page appropriée
-        header("Location: page_succes.php");
-        exit();
-    } catch (PDOException $e) {
-        // Gérer les erreurs de base de données
-        echo "Erreur: " . $e->getMessage();
-    }
-} else {
-    // Si les données du formulaire n'ont pas été soumises, rediriger vers une page d'erreur
-    header("Location: erreur.php");
-    exit();
+// Préparer la requête SQL en fonction du paramètre de tri
+if ($sort === 'date') {
+    $query = $db->prepare("SELECT membres.membre_id, membres.membre_nom, membres.membre_prenom, bi.bi_datein, DATE_FORMAT(bi.bi_datein, '%d/%m/%Y') AS formatted_date FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id ORDER BY bi.bi_datein ASC");
+} elseif ($sort === 'name') {
+    $query = $db->prepare("SELECT membres.membre_id, membres.membre_nom, membres.membre_prenom, bi.bi_datein FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id ORDER BY membres.membre_nom ASC");
 }
+
+$query->execute();
+$membres_avec_bi = $query->fetchAll();
 ?>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des membres avec bons d'interventions</title>
+    <!-- Inclure le fichier CSS de Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Inclure le fichier CSS personnalisé -->
+    <link href="../css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Inclure le navbar -->
+<?php include '../navbar.php'; ?>
+
+<div class="container mt-3">
+    <!-- Boutons de tri -->
+    <div class="d-flex justify-content-between centered-buttons">
+        <a href="?sort=date" class="btn btn-primary" style="background-color: #C8356C;">Trier par date croissante</a>
+        <!--  <a href="bi_form.php" class="btn btn-primary" style="background-color: #C8356C;">Créer un bon d'intervention</a> -->
+        <a href="?sort=name" class="btn btn-primary" style="background-color: #C8356C;">Trier par nom croissant</a>
+    </div>
+
+    <!-- Nombre de membres -->
+    <div class="text-center mt-3">
+        <p style="color: #C8356C; font-size: larger; font-weight: bold; text-decoration: underline;">Il y a : <?php echo count($membres_avec_bi); ?> membre(s) avec des bons d'interventions</p>
+    </div>
+
+    <!-- Liste des membres avec bons d'interventions -->
+    <div class="d-flex flex-wrap justify-content-center mt-3">
+        <?php foreach($membres_avec_bi as $membre): ?>
+            <div class="client-card">
+                <a href="bi_details.php?membre_id=<?php echo $membre['membre_id']; ?>" class="client-link">
+                    <img src="../images/icon.png" style="width: 50px; height: 50px; alt=" Icon" class="icon-size" >
+                    <h3><?php echo $membre['membre_nom']; ?></h3>
+                    <p><?php echo $membre['membre_prenom']; ?></p>
+                </a>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<!-- Inclure le fichier JavaScript de Bootstrap à la fin du corps -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
