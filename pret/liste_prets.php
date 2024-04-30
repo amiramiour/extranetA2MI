@@ -63,8 +63,9 @@ $prets = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td><?= $pret['pret_id'] ?></td>
                     <td><?= $pret['pret_materiel'] ?></td>
                     <td><?= $pret['pret_caution'] ?></td>
-                    <td><?= date('d/m/Y', strtotime($pret['pret_dateout'])) ?></td>
-                    <td><?= date('d/m/Y', strtotime($pret['pret_datein'])) ?></td>
+                    <td><?= date('d/m/Y', intval($pret['pret_dateout'])) ?></td>
+                    <td><?= date('d/m/Y', intval($pret['pret_datein'])) ?></td>
+
                     <td><a href="../profile/profile_client.php?id=<?= $pret['membre_id'] ?>"><?= $pret['membre_nom'] . ' ' . $pret['membre_prenom'] ?></a></td>
                     <td><?= $pret['pret_etat'] ?></td>
                     <td><?= $pret['commentaire'] ?></td>

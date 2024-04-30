@@ -18,14 +18,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $valeurMat = $_POST["valeurMat"];
     $pret_caution = isset($_POST["pret_caution"]) ? $_POST["pret_caution"] : 0; // Si non défini, définir à 0
     $pret_mode = $_POST["pret_mode"];
-    $pret_datein = $_POST["pret_datein"];
-    $pret_dateout = $_POST["pret_dateout"];
+
+    // Convertir les dates en timestamp Unix
+    $pret_datein = $_POST["pret_datein"]; // Convertir la date en timestamp Unix
+    $pret_dateout = $_POST["pret_dateout"]; // Convertir la date en timestamp Unix*
+
+
+
+
     $commentaire = $_POST["commentaire"];
 
     // Récupérer l'ID du technicien connecté
     $pret_technicien = $_SESSION['user_id'];
     $membre_id = $_POST['client_id'];
-
 
     // Valeur par défaut pour l'attribut "rappel"
     $rappel = 1;
@@ -54,4 +59,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: erreur.php");
     exit();
 }
+
 ?>
