@@ -50,9 +50,14 @@ if (isset($_POST['delete']) && $_POST['delete'] === 'delete') {
         $stmt_last_creation_date->execute();
         $last_creation_date = $stmt_last_creation_date->fetchColumn();
 
-        // Insérer une entrée dans la table sauvgarde_etat_info pour enregistrer la désactivation
+// Si aucune entrée n'a été trouvée, utilisez la date actuelle
+        if (!$last_creation_date) {
+            $last_creation_date = date('Y-m-d H:i:s');
+        }
+
+// Insérer une entrée dans la table sauvgarde_etat_info pour enregistrer la désactivation
         $query_insert_sav_history = "INSERT INTO sauvgarde_etat_info (sav_id, sauvgarde_etat, sauvgarde_avancement, date_creation, date_update, created_by, updated_by) 
-                                    VALUES (:sav_id, :sauvgarde_etat, 'Supprimé', :date_creation, NOW(), :created_by, :updated_by)";
+                            VALUES (:sav_id, :sauvgarde_etat, 'Supprimé', :date_creation, NOW(), :created_by, :updated_by)";
         $stmt_insert_sav_history = $connexion->prepare($query_insert_sav_history);
         $stmt_insert_sav_history->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
         $stmt_insert_sav_history->bindParam(':sauvgarde_etat', $sav_info['sav_etats'], PDO::PARAM_INT);
@@ -60,6 +65,7 @@ if (isset($_POST['delete']) && $_POST['delete'] === 'delete') {
         $stmt_insert_sav_history->bindParam(':created_by', $sav_info['sav_technicien'], PDO::PARAM_INT); // Utiliser l'ID de la personne qui a créé le SAV
         $stmt_insert_sav_history->bindParam(':updated_by', $_SESSION['user_id'], PDO::PARAM_INT); // Utiliser l'ID de la personne connectée
         $stmt_insert_sav_history->execute();
+
 
         // Rediriger vers la page d'accueil après "suppression"
         header('Location: sav.php');
@@ -120,6 +126,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_created_by->execute();
             $sav_created_by = $stmt_created_by->fetch(PDO::FETCH_ASSOC);
             $created_by = $sav_created_by['sav_technicien']; // ID de la personne qui a créé le SAV
+
+            $date_creation = date('Y-m-d H:i:s'); // Format MySQL TIMESTAMP
 
 // Insérer un nouvel enregistrement dans la table sauvgarde_etat_info
             $query_insert_new_state = "INSERT INTO sauvgarde_etat_info (sav_id, sauvgarde_etat, sauvgarde_avancement, date_creation, date_update, created_by, updated_by) 
