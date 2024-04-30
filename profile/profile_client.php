@@ -143,6 +143,51 @@ try {
         $stmt_commandes->execute();
         $commandes = $stmt_commandes->fetchAll(PDO::FETCH_ASSOC);
 
+        // Requête SQL pour récupérer les prêts du client
+        $query_prets = "
+    SELECT pret_id, pret_materiel, valeurMat, pret_caution, pret_mode, pret_datein, pret_dateout, commentaire, technicien.membre_nom AS technicien_nom, technicien.membre_prenom AS technicien_prenom
+    FROM pret
+    JOIN membres AS technicien ON pret.pret_technicien = technicien.membre_id
+    WHERE pret.pret_active = 1 AND pret.membre_id = :id";
+
+
+        // Préparation de la requête SQL pour les prêts
+        $stmt_prets = $db->prepare($query_prets);
+        $stmt_prets->bindParam(':id', $client_id, PDO::PARAM_INT);
+        $stmt_prets->execute();
+        $prets = $stmt_prets->fetchAll(PDO::FETCH_ASSOC);
+
+// Vérification si des prêts sont disponibles
+        if (!empty($prets)) {
+            // Affichage des prêts
+            echo "<h2>Prêts en cours</h2>";
+            echo "<div class='row'>";
+            foreach ($prets as $pret) {
+                echo "<div class='col-md-6'>";
+                echo "<div class='card mb-3'>";
+                echo "<div class='card-body'>";
+                echo "<h5 class='card-title'>Matériel : " . $pret['pret_materiel'] . "</h5>";
+                echo "<p class='card-text'>Valeur du matériel : " . $pret['valeurMat'] . "€</p>";
+                echo "<p class='card-text'>Caution : " . $pret['pret_caution'] . "€</p>";
+                echo "<p class='card-text'>Mode de paiement : " . $pret['pret_mode'] . "</p>";
+                echo "<p class='card-text'>Date de prêt : " . date('d/m/Y', strtotime($pret['pret_datein'])) . "</p>";
+                echo "<p class='card-text'>Date de retour : " . date('d/m/Y', strtotime($pret['pret_dateout'])) . "</p>";
+                echo "<p class='card-text'>Commentaire : " . $pret['commentaire'] . "</p>";
+                echo "<p class='card-text'>Technicien : " . $pret['technicien_nom'] . " " . $pret['technicien_prenom'] . "</p>";
+                echo "<a href='../pret/modifier_pret.php?id=" . $pret['pret_id'] . "' class='btn btn-primary'>Modifier</a>";
+                echo "<a href='../pret/supprimer_pret.php?id=" . $pret['pret_id'] . "' class='btn btn-primary'>Supprimer</a>";
+
+                echo "</div>";
+                echo "</div>";
+                echo "</div>";
+            }
+            echo "</div>";
+        } else {
+            echo "<p>Aucun prêt en cours pour ce client.</p>";
+        }
+
+
+
         // Vérification si des commandes sont disponibles
         if(!empty($commandes)) {
             // Affichage des commandes
@@ -187,6 +232,8 @@ if(isset($_POST['action']) && $_POST['action'] === 'supprimer' && isset($_POST['
     echo "Le bon d'intervention a été supprimé avec succès.";
     exit; // Arrêter le script après la réponse AJAX
 }
+
+
 ?>
 
 

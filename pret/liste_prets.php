@@ -18,6 +18,7 @@ $query = "
     SELECT p.pret_id, p.pret_materiel, p.pret_caution, p.pret_datein, p.pret_dateout, p.membre_id, m.membre_nom, m.membre_prenom, p.pret_etat, p.commentaire
     FROM pret p
     INNER JOIN membres m ON p.membre_id = m.membre_id
+    WHERE p.pret_active = 1
     ORDER BY p.pret_dateout DESC"; // Tri par date de sortie du prêt, du plus récent au plus ancien
 
 // Préparation et exécution de la requête
