@@ -96,7 +96,9 @@ $commande_etat = $req->fetchAll();
                             <p class="card-text">Date de livraison souhaitée: <?= date('d/m/Y', $commande['cmd_dateSouhait']) ?></p>
                             <p class="card-text">Etat: <?= $commande['commande_etat'] ?></p>
                             <p class="card-text">Technicien: <?= $commande['nom_livreur'] ?></p>
-                            <a href="modifier_commande.php?id=<?= $commande['cmd_id'] ?>" class="btn btn-primary">Modifier</a>
+                            <?php if ($commande['cmd_etat'] == 1 || $commande['cmd_etat'] == 2 || $commande['cmd_etat'] == 3 || $commande['cmd_etat'] == 4): ?>
+                                <a href="modifier_commande.php?id=<?= $commande['cmd_id'] ?>" class="btn btn-primary">Modifier</a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

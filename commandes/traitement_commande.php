@@ -153,7 +153,7 @@ function sendEmail($client_nom, $client_prenom,$pvTTC, $technicien_email,$techni
         $mail->isHTML(false);
         $mail->Subject = $subject;
         $mail->Body = $body;
-
+        $mail->addAttachment('../conditions-generales-de-vente-2024.pdf');
         $mail->send();
         return true;
     } catch (Exception $e) {

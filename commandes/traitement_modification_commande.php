@@ -128,15 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $pvTTC = $produit[6];
         $etatProduit = $produit[8];
 
-        var_dump($produit);
-        
-
-         //on récupère l'id du fournisseur
-         /*$stmt = $pdo->prepare("SELECT DISTINCT idFournisseur FROM fournisseur WHERE nomFournisseur = :fournisseur");
-         $stmt->bindValue(':fournisseur', $fournisseur);
-         $stmt->execute();
-         $idFournisseur = $stmt->fetchColumn();*/
-
+        //var_dump($produit);
 
         $stmt = $pdo->prepare("SELECT * FROM commande_produit WHERE reference = :reference AND id_commande = :idCommande");
         $stmt->bindValue(':reference', $reference);
@@ -185,7 +177,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 function sendEmail($idClient, $mail_client,$client_nom, $client_prenom,$pvTTC, $technicien_email,$technicien_nom,$technicien_prenom, $date_livraison, $date_creation,$dateSouhait,$etat_commande,$isClient) {
     
-    if($isClient){ //on lui envoie un mail pour lui dire que sa commande a été livré
+    if($isClient){ //on lui envoie un mail pour lui dire que sa commande lui sera livrée 
+
         $subject = "=?UTF-8?B?" . base64_encode("Livraison de votre commande") . "?="; // Encodage du sujet
         
         $body = "Bonjour $client_nom $client_prenom,\n\n";
@@ -214,9 +207,8 @@ function sendEmail($idClient, $mail_client,$client_nom, $client_prenom,$pvTTC, $
         $body .= "A2MI";
     }
     try {
-        $mail = new PHPMailer(true);
-
         // Paramètres du serveur SMTP
+        $mail = new PHPMailer(true);
         $mail->isSMTP();
 
         $mail->Host = SMTP_HOST;
@@ -240,6 +232,7 @@ function sendEmail($idClient, $mail_client,$client_nom, $client_prenom,$pvTTC, $
         $mail->Subject = $subject;
         $mail->Body = $body;
 
+        $mail->addAttachment('../conditions-generales-de-vente-2024.pdf');
         $mail->send();
         return true;
     } catch (Exception $e) {
