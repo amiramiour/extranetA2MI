@@ -2,6 +2,8 @@
 
 session_start();
 include '../ConnexionBD.php';
+require_once '../config.php';
+
 
 // Inclure la classe PHPMailer
 require '../vendor/autoload.php';
@@ -174,15 +176,15 @@ function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_emai
 
         // Paramètres du serveur SMTP
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = SMTP_HOST;
         $mail->SMTPAuth = true;
-        $mail->Username = 'masdouarania02@gmail.com';  // Adresse email de l'expéditeur
-        $mail->Password = 'wmeffiafffoqvkvl';           // Mot de passe de l'expéditeur
-        $mail->SMTPSecure = 'tls';
-        $mail->Port = 587;
+        $mail->Username = SMTP_USERNAME;  // Adresse email de l'expéditeur
+        $mail->Password = SMTP_PASSWORD;           // Mot de passe de l'expéditeur
+        $mail->SMTPSecure = SMTP_SECURE;
+        $mail->Port = SMTP_PORT;
 
         // Destinataires
-        $mail->setFrom('masdouarania02@gmail.com', 'Votre société');
+        $mail->setFrom(SENDER_EMAIL, SENDER_NAME);
         if ($is_client) {
             $mail->addAddress($client_email);    // Adresse e-mail du client
         } else {

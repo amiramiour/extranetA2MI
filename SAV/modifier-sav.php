@@ -11,6 +11,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION[
 // Inclure le fichier de connexion à la base de données
 require_once '../ConnexionBD.php';
 require '../vendor/autoload.php';
+require_once '../config.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -125,7 +126,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_created_by->execute();
             $sav_info = $stmt_created_by->fetch(PDO::FETCH_ASSOC);
             $created_by = $sav_info['sav_technicien']; // ID de la personne qui a créé le SAV
-            $date_creation = date('Y-m-d H:i:s', $sav_info['sav_datein']); // Formatage de la date de création
+            $date_creation =  $sav_info['sav_datein'];
 
 // Insérer un nouvel enregistrement dans la table sauvgarde_etat_info
             $query_insert_new_state = "INSERT INTO sauvgarde_etat_info (sav_id, sauvgarde_etat, sauvgarde_avancement, date_creation, date_update, created_by, updated_by) 
@@ -229,15 +230,14 @@ function sendSAVModificationEmail($to_email, $client_nom, $client_prenom, $techn
 
         // Paramètres du serveur SMTP
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = SMTP_HOST;
         $mail->SMTPAuth = true;
-        $mail->Username = 'masdouarania02@gmail.com';  // Adresse email de l'expéditeur
-        $mail->Password = 'wmeffiafffoqvkvl';           // Mot de passe de l'expéditeur
-        $mail->SMTPSecure = 'tls';
-        $mail->Port = 587;
-
+        $mail->Username = SMTP_USERNAME;  // Adresse email de l'expéditeur
+        $mail->Password = SMTP_PASSWORD;           // Mot de passe de l'expéditeur
+        $mail->SMTPSecure = SMTP_SECURE;
+        $mail->Port = SMTP_PORT;
         // Destinataire
-        $mail->setFrom('masdouarania02@gmail.com', 'A2MI informatique');
+        $mail->setFrom(SENDER_EMAIL, SENDER_NAME);
         $mail->addAddress($to_email);
 
         // Contenu de l'e-mail
