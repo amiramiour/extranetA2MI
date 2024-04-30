@@ -172,8 +172,9 @@ WHERE
                 <td><?= $row['client_entreprise'] ?></td>
                 <td><?= $row['sav_accessoire'] ?></td>
                 <td><?= $row['sauvgarde_avancement'] ?></td>
-                <td><?= date('d/m/Y', intval($row['sav_datein'])) ?></td>
-                <td><?= date('d/m/Y', intval($row['sav_dateout'])) ?></td>
+                <td><?= date('d/m/Y', strtotime(str_replace('/', '-', $row['sav_datein']))) ?></td>
+                <td><?= date('d/m/Y', strtotime(str_replace('/', '-', $row['sav_dateout']))) ?></td>
+                <td><?= $row['sav_envoi'] ?></td>
                 <td><?= $row['sav_envoi'] ?></td>
                 <td><?= $row['sav_forfait'] ?></td>
                 <td><?= $row['sav_garantie'] ?></td>
