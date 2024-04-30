@@ -90,10 +90,10 @@ $commande_etat = $req->fetchAll();
                         <div class="card-header"><?= $commande['cmd_reference'] ?></div>
                         <div class="card-body">
                             <h5 class="card-title"><?= $commande['cmd_designation'] ?></h5>
-                            <p class="card-text">Date de création: <?= date('d/m/Y H:i:s', $commande['cmd_datein']) ?></p>
-                            <p class="card-text">Date de livraison: <?= date('d/m/Y H:i:s', $commande['cmd_dateout']) ?></p>
+                            <p class="card-text">Date de création: <?= date('d/m/Y', $commande['cmd_datein']) ?></p>
+                            <p class="card-text">Date de livraison: <?= date('d/m/Y', $commande['cmd_dateout']) ?></p>
                             <p class="card-text">Prix de vente TTC: <?= $commande['cmd_prixventettc'] ?></p>
-                            <p class="card-text">Date de livraison souhaitée: <?= date('d/m/Y H:i:s', $commande['cmd_dateSouhait']) ?></p>
+                            <p class="card-text">Date de livraison souhaitée: <?= date('d/m/Y', $commande['cmd_dateSouhait']) ?></p>
                             <p class="card-text">Etat: <?= $commande['commande_etat'] ?></p>
                             <p class="card-text">Technicien: <?= $commande['nom_livreur'] ?></p>
                             <a href="modifier_commande.php?id=<?= $commande['cmd_id'] ?>" class="btn btn-primary">Modifier</a>

@@ -118,7 +118,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //récupérer les produits de la commande à partir du formulaire, si le produit existe déjà : il sera mis à jour, sinon il sera ajouté
     foreach ($_POST['dynamic'] as $produit) {
         $reference = $produit[0];
-        //echo($reference); 
         $designation = $produit[1];
         $fournisseur = $produit[2];
         $paHT = $produit[3];
@@ -129,11 +128,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $pvTTC = $produit[6];
         $etatProduit = $produit[8];
 
+        var_dump($produit);
+        
+
          //on récupère l'id du fournisseur
-         $stmt = $pdo->prepare("SELECT DISTINCT idFournisseur FROM fournisseur WHERE nomFournisseur = :fournisseur");
+         /*$stmt = $pdo->prepare("SELECT DISTINCT idFournisseur FROM fournisseur WHERE nomFournisseur = :fournisseur");
          $stmt->bindValue(':fournisseur', $fournisseur);
          $stmt->execute();
-         $idFournisseur = $stmt->fetchColumn();
+         $idFournisseur = $stmt->fetchColumn();*/
 
 
         $stmt = $pdo->prepare("SELECT * FROM commande_produit WHERE reference = :reference AND id_commande = :idCommande");
@@ -143,7 +145,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $produitExiste = $stmt->fetch();
 
         if ($produitExiste) {
-            echo "produit existe";
+            //echo "produit existe";
             $stmt = $pdo->prepare("UPDATE commande_produit 
                                    SET reference = :reference, 
                                        designation = :designation, 
@@ -164,12 +166,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bindValue(':pvTTC', $pvTTC);
             $stmt->bindValue(':etatProduit', $etatProduit);
             $stmt->bindValue(':idCommande', $idCommande);
-            $stmt->bindValue(':fournisseur', $idFournisseur);
+            $stmt->bindValue(':fournisseur', $fournisseur);
 
             $stmt->execute();
         } else {
             $stmt = $pdo->prepare("INSERT INTO commande_produit (reference, designation, paHT, marge, pvHT, pvTTC, etat, id_commande, fournisseur) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$reference, $designation, $paHT, $marge, $pvHT, $pvTTC, $etatProduit, $idCommande, $idFournisseur]);
+            $stmt->execute([$reference, $designation, $paHT, $marge, $pvHT, $pvTTC, $etatProduit, $idCommande, $fournisseur]);
         }
     }
 

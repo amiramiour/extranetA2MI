@@ -4,16 +4,23 @@ session_start();
 // Vérifier si l'utilisateur est connecté et est un technicien
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail'])  || $_SESSION['user_type'] === 'client') {
     // Si l'utilisateur n'est pas connecté ou est un client, redirigez-le ou affichez un message d'erreur
-    header("Location: ../connexion.php");
+    header("Location: ../connexion/connexion.php");
     exit;
 }
 
 include '../ConnexionBD.php';
 $pdo = connexionbdd();
 
+include '../navbar.php';
+
 //requete pour récupérer les fournisseurs
+
 $req = $pdo->query("SELECT * FROM fournisseur");
 $fournisseurs = $req->fetchAll(PDO::FETCH_ASSOC);
+
+$jsonFournisseurs = json_encode($fournisseurs);
+
+file_put_contents('fournisseurs.json', $jsonFournisseurs);
 
 $idCommande = $_GET['id'];
 
@@ -70,7 +77,7 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
                     <input type="text" name="dynamic['<?php echo($i) ?>'][]" id="designation" value="<?php echo $unproduit['designation'] ?>" required>&nbsp;&nbsp;|&nbsp;&nbsp;
                     
                     <label for="fournisseur">Fournisseur </label>
-                    <select name="dynamic['0'][]" required>
+                    <select name="dynamic['<?php echo($i) ?>'][]" required>
                             <?php
                             $jsonData = file_get_contents('fournisseurs.json');
                             $fournisseurs = json_decode($jsonData, true);
@@ -162,8 +169,10 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
             html += '<label for="fournisseur">Fournisseur* </label>';
             html += '<select name="dynamic[' + i + '][]" required>';
             <?php
+            $jsonData = file_get_contents('fournisseurs.json');
+            $fournisseurs = json_decode($jsonData, true);
             foreach ($fournisseurs as $fournisseur) { ?>
-                html += '<option value="<?php echo $fournisseur['nomFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>';
+                html += '<option value="<?php echo $fournisseur['idFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>';
             <?php } ?>
             html += '</select>';
             html += '<br><br>';
