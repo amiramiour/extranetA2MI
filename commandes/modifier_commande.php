@@ -64,30 +64,38 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
                     <label><b>Produit n°<?php echo $i ?></b></label><br>
 
                     <label for="reference">Référence </label> 
-                    <input type="text" name="dynamic['<?php echo($i) ?>'][]" id="reference" value="<?php echo $unproduit['reference'] ?>" readonly>&nbsp;&nbsp;|&nbsp;&nbsp;        
+                    <input type="text" name="dynamic['<?php echo($i) ?>'][]" id="reference" value="<?php echo $unproduit['reference'] ?>" required autofocus>&nbsp;&nbsp;|&nbsp;&nbsp;        
                     
                     <label for="designation">Désignation </label>
-                    <input type="text" name="dynamic['<?php echo($i) ?>'][]" id="designation" value="<?php echo $unproduit['designation'] ?>"readonly>&nbsp;&nbsp;|&nbsp;&nbsp;
+                    <input type="text" name="dynamic['<?php echo($i) ?>'][]" id="designation" value="<?php echo $unproduit['designation'] ?>" required>&nbsp;&nbsp;|&nbsp;&nbsp;
                     
                     <label for="fournisseur">Fournisseur </label>
-                    <input type="text" name="dynamic['<?php echo($i) ?>'][]" id="fournisseur" value="<?php echo $unproduit['nomFournisseur'] ?>"readonly>
-                    
+                    <select name="dynamic['0'][]" required>
+                            <?php
+                            $jsonData = file_get_contents('fournisseurs.json');
+                            $fournisseurs = json_decode($jsonData, true);
+                            foreach ($fournisseurs as $fournisseur) {?>
+                                <option value="<?php echo $fournisseur['idFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>
+                                <?php
+                            }?>
+                    </select>
                     <br><br>
-                    
                     <label >Pa HT </label>
-                    <input type="text" name="dynamic['<?php echo($i) ?>'][]" SIZE="2" id="paHT<?php echo($i) ?>" value="<?php echo $unproduit['paHT'] ?>" readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <input type="text" name="dynamic['<?php echo($i) ?>'][]" SIZE="2" id="paHT<?php echo($i)?>" value="<?php echo $unproduit['paHT'] ?>" onblur="calculerenplus(<?php echo($i)?>)" required autofocus> € &nbsp;&nbsp;|&nbsp;&nbsp;
                         
                     <label>Marge </label>
-                    <input type="text" SIZE="2" name="dynamic['<?php echo($i) ?>'][]" id="marge<?php echo($i) ?>" value="<?php echo $unproduit['marge'] ?>" readonly> % &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <input type="text" SIZE="2" name="dynamic['<?php echo($i) ?>'][]" id="marge<?php echo($i) ?>" value="<?php echo $unproduit['marge'] ?>" onblur="calculerenplus(<?php echo($i)?>)" required autofocus> % &nbsp;&nbsp;|&nbsp;&nbsp;
                     
                     <label>Pv HT </label>
-                    <input type="text" SIZE="2"  name="dynamic['<?php echo($i) ?>'][]" id="pvHT<?php echo($i) ?>" value="<?php echo $unproduit['pvHT'] ?>" readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <input type="text" SIZE="2"  name="dynamic['<?php echo($i) ?>'][]" id="pvHT<?php echo($i) ?>" value="<?php echo $unproduit['pvHT'] ?>" required autofocus readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
                         
                     <label>Pv TTC </label>
-                    <input type="text" SIZE="2" name="dynamic['<?php echo($i) ?>'][]" id="pvTTC<?php echo($i) ?>" value="<?php echo $unproduit['pvTTC'] ?>" readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <input type="text" SIZE="2" name="dynamic['<?php echo($i) ?>'][]" id="pvTTC<?php echo($i) ?>" value="<?php echo $unproduit['pvTTC'] ?>" required autofocus readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
                     
                     <label>Montant marge  </label>
                     <input type="text"  name="dynamic['<?php echo($i) ?>'][]" SIZE="2" id="margeM<?php echo $i ?>" value="<?php echo $unproduit['pvHT']-$unproduit['paHT'] ?>"  readonly> € <br />
+
+                    <div id="choixArrondi<?php echo($i) ?>"></div>
 
                     <label>Statut produit</label> 
                     <select name="dynamic['<?php echo($i) ?>'][]" required>
