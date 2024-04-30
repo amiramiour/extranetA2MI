@@ -22,6 +22,8 @@ $client_id = $_GET['client_id']; //la on recupere l'id passé dans l'url
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
+<?php include('../navbar.php'); ?>
+
 <div class="container">
     <h2 class="text-center mb-4">Formulaire de création d'un SAV client</h2>
     <form action="traitement-sav.php" method="post">

@@ -30,17 +30,17 @@ if (isset($_POST['delete']) && $_POST['delete'] === 'delete') {
         $connexion = connexionbdd();
 
         // Récupérer les informations du SAV avant la désactivation
-        $query_sav_info = "SELECT s.sav_etats, e.etat_intitule, s.sav_technicien FROM sav s INNER JOIN sav_etats e ON s.sav_etats = e.id_etat_sav WHERE s.sav_id = :sav_id";
+        $query_sav_info = "SELECT s.sav_etats, s.sav_technicien, e.etat_intitule FROM sav s INNER JOIN sav_etats e ON s.sav_etats = e.id_etat_sav WHERE s.sav_id = :sav_id";
         $stmt_sav_info = $connexion->prepare($query_sav_info);
         $stmt_sav_info->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
         $stmt_sav_info->execute();
         $sav_info = $stmt_sav_info->fetch(PDO::FETCH_ASSOC);
 
+
         // Mettre à jour le champ active à 0 dans la table SAV
-        $query_delete_sav = "UPDATE sav SET active = 0, date_update = NOW(), updated_by = :updated_by WHERE sav_id = :sav_id";
+        $query_delete_sav = "UPDATE sav SET active = 0 WHERE sav_id = :sav_id";
         $stmt_delete_sav = $connexion->prepare($query_delete_sav);
         $stmt_delete_sav->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
-        $stmt_delete_sav->bindParam(':updated_by', $_SESSION['user_id'], PDO::PARAM_INT); // Utiliser l'ID de la personne connectée
         $stmt_delete_sav->execute();
 
         // Récupérer la date de création de la dernière entrée dans la table sauvgarde_etat_info
@@ -50,9 +50,14 @@ if (isset($_POST['delete']) && $_POST['delete'] === 'delete') {
         $stmt_last_creation_date->execute();
         $last_creation_date = $stmt_last_creation_date->fetchColumn();
 
-        // Insérer une entrée dans la table sauvgarde_etat_info pour enregistrer la désactivation
+// Si aucune entrée n'a été trouvée, utilisez la date actuelle
+        if (!$last_creation_date) {
+            $last_creation_date = date('Y-m-d H:i:s');
+        }
+
+// Insérer une entrée dans la table sauvgarde_etat_info pour enregistrer la désactivation
         $query_insert_sav_history = "INSERT INTO sauvgarde_etat_info (sav_id, sauvgarde_etat, sauvgarde_avancement, date_creation, date_update, created_by, updated_by) 
-                                    VALUES (:sav_id, :sauvgarde_etat, 'Supprimé', :date_creation, NOW(), :created_by, :updated_by)";
+                            VALUES (:sav_id, :sauvgarde_etat, 'Supprimé', :date_creation, NOW(), :created_by, :updated_by)";
         $stmt_insert_sav_history = $connexion->prepare($query_insert_sav_history);
         $stmt_insert_sav_history->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
         $stmt_insert_sav_history->bindParam(':sauvgarde_etat', $sav_info['sav_etats'], PDO::PARAM_INT);
@@ -60,6 +65,7 @@ if (isset($_POST['delete']) && $_POST['delete'] === 'delete') {
         $stmt_insert_sav_history->bindParam(':created_by', $sav_info['sav_technicien'], PDO::PARAM_INT); // Utiliser l'ID de la personne qui a créé le SAV
         $stmt_insert_sav_history->bindParam(':updated_by', $_SESSION['user_id'], PDO::PARAM_INT); // Utiliser l'ID de la personne connectée
         $stmt_insert_sav_history->execute();
+
 
         // Rediriger vers la page d'accueil après "suppression"
         header('Location: sav.php');
@@ -113,25 +119,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_etat_label->bindParam(':nouvel_etat_id', $nouvel_etat_id, PDO::PARAM_INT);
             $stmt_etat_label->execute();
             $etat_label = $stmt_etat_label->fetchColumn();
-            // Récupérer l'ID de la personne qui a créé le SAV
-            $query_created_by = "SELECT sav_technicien FROM sav WHERE sav_id = :sav_id";
+            $query_created_by = "SELECT sav_technicien, sav_datein FROM sav WHERE sav_id = :sav_id";
             $stmt_created_by = $connexion->prepare($query_created_by);
             $stmt_created_by->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
             $stmt_created_by->execute();
-            $sav_created_by = $stmt_created_by->fetch(PDO::FETCH_ASSOC);
-            $created_by = $sav_created_by['sav_technicien']; // ID de la personne qui a créé le SAV
+            $sav_info = $stmt_created_by->fetch(PDO::FETCH_ASSOC);
+            $created_by = $sav_info['sav_technicien']; // ID de la personne qui a créé le SAV
+            $date_creation = date('Y-m-d H:i:s', $sav_info['sav_datein']); // Formatage de la date de création
 
 // Insérer un nouvel enregistrement dans la table sauvgarde_etat_info
             $query_insert_new_state = "INSERT INTO sauvgarde_etat_info (sav_id, sauvgarde_etat, sauvgarde_avancement, date_creation, date_update, created_by, updated_by) 
-                            VALUES (:sav_id, :nouvel_etat_id, :nouvel_avancement, NOW(), NOW(), :created_by, :updated_by)";
+                            VALUES (:sav_id, :nouvel_etat_id, :nouvel_avancement, :date_creation, NOW(), :created_by, :updated_by)";
             $stmt_insert_new_state = $connexion->prepare($query_insert_new_state);
             $stmt_insert_new_state->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
             $stmt_insert_new_state->bindParam(':nouvel_etat_id', $nouvel_etat_id, PDO::PARAM_INT);
             $stmt_insert_new_state->bindParam(':nouvel_avancement', $nouvel_avancement, PDO::PARAM_STR);
+            $stmt_insert_new_state->bindParam(':date_creation', $date_creation, PDO::PARAM_STR);
             $stmt_insert_new_state->bindParam(':created_by', $created_by, PDO::PARAM_INT); // Utiliser l'ID de la personne qui a créé le SAV
             $stmt_insert_new_state->bindParam(':updated_by', $sav_technicien_id, PDO::PARAM_INT);
             $stmt_insert_new_state->execute();
-
 
 
             // Récupérer l'ID de la dernière insertion
@@ -261,6 +267,18 @@ function sendSAVModificationEmail($to_email, $client_nom, $client_prenom, $techn
     <title>Modifier SAV</title>
     <!-- Inclure Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/css/bootstrap.min.css">
+    <!-- Ajouter un style personnalisé pour les boutons -->
+    <style>
+        .custom-btn {
+            background-color: #C8356C;
+            border-color: #C8356C;
+        }
+
+        .custom-btn:hover {
+            background-color: #a72a55;
+            border-color: #a72a55;
+        }
+    </style>
 </head>
 
 <body>
@@ -280,7 +298,7 @@ function sendSAVModificationEmail($to_email, $client_nom, $client_prenom, $techn
                 <option value="2" <?= ($sav['sav_etats'] == 2) ? 'selected' : ''; ?>>En cours</option>
                 <option value="1" <?= ($sav['sav_etats'] == 1) ? 'selected' : ''; ?>>En attente</option>
                 <option value="5" <?= ($sav['sav_etats'] == 5) ? 'selected' : ''; ?>>Terminé</option>
-                <option value="4" <?= ($sav['sav_etats'] == 4) ? 'selected' : ''; ?>>Rendu au client</option>
+                <option value="5" <?= ($sav['sav_etats'] == 4) ? 'selected' : ''; ?>>Rendu au client</option>
                 <!-- Ajoutez d'autres états si nécessaire -->
             </select>
         </div>
@@ -289,11 +307,11 @@ function sendSAVModificationEmail($to_email, $client_nom, $client_prenom, $techn
             <!-- Ajoutez l'attribut required pour obliger l'utilisateur à saisir un nouvel avancement -->
             <textarea class="form-control" name="nouvel_avancement" id="nouvel_avancement" rows="3" required></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+        <button type="submit" class="btn btn-primary custom-btn">Enregistrer les modifications</button>
     </form>
     <form action="" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer ce SAV ?');">
         <input type="hidden" name="delete" value="delete">
-        <button type="submit" class="btn btn-danger mt-3">Supprimer ce SAV</button>
+        <button type="submit" class="btn btn-danger mt-3 custom-btn">Supprimer ce SAV</button>
     </form>
     <?php if (isset($error)) : ?>
         <div class="alert alert-danger mt-3" role="alert">
