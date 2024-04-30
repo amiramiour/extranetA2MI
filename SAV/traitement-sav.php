@@ -1,5 +1,6 @@
 <?php
 require_once '../ConnexionBD.php';
+require_once '../config.php';
 
 session_start(); // Démarrer la session
 
@@ -190,15 +191,15 @@ function sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $c
 
         // Paramètres du serveur SMTP
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = SMTP_HOST;
         $mail->SMTPAuth = true;
-        $mail->Username = 'masdouarania02@gmail.com';  // Adresse email de l'expéditeur
-        $mail->Password = 'wmeffiafffoqvkvl';           // Mot de passe de l'expéditeur
-        $mail->SMTPSecure = 'tls';
-        $mail->Port = 587;
+        $mail->Username = SMTP_USERNAME;  // Adresse email de l'expéditeur
+        $mail->Password = SMTP_PASSWORD;           // Mot de passe de l'expéditeur
+        $mail->SMTPSecure = SMTP_SECURE;
+        $mail->Port = SMTP_PORT;
 
         // Destinataires
-        $mail->setFrom('masdouarania02@gmail.com', 'A2MI informatique');
+        $mail->setFrom(SENDER_EMAIL, SENDER_NAME);
         if ($is_client) {
             $mail->addAddress($client_info['membre_mail']);    // Adresse e-mail du client
         } else {
