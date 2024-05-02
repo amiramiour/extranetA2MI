@@ -20,7 +20,7 @@
                 <li class="nav-item">
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Liste fournisseurs</a>
+                    <a class="nav-link" href="/fournisseurs/liste_fournisseurs.php">Liste fournisseurs</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/commandes/commandes.php">Commandes</a>

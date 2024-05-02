@@ -10,6 +10,9 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail'])  || $_SESSION
 
 include '../ConnexionBD.php';
 $pdo = connexionbdd();
+
+include '../navbar.php';
+
 //requete pour récupérer les fournisseurs
 $req = $pdo->query("SELECT * FROM fournisseur");
 $fournisseurs = $req->fetchAll(PDO::FETCH_ASSOC);
@@ -136,6 +139,8 @@ if (isset($_GET['id'])) {
             <input type="text" name="totalMarge" id="margeT" readonly/><br>
 
             <div class="center"><input class="createButton" type="submit" value="Créer" /></div>
+            <br>
+            <div class="center"><input class="createButton" type="button" value="Annuler" onclick="window.history.back()"/>
         </form>
     </div>
     <script>

@@ -20,8 +20,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $pret_mode = $_POST["pret_mode"];
 
     // Convertir les dates en timestamp Unix
-    $pret_datein = $_POST["pret_datein"]; // Convertir la date en timestamp Unix
-    $pret_dateout = $_POST["pret_dateout"]; // Convertir la date en timestamp Unix*
+    $pret_datein = strtotime(str_replace('/', '-', $_POST["pret_datein"]));
+    $pret_dateout = strtotime(str_replace('/', '-', $_POST["pret_dateout"]));
+
+
 
 
 

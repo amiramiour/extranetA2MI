@@ -13,18 +13,21 @@ try {
     // Connexion à la base de données en utilisant la fonction connexionbdd()
     $db = connexionbdd();
 
-    // Préparer la requête SQL pour récupérer les données de sauvgarde_etat_info avec une jointure sur la table membres
+    // Préparer la requête SQL pour récupérer les données de sauvgarde_etat_info avec une jointure sur la table membres et sav_etats
     $query = "
     SELECT 
         sei.*,
         membres_cree.membre_nom AS cree_par,
-        membres_modifie.membre_nom AS modifie_par
+        membres_modifie.membre_nom AS modifie_par,
+        sav_etats.etat_intitule AS etat_nom
     FROM 
         sauvgarde_etat_info sei
     LEFT JOIN 
         membres membres_cree ON sei.created_by = membres_cree.membre_id
     LEFT JOIN 
         membres membres_modifie ON sei.updated_by = membres_modifie.membre_id
+    LEFT JOIN
+        sav_etats ON sei.sauvgarde_etat = sav_etats.id_etat_sav
     ";
 
     // Préparation de la requête SQL
@@ -73,7 +76,7 @@ try {
             <?php foreach ($results as $row) : ?>
                 <tr>
                     <td><?= $row['sav_id'] ?></td>
-                    <td><?= $row['sauvgarde_etat'] ?></td>
+                    <td><?= $row['etat_nom'] ?></td>
                     <td><?= $row['sauvgarde_avancement'] ?></td>
                     <td><?= $row['date_creation'] ?></td>
                     <td><?= $row['date_update'] ?></td>

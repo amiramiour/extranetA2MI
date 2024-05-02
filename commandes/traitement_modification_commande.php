@@ -1,4 +1,5 @@
 <?php 
+require_once '../config.php';
 session_start();
 
 // Vérifier si l'utilisateur est connecté et est un technicien
@@ -12,7 +13,7 @@ include '../ConnexionBD.php';
 $pdo = connexionbdd();
 
 
-require 'C:\wamp64\www\stageA2MI\extranetA2MI\vendor\autoload.php';
+require '../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -117,7 +118,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //récupérer les produits de la commande à partir du formulaire, si le produit existe déjà : il sera mis à jour, sinon il sera ajouté
     foreach ($_POST['dynamic'] as $produit) {
         $reference = $produit[0];
-        //echo($reference); 
         $designation = $produit[1];
         $fournisseur = $produit[2];
         $paHT = $produit[3];
@@ -128,11 +128,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $pvTTC = $produit[6];
         $etatProduit = $produit[8];
 
+        var_dump($produit);
+        
+
          //on récupère l'id du fournisseur
-         $stmt = $pdo->prepare("SELECT DISTINCT idFournisseur FROM fournisseur WHERE nomFournisseur = :fournisseur");
+         /*$stmt = $pdo->prepare("SELECT DISTINCT idFournisseur FROM fournisseur WHERE nomFournisseur = :fournisseur");
          $stmt->bindValue(':fournisseur', $fournisseur);
          $stmt->execute();
-         $idFournisseur = $stmt->fetchColumn();
+         $idFournisseur = $stmt->fetchColumn();*/
 
 
         $stmt = $pdo->prepare("SELECT * FROM commande_produit WHERE reference = :reference AND id_commande = :idCommande");
@@ -142,7 +145,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $produitExiste = $stmt->fetch();
 
         if ($produitExiste) {
-            echo "produit existe";
+            //echo "produit existe";
             $stmt = $pdo->prepare("UPDATE commande_produit 
                                    SET reference = :reference, 
                                        designation = :designation, 
@@ -163,16 +166,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bindValue(':pvTTC', $pvTTC);
             $stmt->bindValue(':etatProduit', $etatProduit);
             $stmt->bindValue(':idCommande', $idCommande);
-            $stmt->bindValue(':fournisseur', $idFournisseur);
+            $stmt->bindValue(':fournisseur', $fournisseur);
 
             $stmt->execute();
         } else {
             $stmt = $pdo->prepare("INSERT INTO commande_produit (reference, designation, paHT, marge, pvHT, pvTTC, etat, id_commande, fournisseur) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$reference, $designation, $paHT, $marge, $pvHT, $pvTTC, $etatProduit, $idCommande, $idFournisseur]);
+            $stmt->execute([$reference, $designation, $paHT, $marge, $pvHT, $pvTTC, $etatProduit, $idCommande, $fournisseur]);
         }
     }
 
-    if($etatC == '5') { //si la commande est livrée on envoie un mail au client 
+    if($etatC == '4') { //si la commande est livrée on envoie un mail au client 
         sendEmail($idClient,$client["membre_mail"],$client['membre_nom'], $client['membre_prenom'], $totalTTC, $technicien['membre_mail'], $technicien['membre_nom'], $technicien['membre_prenom'], date('d/m/Y',$dateP) , date('d/m/Y'), date('d/m/Y', $dateS) , $etat_commande,true);
     }
 
@@ -186,7 +189,7 @@ function sendEmail($idClient, $mail_client,$client_nom, $client_prenom,$pvTTC, $
         $subject = "=?UTF-8?B?" . base64_encode("Livraison de votre commande") . "?="; // Encodage du sujet
         
         $body = "Bonjour $client_nom $client_prenom,\n\n";
-        $body .= "Votre commande a été livrée\n\n";
+        $body .= "Votre commande vous sera livrée\n\n";
         $body .= "Prix total TTC : $pvTTC   €\n\n";
         $body .= "Technicien : $technicien_nom $technicien_prenom \n\n";
         $body .= "Date de création : $date_creation \n\n";
@@ -200,7 +203,7 @@ function sendEmail($idClient, $mail_client,$client_nom, $client_prenom,$pvTTC, $
         $subject = "=?UTF-8?B?" . base64_encode("Modification de la commande") . "?="; // Encodage du sujet
         
         $body = "Bonjour,\n\n";
-        $body .= "La commande de : $client_nom $client_prenom a été modifié\n\n";
+        $body .= "La commande de : $client_nom $client_prenom a été modifiée\n\n";
         $body .= "Prix total TTC : $pvTTC   €\n\n";
         $body .= "Technicien : $technicien_nom $technicien_prenom \n\n";
         $body .= "Date de création : $date_creation \n\n";
@@ -216,15 +219,15 @@ function sendEmail($idClient, $mail_client,$client_nom, $client_prenom,$pvTTC, $
         // Paramètres du serveur SMTP
         $mail->isSMTP();
 
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = SMTP_HOST;
         $mail->SMTPAuth = true;
-        $mail->Username = 'masdouarania02@gmail.com';  // Adresse email de l'expéditeur
-        $mail->Password = 'wmeffiafffoqvkvl';           // Mot de passe de l'expéditeur
-        $mail->SMTPSecure = 'tls';
-        $mail->Port = 587;
+        $mail->Username = SMTP_USERNAME;  // Adresse email de l'expéditeur
+        $mail->Password = SMTP_PASSWORD;           // Mot de passe de l'expéditeur
+        $mail->SMTPSecure = SMTP_SECURE;
+        $mail->Port = SMTP_PORT;
 
         // Destinataire
-        $mail->setFrom('masdouarania02@gmail.com', 'A2MI');  
+        $mail->setFrom(SENDER_EMAIL, SENDER_NAME);  
         if ($isClient) {
             $mail->addAddress($mail_client);    // Adresse e-mail du client
         } else {

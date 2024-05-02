@@ -1,4 +1,5 @@
 <?php
+require_once '../config.php';
 session_start();
 // Vérifier si l'utilisateur est connecté et est un technicien
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail'])  || $_SESSION['user_type'] === 'client') {
@@ -10,7 +11,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail'])  || $_SESSION
 include '../ConnexionBD.php';
 $pdo = connexionbdd();
 
-require 'C:\wamp64\www\stageA2MI\extranetA2MI\vendor\autoload.php';
+require '../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -136,15 +137,15 @@ function sendEmail($client_nom, $client_prenom,$pvTTC, $technicien_email,$techni
         // Paramètres du serveur SMTP
         $mail->isSMTP();
 
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = SMTP_HOST;
         $mail->SMTPAuth = true;
-        $mail->Username = 'masdouarania02@gmail.com';  // Adresse email de l'expéditeur
-        $mail->Password = 'wmeffiafffoqvkvl';           // Mot de passe de l'expéditeur
-        $mail->SMTPSecure = 'tls';
-        $mail->Port = 587;
+        $mail->Username = SMTP_USERNAME;  // Adresse email de l'expéditeur
+        $mail->Password = SMTP_PASSWORD;           // Mot de passe de l'expéditeur
+        $mail->SMTPSecure = SMTP_SECURE;
+        $mail->Port = SMTP_PORT;
 
         // Destinataire
-        $mail->setFrom('masdouarania02@gmail.com', 'A2MI');  
+        $mail->setFrom(SENDER_EMAIL, SENDER_NAME);  
         $mail->addAddress($technicien_email); 
 
         // Contenu de l'email

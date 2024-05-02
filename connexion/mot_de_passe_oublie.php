@@ -1,9 +1,11 @@
 <?php
 // Inclure le fichier de connexion à la base de données
 include('../ConnexionBD.php');
-require 'C:\wamp64\www\A2MI2024\extranetA2MI\vendor\autoload.php';
+require '../vendor/autoload.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
 // Initialiser les variables
 $email = "";
 $message = "";
