@@ -1,68 +1,171 @@
 <?php
-session_start();
+session_start(); // Démarrer la session si ce n'est pas déjà fait
 
-// Vérifier si l'utilisateur est connecté et est un technicien
+// Inclure la connexion à la base de données
+include('../ConnexionBD.php');
+
+// Inclure la classe PHPMailer
+require '../vendor/autoload.php';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Vérifier si l'utilisateur est connecté en tant qu'administrateur ou sous-administrateur
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'sousadmin')) {
-    // Si l'utilisateur n'est pas connecté en tant qu'admin ou sous-admin, redirigez-le ou affichez un message d'erreur
-    header("Location: ../connexion.php");
-    exit;
+    // Redirection vers une page d'erreur si l'utilisateur n'est pas connecté en tant qu'admin ou sous-admin
+    header('Location: ../index.php');
+    exit();
 }
 
-// Vérifier si le formulaire a été soumis et si l'identifiant du prêt est défini
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pret_id'])) {
-    // Récupérer les valeurs des champs du formulaire
-    $pret_id = $_POST['pret_id'];
-    $caution = $_POST['caution'];
-    // Mode de paiement est en lecture seule, donc pas besoin de récupérer sa valeur
-    //$date_rendu = $_POST['date_rendu'];
-    $commentaire = $_POST['commentaire'];
+// Récupération de l'ID et de l'adresse e-mail du technicien à partir de la session
+$technicien_id = $_SESSION['user_id'];
+$technicien_email = $_SESSION['user_mail'];
 
+// Vérifier si les données du formulaire ont été soumises
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $db = connexionbdd();
+    // Récupérer les informations du client
+    $query_client = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :membre_id";
+    $stmt_client = $db->prepare($query_client);
+    $stmt_client->bindParam(':membre_id', $membre_id);
+    $stmt_client->execute();
+    $client_info = $stmt_client->fetch(PDO::FETCH_ASSOC);
 
+    // Récupérer les données du formulaire
+    $pret_materiel = $_POST["pret_materiel"];
+    $valeurMat = $_POST["valeurMat"];
+    $pret_caution = isset($_POST["pret_caution"]) ? $_POST["pret_caution"] : 0; // Si non défini, définir à 0
+    $pret_mode = $_POST["pret_mode"];
 
-// Convertir la date au format UNIX TIMESTAMP
-    //$date_rendu_timestamp = strtotime($date_rendu);
+    // Convertir les dates en timestamp Unix
+    $pret_datein = strtotime(str_replace('/', '-', $_POST["pret_datein"]));
+    $pret_dateout = strtotime(str_replace('/', '-', $_POST["pret_dateout"]));
 
-    $date_rendu = strtotime(str_replace('/', '-', $_POST["date_rendu"]));
+    $commentaire = $_POST["commentaire"];
+    $membre_id = $_POST['client_id'];
 
+    // Récupérer l'ID du technicien connecté
+    $pret_technicien = $_SESSION['user_id'];
 
+    // Valeur par défaut pour l'attribut "rappel"
+    $rappel = 1;
 
+    // Valeur par défaut pour l'attribut "pret_etat"
+    $pret_etat = 1;
 
-    // Inclure la connexion à la base de données
-    include('../ConnexionBD.php');
+    // Etablir la connexion à la base de données
 
+    // Préparer la requête SQL pour insérer les données du prêt
+    $sql = "INSERT INTO pret (pret_materiel, pret_caution, pret_mode, pret_datein, pret_dateout, membre_id, pret_technicien, commentaire, valeurMat, rappel, pret_etat) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    // Préparer la déclaration SQL
+    $stmt = $db->prepare($sql);
+
+    // Exécuter la requête avec les valeurs des paramètres
+    $stmt->execute([$pret_materiel, $pret_caution, $pret_mode, $pret_datein, $pret_dateout, $membre_id, $pret_technicien, $commentaire, $valeurMat, $rappel, $pret_etat]);
+
+    // Compteur de succès et d'erreurs
+    $success_count = 0;
+    $error_count = 0;
+
+    // Envoi d'e-mails de confirmation au client et au technicien
+    if (sendPretCreationEmail($membre_id, $technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], true)) {
+        $success_count++;
+    } else {
+        $error_count++;
+    }
+    if (sendPretCreationEmail($technicien_id, $technicien_email, $client_info['membre_mail'], $client_info['membre_nom'], false)) {
+        $success_count++;
+    } else {
+        $error_count++;
+    }
+
+    // Rediriger vers une page de succès ou afficher un message de succès
+    header("Location: liste_prets.php");
+    exit();
+} else {
+    // Si les données du formulaire n'ont pas été soumises, rediriger vers une page d'erreur
+    header("Location: erreur.php");
+    exit();
+}
+
+// Fonction pour envoyer un e-mail de création de prêt
+
+function sendPretCreationEmail($membre_id, $technicien_email, $client_nom, $client_prenom, $is_technicien) {
     try {
         // Etablir la connexion à la base de données
-        $db = connexionbdd();
+        $connexion = connexionbdd();
 
-        // Requête SQL pour mettre à jour les détails du prêt
-        $query = "UPDATE pret SET pret_caution = :caution, pret_dateout = :date_rendu, commentaire = :commentaire WHERE pret_id = :pret_id";
+        // Requête SQL pour récupérer les informations du client à partir de la table pret
+        $query = $connexion->prepare("SELECT membres.membre_mail, pret_datein, pret_dateout, pret_materiel, commentaire FROM membres INNER JOIN pret ON membres.membre_id = pret.membre_id WHERE membres.membre_id = ?");
+        $query->execute([$membre_id]);
 
-        // Préparer la requête SQL
-        $stmt = $db->prepare($query);
+        // Récupération des résultats
+        $result = $query->fetch(PDO::FETCH_ASSOC);
 
-        // Liaison des valeurs des paramètres de requête
-        $stmt->bindParam(':caution', $caution, PDO::PARAM_STR);
-        $stmt->bindParam(':date_rendu', $date_rendu, PDO::PARAM_STR);
-        $stmt->bindParam(':commentaire', $commentaire, PDO::PARAM_STR);
-        $stmt->bindParam(':pret_id', $pret_id, PDO::PARAM_INT);
+        // Vérifier si les résultats ont été récupérés avec succès
+        if ($result) {
+            // Récupérer les informations du client
+            $client_email = $result['membre_mail'];
+            $pret_datein = date('d/m/Y', strtotime($result['pret_datein']));
+            $pret_dateout = date('d/m/Y', strtotime($result['pret_dateout']));
+            $pret_materiel = $result['pret_materiel'];
+            $commentaire = $result['commentaire'];
 
-        // Exécution de la requête
-        if ($stmt->execute()) {
-            // Rediriger vers la liste des prêts si la mise à jour est réussie
-            header("Location: liste_prets.php");
-            exit;
+            // Composition du contenu de l'e-mail
+            $subject = "Création de prêt - Notification";
+            $body = "Bonjour,\n\n";
+
+            if ($is_technicien) {
+                $body .= "Un nouveau prêt a été créé pour le client $client_nom $client_prenom.\n\n";
+            } else {
+                $body .= "Un nouveau prêt a été créé pour vous.\n\n";
+            }
+
+            $body .= "Détails du prêt :\n";
+            $body .= "Matériel : $pret_materiel\n";
+            $body .= "Date de début : $pret_datein\n";
+            $body .= "Date de fin : $pret_dateout\n";
+            $body .= "Commentaire : $commentaire\n\n";
+            $body .= "Cordialement,\nVotre société";
+
+            // Instancier un nouvel objet PHPMailer
+            $mail = new PHPMailer(true);
+
+            // Paramètres du serveur SMTP
+            $mail->isSMTP();
+            $mail->Host = SMTP_HOST;
+            $mail->SMTPAuth = true;
+            $mail->Username = SMTP_USERNAME;  // Adresse email de l'expéditeur
+            $mail->Password = SMTP_PASSWORD;           // Mot de passe de l'expéditeur
+            $mail->SMTPSecure = SMTP_SECURE;
+            $mail->Port = SMTP_PORT;
+
+            // Destinataires
+            $mail->setFrom(SENDER_EMAIL, SENDER_NAME);
+            if ($is_technicien) {
+                $mail->addAddress($client_email);    // Adresse e-mail du client
+            } else {
+                $mail->addAddress($technicien_email);    // Adresse e-mail du technicien
+            }
+
+            // Contenu de l'e-mail
+            $mail->isHTML(false);
+            $mail->CharSet = 'UTF-8';
+            $mail->Subject = $subject;
+            $mail->Body = $body;
+
+            // Envoi de l'e-mail
+            $mail->send();
+
+            // Succès de l'envoi
+            return true;
         } else {
-            // Rediriger vers une page d'erreur si la mise à jour échoue
-            header("Location: erreur.php");
-            exit;
+            // Gérer l'erreur si les informations du client n'ont pas été récupérées
+            return false;
         }
-    } catch (PDOException $e) {
-        // Afficher un message d'erreur en cas d'erreur PDO
-        echo "Erreur : " . $e->getMessage();
+    } catch (Exception $e) {
+        // Erreur lors de l'envoi de l'e-mail
+        return false;
     }
-} else {
-    // Rediriger vers une page d'erreur si le formulaire n'a pas été soumis correctement
-    header("Location: erreur.php");
-    exit;
 }
 ?>
