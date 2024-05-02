@@ -80,12 +80,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $error_count = 0;
 
     // Envoi d'e-mails de confirmation au client et au technicien
-    if (sendPretCreationEmail($technicien_id, $technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], true, $new_pret_info, $client_info)) {
+    if (sendPretCreationEmail($technicien_id, $technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], true, $new_pret_info)) {
         $success_count++;
     } else {
         $error_count++;
     }
-    if (sendPretCreationEmail($membre_id, $technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], false, $new_pret_info, $client_info)) {
+    if (sendPretCreationEmail($membre_id, $technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], false, $new_pret_info)) {
         $success_count++;
     } else {
         $error_count++;
@@ -101,7 +101,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 // Fonction pour envoyer un e-mail de création de prêt
-function sendPretCreationEmail($membre_id, $technicien_email, $client_nom, $client_prenom, $is_technicien, $pret_info, $client_info) {
+function sendPretCreationEmail($membre_id, $technicien_email, $client_nom, $client_prenom, $is_technicien, $pret_info) {
     try {
         $connexion = connexionbdd();
         // Requête SQL pour récupérer les informations du client à partir de la table pret
@@ -111,6 +111,8 @@ function sendPretCreationEmail($membre_id, $technicien_email, $client_nom, $clie
         // Récupération des résultats
         $result = $query->fetch(PDO::FETCH_ASSOC);
         $client_email = $result['membre_mail'];
+        echo "Client Email: " . $client_email . "<br>"; // Débogage
+        echo "Technicien Email: " . $technicien_email . "<br>"; // Débogage
 
         // Récupérer les informations du prêt nouvellement inséré
         $pret_materiel = $pret_info['pret_materiel'];
@@ -128,7 +130,7 @@ function sendPretCreationEmail($membre_id, $technicien_email, $client_nom, $clie
         if ($is_technicien) {
             $body .= "Un nouveau prêt a été créé pour le client $client_nom $client_prenom.\n\n";
         } else {
-            $body .= "Un nouveau prêt a été créé pour vous, $client_nom $client_prenom.\n\n";
+            $body .= "Un nouveau prêt a été créé pour vous.\n\n";
         }
 
         $body .= "Détails du prêt :\n";
@@ -155,11 +157,9 @@ function sendPretCreationEmail($membre_id, $technicien_email, $client_nom, $clie
 
         // Destinataires
         $mail->setFrom(SENDER_EMAIL, SENDER_NAME);
+        $mail->addAddress($client_email);    // Adresse e-mail du client
         if ($is_technicien) {
-            $mail->addAddress($client_email);    // Adresse e-mail du client
             $mail->addAddress($technicien_email);    // Adresse e-mail du technicien
-        } else {
-            $mail->addAddress($client_email);    // Adresse e-mail du client
         }
 
         // Contenu de l'e-mail
@@ -175,7 +175,9 @@ function sendPretCreationEmail($membre_id, $technicien_email, $client_nom, $clie
         return true;
     } catch (Exception $e) {
         // Erreur lors de l'envoi de l'e-mail
+        echo "Erreur lors de l'envoi de l'e-mail: " . $mail->ErrorInfo; // Débogage
         return false;
     }
 }
+
 ?>
