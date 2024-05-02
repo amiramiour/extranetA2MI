@@ -43,14 +43,20 @@ if (isset($_GET['id'])) {
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Commandes</title>
+    <title>Commandes / Devis</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container">
-        <h2>Ajouter une commande</h2>
+        <h2>Ajouter une Commande / Devis</h2>
         <!-- <form action="traitement_commande.php?id=<?php echo $id; ?>" method="post" name="commande">-->
         <form action="<?php echo isset($id) ? 'traitement_commande.php?id=' . $id : 'traitement_commande.php'; ?>" method="post" name="commande">
+            <!-- Liste déroulante pour selectionner si le formulaire est pour créer une commande ou un devis -->
+            <select name="type" required onchange="afficherChampsSupplementaires()">
+                <option value="1">Commande</option>
+                <option value="2">Devis</option>
+            </select>
+            <br><br>
             <?php if (!isset($id)) { ?>
                 <label for="id">Client</label>
                 <select name="client_id" id="client_id" required>
@@ -107,8 +113,17 @@ if (isset($_GET['id'])) {
             <button type="button" onclick="ajouterProduit()">Ajouter un produit à la commande</button>
             <br><br>
             <!-- <button type="button" onclick="enleverProduit()">Enlever un produit à la commande</button> -->
+
+            <div id="champsDevis" style="display: none;">
+                <label for="photo">Prendre une photo :</label>
+                <input type="file" accept="image/*" capture="camera" id="photo" name="photo">
+                <br><br>
+                <label for="commentaire">Commentaire *</label><br>
+                <textarea name="commentaire" id="commentaire" rows="4" cols="50" required></textarea><br>
+            </div>
+
             
-            <label for="reference" class="float" >Nom de la commande* </label>
+            <label for="reference" class="float" >Reference* </label>
             <input type="text" name="nomC" id="reference" required autofocus/><br>
 
             <label for="designation" class="float">Désignation* </label>
@@ -117,7 +132,7 @@ if (isset($_GET['id'])) {
             <label class="float">Date de livraison prévue</label><input type="date" name="dateP" required autofocus><br>
             <label class="float">Date de livraison souhaitée</label><input type="date" name="dateS" required autofocus><br>
 
-            <label for="etat" class="float" >Statut commande* </label>
+            <label for="etat" class="float" >Statut * </label>
             <!-- <select name="etatC" required>
                 <option value="1">Commandé</option>
                 <option value="2">En attente</option>
@@ -469,6 +484,24 @@ if (isset($_GET['id'])) {
                 alert("Vous ne pouvez pas supprimer le dernier produit.");
             }
         }
+
+        function afficherChampsSupplementaires() {
+            var type = document.querySelector('select[name="type"]').value;
+            var champsDevis = document.getElementById('champsDevis');
+
+            // Si l'utilisateur choisit un devis, affichez les champs supplémentaires, sinon masquez-les
+            if (type === '2') {
+                champsDevis.style.display = 'block';
+            } else {
+                champsDevis.style.display = 'none';
+            }
+        }
+
+        // Écoutez les changements dans la liste déroulante pour afficher ou masquer les champs supplémentaires
+        document.querySelector('select[name="type"]').addEventListener('change', afficherChampsSupplementaires);
+
+        // Appelez la fonction une fois au chargement de la page pour vérifier l'état initial de la liste déroulante
+        afficherChampsSupplementaires();
     </script>
 </body>
 </html>
