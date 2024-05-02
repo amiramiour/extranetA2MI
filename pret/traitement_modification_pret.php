@@ -14,13 +14,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pret_id'])) {
     $pret_id = $_POST['pret_id'];
     $caution = $_POST['caution'];
     // Mode de paiement est en lecture seule, donc pas besoin de récupérer sa valeur
-    $date_rendu = $_POST['date_rendu'];
+    //$date_rendu = $_POST['date_rendu'];
     $commentaire = $_POST['commentaire'];
 
 
 
-    // Convertir la date au format YYYY-MM-DD
-    $date_rendu = date("Y-m-d", strtotime($date_rendu));
+// Convertir la date au format UNIX TIMESTAMP
+    //$date_rendu_timestamp = strtotime($date_rendu);
+
+    $date_rendu = strtotime(str_replace('/', '-', $_POST["date_rendu"]));
+
+
+
 
     // Inclure la connexion à la base de données
     include('../ConnexionBD.php');

@@ -114,7 +114,7 @@ try {
                 echo "<div class='card mb-3'>";
                 echo "<div class='card-body'>";
                 echo "<h5 class='card-title'>BI n° " . $bi['bi_id'] . "</h5>";
-                echo "<p>Date de création : " . date('d/m/Y', strtotime($bi['bi_datein'])) . "</p>";
+                echo "<p>Date de création : " . date('d/m/Y', $bi['bi_datein']) . "</p>";
                 echo "<p>Facturation : " . $bi['bi_facturation'] . "</p>";
                 echo "<p>Heure d'arrivée : " . $bi['bi_heurearrive'] . "</p>";
                 echo "<p>Heure de départ : " . $bi['bi_heuredepart'] . "</p>";
@@ -170,8 +170,8 @@ try {
                 echo "<p class='card-text'>Valeur du matériel : " . $pret['valeurMat'] . "€</p>";
                 echo "<p class='card-text'>Caution : " . $pret['pret_caution'] . "€</p>";
                 echo "<p class='card-text'>Mode de paiement : " . $pret['pret_mode'] . "</p>";
-                echo "<p class='card-text'>Date de prêt : " . date('d/m/Y', strtotime($pret['pret_datein'])) . "</p>";
-                echo "<p class='card-text'>Date de retour : " . date('d/m/Y', strtotime($pret['pret_dateout'])) . "</p>";
+                echo "<p class='card-text'>Date de prêt : " . date('d/m/Y', $pret['pret_datein']) . "</p>";
+                echo "<p class='card-text'>Date de retour : " . date('d/m/Y', $pret['pret_dateout']) . "</p>";
                 echo "<p class='card-text'>Commentaire : " . $pret['commentaire'] . "</p>";
                 echo "<p class='card-text'>Technicien : " . $pret['technicien_nom'] . " " . $pret['technicien_prenom'] . "</p>";
                 echo "<a href='../pret/modifier_pret.php?id=" . $pret['pret_id'] . "' class='btn btn-primary'>Modifier</a>";
