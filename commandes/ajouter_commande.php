@@ -1,5 +1,7 @@
 <?php
 require_once '../config.php';
+//echo TVA;
+
 session_start();
 // Vérifier si l'utilisateur est connecté et est un technicien
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail'])  || $_SESSION['user_type'] === 'client') {
@@ -142,6 +144,7 @@ if (isset($_GET['id'])) {
         </form>
     </div>
     <script>
+        var TVA = <?php echo TVA; ?>;
         function calcul(){
             var i = document.querySelectorAll('.materiel').length;
 
@@ -172,7 +175,7 @@ if (isset($_GET['id'])) {
             pvTTC = Math.round(pvTTC * multiplier) / multiplier;
             document.getElementById("pvHT").value = pvHT;
     
-            var pvTTC = Number(pvHT+(pvHT*(20/100)));
+            var pvTTC = Number(pvHT+(pvHT * TVA));
             pvTTC = Math.round(pvTTC * multiplier) / multiplier;
             document.getElementById("pvTTC").value = pvTTC;
     
@@ -225,7 +228,7 @@ if (isset($_GET['id'])) {
             choix = Number(choix);
             document.getElementById("pvHT").value = choix;
 
-            var pvTTC = Number(choix+(choix*(20/100))); 
+            var pvTTC = Number(choix+(choix * TVA)); 
             pvTTC = Number(pvTTC);
             document.getElementById("pvTTC").value = pvTTC;
 
@@ -334,7 +337,7 @@ if (isset($_GET['id'])) {
             pvHT = Math.round(pvHT * multiplier) / multiplier;
             document.getElementById(pvHTs).value = pvHT;
 
-            var pvTTC = Number(pvHT + (pvHT * (20 / 100)));
+            var pvTTC = Number(pvHT + (pvHT * TVA));
             pvTTC = Math.round(pvTTC * multiplier) / multiplier;
             document.getElementById(pvTTCs).value = pvTTC;
 
@@ -374,7 +377,7 @@ if (isset($_GET['id'])) {
             choix = Number(choix);
             document.getElementById("pvHTs" + i).value = choix;
             
-            var pvTTC = Number(choix + (choix * (20 / 100)));
+            var pvTTC = Number(choix + (choix * TVA));
             pvTTC = Number(pvTTC);
             document.getElementById("pvTTCs" + i).value = pvTTC;
 

@@ -1,4 +1,5 @@
 <?php
+require_once '../config.php';
 session_start();
 
 // Vérifier si l'utilisateur est connecté et est un technicien
@@ -153,6 +154,7 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </form>
 <script>
+    var TVA = <?php echo TVA; ?>;
     function ajouterProduit(){
             var i = document.querySelectorAll('.materiel').length;
             i++;
@@ -229,7 +231,7 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
             pvHT = Math.round(pvHT * multiplier) / multiplier;
             document.getElementById(pvHTs).value = pvHT;
 
-            var pvTTC = Number(pvHT + (pvHT * (20 / 100)));
+            var pvTTC = Number(pvHT + (pvHT * TVA));
             pvTTC = Math.round(pvTTC * multiplier) / multiplier;
             document.getElementById(pvTTCs).value = pvTTC;
 
@@ -261,7 +263,7 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
             choix = Number(choix);
             document.getElementById("pvHT" + i).value = choix;
             
-            var pvTTC = Number(choix + (choix * (20 / 100)));
+            var pvTTC = Number(choix + (choix * TVA));
             pvTTC = Number(pvTTC);
             document.getElementById("pvTTC" + i).value = pvTTC;
 

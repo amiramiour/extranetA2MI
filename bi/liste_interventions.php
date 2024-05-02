@@ -62,7 +62,7 @@ $membres_avec_bi = $query->fetchAll();
         <?php foreach($membres_avec_bi as $membre): ?>
             <div class="client-card">
                 <a href="bi_details.php?membre_id=<?php echo $membre['membre_id']; ?>" class="client-link">
-                    <img src="../images/icon.png" style="width: 50px; height: 50px; alt=" Icon" class="icon-size" >
+                    <img src="../images/icon.png" style="width: 50px; height: 50px;" alt="Icon" class="icon-size" >
                     <h3><?php echo $membre['membre_nom']; ?></h3>
                     <p><?php echo $membre['membre_prenom']; ?></p>
                 </a>

@@ -2,6 +2,8 @@
 // TVA
 define('TVA', (20/100)); // 20%
 
+//echo TVA;
+
 // Paramètres SMTP
 define('SMTP_HOST', 'smtp.gmail.com');
 define('SMTP_PORT', 587);
