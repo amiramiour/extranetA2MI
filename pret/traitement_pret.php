@@ -91,6 +91,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error_count++;
     }
 
+
+
     // Rediriger vers une page de succès ou afficher un message de succès
     header("Location: liste_prets.php");
     exit();
@@ -100,6 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     exit();
 }
 
+// Fonction pour envoyer un e-mail de création de prêt
 // Fonction pour envoyer un e-mail de création de prêt
 function sendPretCreationEmail($membre_id, $technicien_email, $client_nom, $client_prenom, $is_technicien, $pret_info) {
     try {
@@ -128,6 +131,7 @@ function sendPretCreationEmail($membre_id, $technicien_email, $client_nom, $clie
         $body = "Bonjour,\n\n";
 
         if ($is_technicien) {
+            // Ajout du nom et prénom du client dans le corps de l'e-mail destiné au technicien
             $body .= "Un nouveau prêt a été créé pour le client $client_nom $client_prenom.\n\n";
         } else {
             $body .= "Un nouveau prêt a été créé pour vous.\n\n";
@@ -155,12 +159,16 @@ function sendPretCreationEmail($membre_id, $technicien_email, $client_nom, $clie
         $mail->SMTPSecure = SMTP_SECURE;
         $mail->Port = SMTP_PORT;
 
-        // Destinataires
+// Destinataires
         $mail->setFrom(SENDER_EMAIL, SENDER_NAME);
-        $mail->addAddress($client_email);    // Adresse e-mail du client
         if ($is_technicien) {
+            // Si c'est le technicien, utiliser son adresse e-mail
             $mail->addAddress($technicien_email);    // Adresse e-mail du technicien
+        } else {
+            // Sinon, utiliser l'adresse e-mail du client
+            $mail->addAddress($client_email);    // Adresse e-mail du client
         }
+
 
         // Contenu de l'e-mail
         $mail->isHTML(false);
@@ -179,5 +187,6 @@ function sendPretCreationEmail($membre_id, $technicien_email, $client_nom, $clie
         return false;
     }
 }
+
 
 ?>
