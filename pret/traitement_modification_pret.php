@@ -17,8 +17,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pret_id'])) {
     $date_rendu = $_POST['date_rendu'];
     $commentaire = $_POST['commentaire'];
 
-    // Convertir la date au format YYYY-MM-DD
-    $date_rendu = date("Y-m-d", strtotime($date_rendu));
 
     // Inclure la connexion à la base de données
     include('../ConnexionBD.php');

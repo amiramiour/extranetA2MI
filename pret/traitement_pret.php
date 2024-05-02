@@ -50,8 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Exécuter la requête avec les valeurs des paramètres
     $stmt->execute([$pret_materiel, $pret_caution, $pret_mode, $pret_datein, $pret_dateout, $membre_id, $pret_technicien, $commentaire, $valeurMat, $rappel, $pret_etat]);
 
-    // Rediriger ou afficher un message de succès
-    // Par exemple, rediriger vers une page de succès
+    //rediriger vers une page de succès
     header("Location: liste_prets.php");
     exit();
 } else {

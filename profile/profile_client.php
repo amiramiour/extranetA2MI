@@ -174,7 +174,7 @@ try {
                 echo "<p class='card-text'>Date de retour : " . date('d/m/Y', strtotime($pret['pret_dateout'])) . "</p>";
                 echo "<p class='card-text'>Commentaire : " . $pret['commentaire'] . "</p>";
                 echo "<p class='card-text'>Technicien : " . $pret['technicien_nom'] . " " . $pret['technicien_prenom'] . "</p>";
-                echo "<a href='../pret/modifier_pret.php?id=" . $pret['pret_id'] . "' class='btn btn-primary'>Modifier</a>";
+                echo "<a href='/pret/modifier_pret.php?id=" . $pret['pret_id'] . "' class='btn btn-primary'>Modifier</a>";
                 echo "<a href='../pret/supprimer_pret.php?id=" . $pret['pret_id'] . "' class='btn btn-primary'>Supprimer</a>";
 
                 echo "</div>";
