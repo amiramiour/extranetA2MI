@@ -55,6 +55,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $date_recu = $_POST['date_recu']; // Nouvelle ligne pour récupérer la date de réception
         $date_livraison = $_POST['date_livraison']; // Nouvelle ligne pour récupérer la date de livraison
 
+
+
+
+
         // Récupération des totaux HT depuis le formulaire
         $prix_materiel_ht = $_POST['total_materiel_ht'];
         $prix_main_oeuvre_ht = $_POST['total_service_ht'];
@@ -93,8 +97,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $etat_id = $etat_row['id_etat_sav'];
 
         // Enregistrement dans la base de données
-        $sql = "INSERT INTO sav (membre_id, sav_accessoire, sav_datein, sav_dateout, sav_envoi, sav_etat, sav_etats, sav_forfait, sav_garantie, sav_maindoeuvreht, sav_maindoeuvrettc, sav_mdpclient, sav_probleme, sav_regle, sav_tarifmaterielht, sav_tarifmaterielttc, sav_typemateriel, sav_technicien) 
-VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, 744, :etat_id, :forfait, :garantie, :maindoeuvreht, :maindoeuvrettc, :mdpclient, :probleme, :facture_reglee, :tarifmaterielht, :tarifmaterielttc, :typemateriel, :sav_technicien_id)";
+        $sql = "INSERT INTO sav (membre_id, sav_accessoire, sav_datein, sav_dateout, sav_envoi,  sav_etats, sav_forfait, sav_garantie, sav_maindoeuvreht, sav_maindoeuvrettc, sav_mdpclient, sav_probleme, sav_regle, sav_tarifmaterielht, sav_tarifmaterielttc, sav_typemateriel, sav_technicien) 
+VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, :etat_id, :forfait, :garantie, :maindoeuvreht, :maindoeuvrettc, :mdpclient, :probleme, :facture_reglee, :tarifmaterielht, :tarifmaterielttc, :typemateriel, :sav_technicien_id)";
 
         $stmt = $connexion->prepare($sql);
         $stmt->bindParam(':membre_id', $membre_id);
@@ -119,6 +123,32 @@ VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, 7
 
 // Récupérer l'ID du SAV nouvellement inséré
         $sav_id = $connexion->lastInsertId();
+        /////inserion dans materiel_sav
+        // Récupérer les données des matériels
+        $materiels_utilises = $_POST['materiel'];
+        $nombres = $_POST['nombre'];
+        $prix_unitaires = $_POST['prix_unité'];
+
+// Insérer chaque matériel dans la base de données
+        for ($i = 0; $i < count($materiels_utilises); $i++) {
+            // Récupérer les valeurs pour chaque matériel
+            $materiel_utilise = $materiels_utilises[$i];
+            $quantite = $nombres[$i];
+            $cout_unitaire = $prix_unitaires[$i];
+
+            // Insérer ces valeurs dans la base de données
+            $sql_materiel = "INSERT INTO sav_materiel (materiel_utilise, sav_id, quantite, coutUnitaire) 
+                    VALUES (:materiel_utilise, :sav_id, :quantite, :cout_unitaire)";
+
+            $stmt_materiel = $connexion->prepare($sql_materiel);
+            $stmt_materiel->bindParam(':materiel_utilise', $materiel_utilise);
+            $stmt_materiel->bindParam(':sav_id', $sav_id);
+            $stmt_materiel->bindParam(':quantite', $quantite);
+            $stmt_materiel->bindParam(':cout_unitaire', $cout_unitaire);
+
+            $stmt_materiel->execute();
+        }
+
 
 // Enregistrer l'historique de sauvegarde
         // Récupérer l'ID de session de l'utilisateur connecté
