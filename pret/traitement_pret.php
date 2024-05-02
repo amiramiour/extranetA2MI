@@ -26,11 +26,27 @@ $technicien_email = $_SESSION['user_mail'];
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $db = connexionbdd();
     // Récupérer les informations du client
+    $membre_id = $_POST['client_id'];
     $query_client = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :membre_id";
     $stmt_client = $db->prepare($query_client);
     $stmt_client->bindParam(':membre_id', $membre_id);
     $stmt_client->execute();
     $client_info = $stmt_client->fetch(PDO::FETCH_ASSOC);
+    // Récupération de l'ID du technicien en charge depuis la session
+    // À remplacer par la gestion de sessions
+// Récupérer l'ID de l'utilisateur connecté depuis la session
+    $sav_technicien_id = $_SESSION['user_id'];
+
+    // Récupération des informations du technicien
+    $query_technicien = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :sav_technicien_id";
+    $stmt_technicien = $db->prepare($query_technicien);
+    $stmt_technicien->bindParam(':sav_technicien_id', $sav_technicien_id);
+    $stmt_technicien->execute();
+    $technicien_info = $stmt_technicien->fetch(PDO::FETCH_ASSOC);
+
+    $technicien_nom = $technicien_info['membre_nom'];
+    $technicien_prenom = $technicien_info['membre_prenom'];
+    $technicien_email = $technicien_info['membre_mail'];
 
     // Récupérer les données du formulaire
     $pret_materiel = $_POST["pret_materiel"];
@@ -79,17 +95,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $success_count = 0;
     $error_count = 0;
 
-    // Envoi d'e-mails de confirmation au client et au technicien
-    if (sendPretCreationEmail($technicien_id, $technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], true, $new_pret_info, $client_info)) {
-        $success_count++;
-    } else {
-        $error_count++;
-    }
-    if (sendPretCreationEmail($membre_id, $technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], false, $new_pret_info, $client_info)) {
-        $success_count++;
-    } else {
-        $error_count++;
-    }
+    sendPretCreationEmail($membre_id, $client_info['membre_mail'], $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_email, $technicien_nom, $technicien_prenom, $new_pret_info, true);
+    sendPretCreationEmail($membre_id, $client_info['membre_mail'], $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_email, $technicien_nom, $technicien_prenom, $new_pret_info, false);
+
+
 
     // Rediriger vers une page de succès ou afficher un message de succès
     header("Location: liste_prets.php");
@@ -101,44 +110,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 // Fonction pour envoyer un e-mail de création de prêt
-function sendPretCreationEmail($membre_id, $technicien_email, $client_nom, $client_prenom, $is_technicien, $pret_info, $client_info) {
+function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_prenom, $technicien_email, $technicien_nom, $technicien_prenom, $pret_info, $is_client) {
     try {
-        $connexion = connexionbdd();
-        // Requête SQL pour récupérer les informations du client à partir de la table pret
-        $query = $connexion->prepare("SELECT membres.membre_mail, pret_datein, pret_dateout, pret_materiel, commentaire FROM membres INNER JOIN pret ON membres.membre_id = pret.membre_id WHERE membres.membre_id = ?");
-        $query->execute([$membre_id]);
-
-        // Récupération des résultats
-        $result = $query->fetch(PDO::FETCH_ASSOC);
-        $client_email = $result['membre_mail'];
-
-        // Récupérer les informations du prêt nouvellement inséré
-        $pret_materiel = $pret_info['pret_materiel'];
-        $pret_caution = $pret_info['pret_caution'];
-        $pret_mode = $pret_info['pret_mode'];
-        $pret_datein = date('d/m/Y', $pret_info['pret_datein']);
-        $pret_dateout = date('d/m/Y', $pret_info['pret_dateout']);
-        $commentaire = $pret_info['commentaire'];
-        $valeurMat = $pret_info['valeurMat'];
-
-        // Composition du contenu de l'e-mail
+        // Composez le contenu de l'e-mail
         $subject = "Création de prêt - Notification";
         $body = "Bonjour,\n\n";
-
-        if ($is_technicien) {
-            $body .= "Un nouveau prêt a été créé pour le client $client_nom $client_prenom.\n\n";
+        $body .= "Un nouveau prêt a été créé ";
+        if ($is_client) {
+            $body .= "pour vous :\n\n";
+            $body .= "Détails du prêt :\n";
+            $body .= "Matériel : {$pret_info['pret_materiel']}\n";
+            $body .= "Valeur du matériel : {$pret_info['valeurMat']}\n";
+            $body .= "Caution : {$pret_info['pret_caution']}\n";
+            $body .= "Mode : {$pret_info['pret_mode']}\n";
+            $body .= "Date de début : " . date('d/m/Y', $pret_info['pret_datein']) . "\n";
+            $body .= "Date de fin : " . date('d/m/Y', $pret_info['pret_dateout']) . "\n";
+            $body .= "Commentaire : {$pret_info['commentaire']}\n\n";
         } else {
-            $body .= "Un nouveau prêt a été créé pour vous, $client_nom $client_prenom.\n\n";
+            $body .= "pour le client $client_nom $client_prenom :\n\n";
+            $body .= "Détails du prêt :\n";
+            $body .= "Matériel : {$pret_info['pret_materiel']}\n";
+            $body .= "Valeur du matériel : {$pret_info['valeurMat']}\n";
+            $body .= "Caution : {$pret_info['pret_caution']}\n";
+            $body .= "Mode : {$pret_info['pret_mode']}\n";
+            $body .= "Date de début : " . date('d/m/Y', $pret_info['pret_datein']) . "\n";
+            $body .= "Date de fin : " . date('d/m/Y', $pret_info['pret_dateout']) . "\n";
+            $body .= "Commentaire : {$pret_info['commentaire']}\n\n";
         }
-
-        $body .= "Détails du prêt :\n";
-        $body .= "Matériel : $pret_materiel\n";
-        $body .= "Valeur du matériel : $valeurMat\n";
-        $body .= "Caution : $pret_caution\n";
-        $body .= "Mode : $pret_mode\n";
-        $body .= "Date de début : $pret_datein\n";
-        $body .= "Date de fin : $pret_dateout\n";
-        $body .= "Commentaire : $commentaire\n\n";
         $body .= "Cordialement,\nVotre société";
 
         // Instancier un nouvel objet PHPMailer
@@ -149,22 +147,21 @@ function sendPretCreationEmail($membre_id, $technicien_email, $client_nom, $clie
         $mail->Host = SMTP_HOST;
         $mail->SMTPAuth = true;
         $mail->Username = SMTP_USERNAME;  // Adresse email de l'expéditeur
-        $mail->Password = SMTP_PASSWORD;           // Mot de passe de l'expéditeur
+        $mail->Password = SMTP_PASSWORD;  // Mot de passe de l'expéditeur
         $mail->SMTPSecure = SMTP_SECURE;
         $mail->Port = SMTP_PORT;
 
         // Destinataires
         $mail->setFrom(SENDER_EMAIL, SENDER_NAME);
-        if ($is_technicien) {
+        if ($is_client) {
             $mail->addAddress($client_email);    // Adresse e-mail du client
-            $mail->addAddress($technicien_email);    // Adresse e-mail du technicien
         } else {
-            $mail->addAddress($client_email);    // Adresse e-mail du client
+            $mail->addAddress($technicien_email);    // Adresse e-mail du technicien
         }
 
         // Contenu de l'e-mail
         $mail->isHTML(false);
-        $mail->CharSet = 'UTF-8';
+        $mail->CharSet = 'UTF-8'; // Spécification de l'encodage
         $mail->Subject = $subject;
         $mail->Body = $body;
 
@@ -175,7 +172,9 @@ function sendPretCreationEmail($membre_id, $technicien_email, $client_nom, $clie
         return true;
     } catch (Exception $e) {
         // Erreur lors de l'envoi de l'e-mail
+        echo "Erreur lors de l'envoi de l'e-mail : {$mail->ErrorInfo}";
         return false;
     }
 }
+
 ?>
