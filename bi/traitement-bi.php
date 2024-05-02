@@ -122,11 +122,11 @@ if (isset($_GET['membre_id'])) {
 
             // Affichage du résultat
             if ($success_count > 0 && $error_count == 0) {
-                echo "Enregistrement du SAV effectué avec succès. Les e-mails ont été envoyés avec succès.";
+                echo "Enregistrement du BI effectué avec succès. Les e-mails ont été envoyés avec succès.";
             } elseif ($success_count > 0 && $error_count > 0) {
-                echo "Enregistrement du SAV effectué avec succès. Certains e-mails ont été envoyés avec succès, mais il y a eu des erreurs lors de l'envoi de certains e-mails.";
+                echo "Enregistrement du BI effectué avec succès. Certains e-mails ont été envoyés avec succès, mais il y a eu des erreurs lors de l'envoi de certains e-mails.";
             } else {
-                echo "Enregistrement du SAV effectué, mais aucun e-mail n'a été envoyé. Veuillez vérifier les erreurs.";
+                echo "Enregistrement du BI effectué, mais aucun e-mail n'a été envoyé. Veuillez vérifier les erreurs.";
             }
 
             // Redirection vers bonIntervention.php après traitement
