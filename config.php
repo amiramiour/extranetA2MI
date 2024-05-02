@@ -1,4 +1,6 @@
 <?php
+// TVA
+define('TVA', (20/100)); // 20%
 
 // Paramètres SMTP
 define('SMTP_HOST', 'smtp.gmail.com');

@@ -1,5 +1,5 @@
-
 <?php
+require_once '../config.php';
 session_start();
 // Vérifier si l'utilisateur est connecté et est un technicien
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail'])  || $_SESSION['user_type'] === 'client') {
@@ -139,8 +139,6 @@ if (isset($_GET['id'])) {
             <input type="text" name="totalMarge" id="margeT" readonly/><br>
 
             <div class="center"><input class="createButton" type="submit" value="Créer" /></div>
-            <br>
-            <div class="center"><input class="createButton" type="button" value="Annuler" onclick="window.history.back()"/>
         </form>
     </div>
     <script>
