@@ -38,6 +38,7 @@ try {
 
     // Récupération du résultat
     $pret = $stmt->fetch(PDO::FETCH_ASSOC);
+    $client_id = $_GET['id']; //la on recupere l'id passé dans l'url
 
     // Vérifier si le prêt existe
     if($pret) {
@@ -60,6 +61,7 @@ try {
         <div class="container mt-3">
             <h1>Modifier Prêt</h1>
             <form action="traitement_modification_pret.php" method="post">
+                <input type="hidden" name="client_id" value="<?php echo $client_id; ?>">
                 <div class="form-group">
                     <label for="caution">Caution</label>
                     <input type="text" class="form-control" id="caution" name="caution" value="<?php echo $pret['pret_caution']; ?>">
