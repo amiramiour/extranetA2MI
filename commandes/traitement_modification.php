@@ -51,24 +51,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $dateActuelle = time();
 
-    $query = $pdo->prepare("SELECT commande_etat FROM commande_etats WHERE id_etat_cmd = :etatC");
+    $query = $pdo->prepare("SELECT cmd_devis_etat FROM cmd_devis_etats WHERE id_etat_cmd_devis = :etatC");
     $query->bindParam(':etatC', $etatC, PDO::PARAM_INT);
     $query->execute();
     $etat_commande = $query->fetchColumn();
 
-    $stmt = $pdo->prepare("UPDATE commande 
-                           SET cmd_reference = :nomC, 
-                               cmd_designation = :designation, 
-                               cmd_datein = :dateActuelle, 
-                               cmd_dateout = :dateP, 
+    $stmt = $pdo->prepare("UPDATE commande_devis 
+                           SET cmd_devis_reference = :nomC, 
+                               cmd_devis_designation = :designation, 
+                               cmd_devis_datein = :dateActuelle, 
+                               cmd_devis_dateout = :dateP, 
                                membre_id = :idClient, 
-                               cmd_prixventettc = :totalTTC,
-                               cmd_livreur = :id_technicien,
-                               cmd_dateSouhait = :dateS, 
-                               cmd_etat = :etatC, 
-                               cmd_prixHT = :totalHT, 
-                               cmd_margeT = :totalMarge 
-                           WHERE cmd_id = :idCommande");
+                               cmd_devis_prixventettc = :totalTTC,
+                               cmd_devis_technicien = :id_technicien,
+                               cmd_devis_dateSouhait = :dateS, 
+                               cmd_devis_etat = :etatC, 
+                               cmd_devis_prixHT = :totalHT, 
+                               cmd_devis_margeT = :totalMarge 
+                           WHERE cmd_devis_id = :idCommande");
 
     $stmt->bindValue(':nomC', $nomC);
     $stmt->bindValue(':designation', $designation);
@@ -85,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt->execute();
 
-    $stmt = $pdo->prepare("SELECT cmd_datein, cmd_livreur FROM commande WHERE cmd_id = :commande_id");
+    $stmt = $pdo->prepare("SELECT cmd_devis_datein, cmd_devis_technicien FROM commande_devis WHERE cmd_devis_id = :commande_id");
     $stmt->bindValue(':commande_id', $idCommande);
     $stmt->execute();
     $commande = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -93,8 +93,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Si la commande existe
     if ($commande) {
         // Récupération des valeurs de la commande
-        $cmd_datein = $commande['cmd_datein'];
-        $cmd_livreur = $commande['cmd_livreur'];
+        $cmd_datein = $commande['cmd_devis_datein'];
+        $cmd_livreur = $commande['cmd_devis_technicien'];
 
         // Préparation de la requête d'insertion
         $stmt = $pdo->prepare("INSERT INTO sauvgarde_etat_info_commande 

@@ -15,7 +15,7 @@ $pdo = connexionbdd();
 
 $query = $pdo->query("SELECT DISTINCT m.membre_id, m.membre_nom, m.membre_prenom
                     FROM membres m
-                    JOIN commande c ON m.membre_id = c.membre_id;
+                    JOIN commande_devis c ON m.membre_id = c.membre_id;
                     ");
 $query->execute();
 $clients = $query->fetchAll();
@@ -33,7 +33,7 @@ $clients = $query->fetchAll();
 <body>
     <div class="container">
         <h2>Liste des clients ayant des commandes</h2>
-        <a href="ajouter_commande.php" class="btn btn-primary mb-3">Ajouter une commande</a>
+        <a href="ajouter_commandes_devis.php" class="btn btn-primary mb-3">Ajouter</a>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -47,7 +47,7 @@ $clients = $query->fetchAll();
                     <tr>
                         <td><a href="commandes_client.php?id=<?= $client['membre_id'] ?>"><?= $client['membre_nom'] ?> </a></td>
                         <td><a href="commandes_client.php?id=<?= $client['membre_id'] ?>"><?= $client['membre_prenom'] ?> </a></td>
-                        <td><a href="ajouter_commande.php?id=<?= $client['membre_id']?>" class="btn btn-primary">Ajouter</a></td>
+                        <td><a href="ajouter_commandes_devis.php?id=<?= $client['membre_id']?>" class="btn btn-primary">Ajouter</a></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

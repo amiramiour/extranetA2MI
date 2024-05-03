@@ -24,15 +24,15 @@ $client = $query->fetch();
 //var_dump($client);
 
 $query = $pdo->prepare("SELECT c.membre_id, m.membre_nom AS nom_client , 
-                      m.membre_prenom, c.cmd_id, c.cmd_reference, c.cmd_designation, 
-                      c.cmd_datein, c.cmd_dateout, c.cmd_prixventettc, 
-                      l.membre_nom AS nom_livreur, 
-                      c.cmd_dateSouhait, e.commande_etat, c.cmd_etat
-                      FROM commande c JOIN membres m ON m.membre_id = c.membre_id 
-                      JOIN membres l ON c.cmd_livreur = l.membre_id 
-                      JOIN commande_etats e ON c.cmd_etat = e.id_etat_cmd 
+                      m.membre_prenom, c.cmd_devis_id, c.cmd_devis_reference, c.cmd_devis_designation, 
+                      c.cmd_devis_datein, c.cmd_devis_dateout, c.cmd_devis_prixventettc, 
+                      l.membre_nom AS nom_technicien, 
+                      c.cmd_devis_dateSouhait, e.cmd_devis_etat, c.cmd_devis_etat
+                      FROM commande_devis c JOIN membres m ON m.membre_id = c.membre_id 
+                      JOIN membres l ON c.cmd_devis_technicien = l.membre_id 
+                      JOIN cmd_devis_etats e ON c.cmd_devis_etat = e.id_etat_cmd_devis
                       WHERE c.membre_id = :id_client
-                      ORDER BY c.cmd_datein ASC");
+                      ORDER BY c.cmd_devis_datein ASC");
 
 $query->bindParam(':id_client', $id_client, PDO::PARAM_INT);
 $query->execute();
@@ -40,7 +40,7 @@ $commandes_client = $query->fetchAll();
 //var_dump($commandes_client);
 
 //requete pour récupréer les états des commandes
-$req = $pdo->prepare("SELECT commande_etat FROM commande_etats");
+$req = $pdo->prepare("SELECT cmd_devis_etat FROM cmd_devis_etats");
 $req->execute();
 $commande_etat = $req->fetchAll();
 //var_dump($commandes_client);
@@ -58,13 +58,13 @@ $commande_etat = $req->fetchAll();
         <h2>Liste des commandes de <?= $client['membre_nom'] . ' ' . $client['membre_prenom'] ?></h2>
         <a href="commandes.php" class="btn btn-primary mb-3">Retour</a>
         <br>
-        <a href="ajouter_commande.php?id=<?= $id_client ?>" class="btn btn-primary">Ajouter</a>
+        <a href="ajouter_commandes_devis.php?id=<?= $id_client ?>" class="btn btn-primary">Ajouter</a>
         <br><br>
         <div class="row">
             <?php foreach ($commandes_client as $commande): ?>
                 <?php
                 $etat_classe = '';
-                switch ($commande['cmd_etat']) {
+                switch ($commande['cmd_devis_etat']) {
                     case '1':
                         $etat_classe = 'bg-info';
                         break;
@@ -87,17 +87,17 @@ $commande_etat = $req->fetchAll();
                 ?>
                 <div class="col-md-4 mb-3">
                     <div class="card text-white <?= $etat_classe ?>">
-                        <div class="card-header"><?= $commande['cmd_reference'] ?></div>
+                        <div class="card-header"><?= $commande['cmd_devis_reference'] ?></div>
                         <div class="card-body">
-                            <h5 class="card-title"><?= $commande['cmd_designation'] ?></h5>
-                            <p class="card-text">Date de création: <?= date('d/m/Y', $commande['cmd_datein']) ?></p>
-                            <p class="card-text">Date de livraison: <?= date('d/m/Y', $commande['cmd_dateout']) ?></p>
-                            <p class="card-text">Prix de vente TTC: <?= $commande['cmd_prixventettc'] ?></p>
-                            <p class="card-text">Date de livraison souhaitée: <?= date('d/m/Y', $commande['cmd_dateSouhait']) ?></p>
-                            <p class="card-text">Etat: <?= $commande['commande_etat'] ?></p>
-                            <p class="card-text">Technicien: <?= $commande['nom_livreur'] ?></p>
-                            <?php if ($commande['cmd_etat'] == 1 || $commande['cmd_etat'] == 2 || $commande['cmd_etat'] == 3 || $commande['cmd_etat'] == 4): ?>
-                                <a href="modifier_commande.php?id=<?= $commande['cmd_id'] ?>" class="btn btn-primary">Modifier</a>
+                            <h5 class="card-title"><?= $commande['cmd_devis_designation'] ?></h5>
+                            <p class="card-text">Date de création: <?= date('d/m/Y', $commande['cmd_devis_datein']) ?></p>
+                            <p class="card-text">Date de livraison: <?= date('d/m/Y', $commande['cmd_devis_dateout']) ?></p>
+                            <p class="card-text">Prix de vente TTC: <?= $commande['cmd_devis_prixventettc'] ?></p>
+                            <p class="card-text">Date de livraison souhaitée: <?= date('d/m/Y', $commande['cmd_devis_dateSouhait']) ?></p>
+                            <p class="card-text">Etat: <?= $commande['cmd_devis_etat'] ?></p>
+                            <p class="card-text">Technicien: <?= $commande['nom_technicien'] ?></p>
+                            <?php if ($commande['cmd_devis_etat'] == 1 || $commande['cmd_devis_etat'] == 2 || $commande['cmd_devis_etat'] == 3 || $commande['cmd_devis_etat'] == 4): ?>
+                                <a href="modifier_commandes_devis.php?id=<?= $commande['cmd_devis_id'] ?>" class="btn btn-primary">Modifier</a>
                             <?php endif; ?>
                         </div>
                     </div>

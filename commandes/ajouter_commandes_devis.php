@@ -23,8 +23,8 @@ $jsonFournisseurs = json_encode($fournisseurs);
 
 file_put_contents('fournisseurs.json', $jsonFournisseurs);
 
-$req2 = $pdo->query("SELECT * FROM commande_etats");
-$commande_etats = $req2->fetchAll(PDO::FETCH_ASSOC);
+$req2 = $pdo->query("SELECT * FROM cmd_devis_etats");
+$cmd_devis_etats = $req2->fetchAll(PDO::FETCH_ASSOC);
 
 //vérifier si $id est récupéré
 if (isset($_GET['id'])) {
@@ -50,7 +50,7 @@ if (isset($_GET['id'])) {
     <div class="container">
         <h2>Ajouter une Commande / Devis</h2>
         <!-- <form action="traitement_commande.php?id=<?php echo $id; ?>" method="post" name="commande">-->
-        <form action="<?php echo isset($id) ? 'traitement_commande.php?id=' . $id : 'traitement_commande.php'; ?>" method="post" name="commande">
+        <form action="<?php echo isset($id) ? 'traitement_ajout.php?id=' . $id : 'traitement_ajout.php'; ?>" method="post" name="commande">
             <!-- Liste déroulante pour selectionner si le formulaire est pour créer une commande ou un devis -->
             <select name="type" required onchange="afficherChampsSupplementaires()">
                 <option value="1">Commande</option>
@@ -115,13 +115,18 @@ if (isset($_GET['id'])) {
             <!-- <button type="button" onclick="enleverProduit()">Enlever un produit à la commande</button> -->
 
             <div id="champsDevis" style="display: none;">
-                <label for="photo">Prendre une photo :</label>
-                <input type="file" accept="image/*" capture="camera" id="photo" name="photo">
+                <div id="photos">
+                    <label for="photo">Prendre une photo :</label>
+                    <input type="file" accept="image/*" capture="camera" name="photos[]" multiple>
+                </div>
                 <br><br>
-                <label for="commentaire">Commentaire *</label><br>
-                <textarea name="commentaire" id="commentaire" rows="4" cols="50" required></textarea><br>
+                <button type="button" onclick="ajouterPhoto()">Ajouter une autre photo</button>
+                <br><br>
+                <label for="commentaire">Commentaire </label><br>
+                <textarea name="commentaire" id="commentaire" rows="4" cols="50"></textarea><br><br>
             </div>
-
+            
+            <br>
             
             <label for="reference" class="float" >Reference* </label>
             <input type="text" name="nomC" id="reference" required autofocus/><br>
@@ -141,8 +146,8 @@ if (isset($_GET['id'])) {
                 <option value="5">Livrer</option>
             </select><br> -->
             <select name="etatC" required>
-                <?php foreach ($commande_etats as $etat) { ?>
-                    <option value="<?php echo $etat['id_etat_cmd']; ?>"><?php echo $etat['commande_etat']; ?></option>
+                <?php foreach ($cmd_devis_etats as $etat) { ?>
+                    <option value="<?php echo $etat['id_etat_cmd_devis']; ?>"><?php echo $etat['cmd_devis_etat']; ?></option>
                 <?php } ?>
             </select><br>
 
@@ -502,6 +507,15 @@ if (isset($_GET['id'])) {
 
         // Appelez la fonction une fois au chargement de la page pour vérifier l'état initial de la liste déroulante
         afficherChampsSupplementaires();
+
+        function ajouterPhoto() {
+            var divPhotos = document.getElementById('photos');
+            var nouveauChamp = document.createElement('div');
+            nouveauChamp.innerHTML = '<label for="photo">Prendre une photo :</label>' +
+                                    '<input type="file" accept="image/*" capture="camera" name="photos[]" multiple>';
+            divPhotos.appendChild(nouveauChamp);
+        }
+
     </script>
 </body>
 </html>

@@ -25,31 +25,46 @@ file_put_contents('fournisseurs.json', $jsonFournisseurs);
 
 $idCommande = $_GET['id'];
 
-$req = $pdo->query("SELECT * FROM commande_etats");
-$commande_etats = $req->fetchAll(PDO::FETCH_ASSOC);
+$req = $pdo->query("SELECT * FROM cmd_devis_etats");
+$cmd_devis_etats = $req->fetchAll(PDO::FETCH_ASSOC);
 
 
 //requete pour récupérer les informations de la commande
-$query = $pdo->prepare("SELECT c.cmd_id, c.cmd_reference, c.cmd_designation, 
-                        c.cmd_dateout, c.cmd_prixventettc, c.membre_id,
-                        c.cmd_dateSouhait, e.commande_etat, c.cmd_etat, 
-                        c.cmd_prixHT, c.cmd_margeT
-                        FROM commande c
-                        JOIN commande_etats e ON c.cmd_etat = e.id_etat_cmd
-                        WHERE c.cmd_id = :id");
+$query = $pdo->prepare("SELECT c.cmd_devis_id, c.cmd_devis_reference, c.cmd_devis_designation, 
+                        c.cmd_devis_dateout, c.cmd_devis_prixventettc, c.membre_id,
+                        c.cmd_devis_dateSouhait, e.cmd_devis_etat, c.cmd_devis_etat, 
+                        c.cmd_devis_prixHT, c.cmd_devis_margeT, c.type_cmd_devis, c.commentaire
+                        FROM commande_devis c
+                        JOIN cmd_devis_etats e ON c.cmd_devis_etat = e.id_etat_cmd_devis
+                        WHERE c.cmd_devis_id = :id");
 $query->execute(array(":id" => $idCommande));
 $commande = $query->fetch(PDO::FETCH_ASSOC);
 //var_dump($commande);
 
+if ($commande['type_cmd_devis'] == '1') {
+    //On récupère les informations des produits de la commande
+    $query2 = $pdo->prepare("SELECT cp.reference, cp.designation, cp.fournisseur, 
+                            cp.paHT, cp.marge, cp.pvHT, cp.pvTTC, cp.etat, f.nomFournisseur
+                            FROM commande_produit cp
+                            JOIN fournisseur f ON cp.fournisseur = f.idFournisseur
+                            WHERE cp.id_commande = :id");
+    $query2->execute(array(":id"=> $idCommande));
+    $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    //On récupère les informations des produits du devis 
+    $query2 = $pdo->prepare("SELECT dp.reference, dp.designation, dp.fournisseur, 
+                            dp.paHT, dp.marge, dp.pvHT, dp.pvTTC, dp.etat, f.nomFournisseur
+                            FROM devis_produit dp
+                            JOIN fournisseur f ON dp.fournisseur = f.idFournisseur
+                            WHERE dp.id_devis = :id");
+    $query2->execute(array(":id"=> $idCommande));
+    $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
 
-//requete pour récupérer les informations des produits de la commande
-$query2 = $pdo->prepare("SELECT cp.reference, cp.designation, cp.fournisseur, 
-                        cp.paHT, cp.marge, cp.pvHT, cp.pvTTC, cp.etat, f.nomFournisseur
-                        FROM commande_produit cp
-                        JOIN fournisseur f ON cp.fournisseur = f.idFournisseur
-                        WHERE cp.id_commande = :id");
-$query2->execute(array(":id"=> $idCommande));
-$produits = $query2->fetchAll(PDO::FETCH_ASSOC);
+    //On récupère les photo du devis 
+    $query3 = $pdo->prepare("SELECT photo FROM photos_devis WHERE id_devis = :id");
+    $query3->execute(array(":id"=> $idCommande));
+    $photos = $query3->fetchAll(PDO::FETCH_ASSOC);
+}
 //var_dump($produits);
 ?>
 <html>
@@ -60,93 +75,114 @@ $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
     <div class="container">
-        <h2>Modifier une commande</h2>
-        <form action="traitement_modification_commande.php?idcommande=<?php echo $idCommande ?>&idclient=<?php echo $commande['membre_id']?>" method="post">
-        <fieldset><legend>Produit <small></small></legend>
+        <h2>Modifier une commande / Devis</h2>
+        <form action="traitement_modification.php?idcommande=<?php echo $idCommande ?>&idclient=<?php echo $commande['membre_id']?>" method="post">
+            <fieldset><legend>Produit <small></small></legend>
+                <div id="materiels">
+                    <?php 
+                    $i=0;
+                    foreach ($produits as $unproduit) { $i++; ?>
+                        <div class="materiel">
+                            <label><b>Produit n°<?php echo $i ?></b></label><br>
 
-        <div id="materiels">
-            <?php 
-            $i=0;
-            foreach ($produits as $unproduit) { $i++; ?>
-                <div class="materiel">
-                    <label><b>Produit n°<?php echo $i ?></b></label><br>
+                            <label for="reference">Référence </label> 
+                            <input type="text" name="dynamic['<?php echo($i) ?>'][]" id="reference" value="<?php echo $unproduit['reference'] ?>" required autofocus>&nbsp;&nbsp;|&nbsp;&nbsp;        
+                            
+                            <label for="designation">Désignation </label>
+                            <input type="text" name="dynamic['<?php echo($i) ?>'][]" id="designation" value="<?php echo $unproduit['designation'] ?>" required>&nbsp;&nbsp;|&nbsp;&nbsp;
+                            
+                            <label for="fournisseur">Fournisseur </label>
+                            <select name="dynamic['<?php echo($i) ?>'][]" required>
+                                    <?php
+                                    $jsonData = file_get_contents('fournisseurs.json');
+                                    $fournisseurs = json_decode($jsonData, true);
+                                    foreach ($fournisseurs as $fournisseur) {?>
+                                        <option value="<?php echo $fournisseur['idFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>
+                                        <?php
+                                    }?>
+                            </select>
+                            <br><br>
+                            <label >Pa HT </label>
+                            <input type="text" name="dynamic['<?php echo($i) ?>'][]" SIZE="2" id="paHT<?php echo($i)?>" value="<?php echo $unproduit['paHT'] ?>" onblur="calculerenplus(<?php echo($i)?>)" required autofocus> € &nbsp;&nbsp;|&nbsp;&nbsp;
+                                
+                            <label>Marge </label>
+                            <input type="text" SIZE="2" name="dynamic['<?php echo($i) ?>'][]" id="marge<?php echo($i) ?>" value="<?php echo $unproduit['marge'] ?>" onblur="calculerenplus(<?php echo($i)?>)" required autofocus> % &nbsp;&nbsp;|&nbsp;&nbsp;
+                            
+                            <label>Pv HT </label>
+                            <input type="text" SIZE="2"  name="dynamic['<?php echo($i) ?>'][]" id="pvHT<?php echo($i) ?>" value="<?php echo $unproduit['pvHT'] ?>" required autofocus readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
+                                
+                            <label>Pv TTC </label>
+                            <input type="text" SIZE="2" name="dynamic['<?php echo($i) ?>'][]" id="pvTTC<?php echo($i) ?>" value="<?php echo $unproduit['pvTTC'] ?>" required autofocus readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
+                            
+                            <label>Montant marge  </label>
+                            <input type="text"  name="dynamic['<?php echo($i) ?>'][]" SIZE="2" id="margeM<?php echo $i ?>" value="<?php echo $unproduit['pvHT']-$unproduit['paHT'] ?>"  readonly> € <br />
 
-                    <label for="reference">Référence </label> 
-                    <input type="text" name="dynamic['<?php echo($i) ?>'][]" id="reference" value="<?php echo $unproduit['reference'] ?>" required autofocus>&nbsp;&nbsp;|&nbsp;&nbsp;        
-                    
-                    <label for="designation">Désignation </label>
-                    <input type="text" name="dynamic['<?php echo($i) ?>'][]" id="designation" value="<?php echo $unproduit['designation'] ?>" required>&nbsp;&nbsp;|&nbsp;&nbsp;
-                    
-                    <label for="fournisseur">Fournisseur </label>
-                    <select name="dynamic['<?php echo($i) ?>'][]" required>
-                            <?php
-                            $jsonData = file_get_contents('fournisseurs.json');
-                            $fournisseurs = json_decode($jsonData, true);
-                            foreach ($fournisseurs as $fournisseur) {?>
-                                <option value="<?php echo $fournisseur['idFournisseur']; ?>"><?php echo $fournisseur['nomFournisseur']; ?></option>
-                                <?php
-                            }?>
-                    </select>
-                    <br><br>
-                    <label >Pa HT </label>
-                    <input type="text" name="dynamic['<?php echo($i) ?>'][]" SIZE="2" id="paHT<?php echo($i)?>" value="<?php echo $unproduit['paHT'] ?>" onblur="calculerenplus(<?php echo($i)?>)" required autofocus> € &nbsp;&nbsp;|&nbsp;&nbsp;
-                        
-                    <label>Marge </label>
-                    <input type="text" SIZE="2" name="dynamic['<?php echo($i) ?>'][]" id="marge<?php echo($i) ?>" value="<?php echo $unproduit['marge'] ?>" onblur="calculerenplus(<?php echo($i)?>)" required autofocus> % &nbsp;&nbsp;|&nbsp;&nbsp;
-                    
-                    <label>Pv HT </label>
-                    <input type="text" SIZE="2"  name="dynamic['<?php echo($i) ?>'][]" id="pvHT<?php echo($i) ?>" value="<?php echo $unproduit['pvHT'] ?>" required autofocus readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
-                        
-                    <label>Pv TTC </label>
-                    <input type="text" SIZE="2" name="dynamic['<?php echo($i) ?>'][]" id="pvTTC<?php echo($i) ?>" value="<?php echo $unproduit['pvTTC'] ?>" required autofocus readonly> € &nbsp;&nbsp;|&nbsp;&nbsp;
-                    
-                    <label>Montant marge  </label>
-                    <input type="text"  name="dynamic['<?php echo($i) ?>'][]" SIZE="2" id="margeM<?php echo $i ?>" value="<?php echo $unproduit['pvHT']-$unproduit['paHT'] ?>"  readonly> € <br />
+                            <div id="choixArrondi<?php echo($i) ?>"></div>
 
-                    <div id="choixArrondi<?php echo($i) ?>"></div>
-
-                    <label>Statut produit</label> 
-                    <select name="dynamic['<?php echo($i) ?>'][]" required>
-                        <option value="commande">Commandé</option>
-                        <option value="recu">Reçu</option>
-                        <option value="livre">
-                    </select>
+                            <label>Statut produit</label> 
+                            <select name="dynamic['<?php echo($i) ?>'][]" required>
+                                <option value="commande">Commandé</option>
+                                <option value="recu">Reçu</option>
+                                <option value="livre">
+                            </select>
+                        </div> 
+                    <?php } ?>
                 </div>
-                
-             <?php } ?>
-        </div>
-        <button type="button" onclick="supprimerProduit()">Supprimer</button>
-        <br><br>
-        <button type="button" onclick="ajouterProduit()">Ajouter un nouveau produit</button>
-        </fieldset>
+                <button type="button" onclick="supprimerProduit()">Supprimer</button>
+                <br><br>
+                <button type="button" onclick="ajouterProduit()">Ajouter un nouveau produit</button>
+            </fieldset>
             <br>
+
+            <?php if ($commande['type_cmd_devis'] == '2') { ?>
+                <!-- Si c'est un devis, on affiche les photos et le commentaire-->
+                <fieldset><legend>Photos <small></small></legend>
+                    <div id="photos">
+                        <?php 
+                        $i=0;
+                        foreach ($photos as $photo) { $i++; ?>
+                            <div class="photo">
+                                <label><b>Photo n°<?php echo $i ?></b></label><br>
+                                <img src="<?php echo $photo['photo'] ?>" alt="photo" style="width: 100px; height: 100px;">
+                            </div> 
+                        <?php } ?>
+                    </div>
+                </fieldset>
+                <br>
+                <fieldset><legend>Commentaire <small></small></legend>
+                    <textarea name="commentaire" rows="4" cols="50"><?php echo $commande['commentaire'] ?></textarea>
+                </fieldset>
+            <?php } ?>
+
+            <br>
+
             <label for="reference" class="float" >Nom de la commande </label>
-                <input type="text" name="nomC" id="reference" value="<?php echo $commande['cmd_reference']?>" readonly/><br>
+                <input type="text" name="nomC" id="reference" value="<?php echo $commande['cmd_devis_reference']?>" readonly/><br>
             <label for="designation" class="float">Désignation</label>
-                <input type="text" name="designationC" id="designation" value="<?php echo $commande['cmd_designation']?>" readonly><br>
+                <input type="text" name="designationC" id="designation" value="<?php echo $commande['cmd_devis_designation']?>" readonly><br>
 
             <label class="float">Date de livraison prévue</label>
-                <input type="date" name="dateP" value="<?php echo date('Y-m-d', $commande['cmd_dateout']) ?>"><br>
+                <input type="date" name="dateP" value="<?php echo date('Y-m-d', $commande['cmd_devis_dateout']) ?>"><br>
             
             <label class="float">Date de livraison souhaitée</label>
-            <input type="date" name="dateS" value="<?php echo date('Y-m-d', $commande['cmd_dateSouhait']) ?>" required autofocus readonly><br>
+            <input type="date" name="dateS" value="<?php echo date('Y-m-d', $commande['cmd_devis_dateSouhait']) ?>" required autofocus readonly><br>
 
             <label for="etat" class="float" >Statut commande </label>
             <select name="etatC" required>
-                <?php foreach ($commande_etats as $etat) { ?>
-                    <option value="<?php echo $etat['id_etat_cmd']; ?>"><?php echo $etat['commande_etat']; ?></option>
+                <?php foreach ($cmd_devis_etats as $etat) { ?>
+                    <option value="<?php echo $etat['id_etat_cmd_devis']; ?>"><?php echo $etat['cmd_devis_etat']; ?></option>
                 <?php } ?>
             </select>
 
             <br><br>
             <label for="reference" class="float">Total HT </label>
-            <input type="text" name="totalHT" id="pvHTT" value="<?php echo $commande['cmd_prixHT'] ?>" readonly> €<br>
+            <input type="text" name="totalHT" id="pvHTT" value="<?php echo $commande['cmd_devis_prixHT'] ?>" readonly> €<br>
             
             <label for="reference" class="float">Total TTC </label>
-            <input type="text" name="totalTTC" id="pvTTCT" value="<?php echo $commande['cmd_prixventettc'] ?>" readonly> €<br>
+            <input type="text" name="totalTTC" id="pvTTCT" value="<?php echo $commande['cmd_devis_prixventettc'] ?>" readonly> €<br>
             
             <label for="reference" class="float">Total marge </label>
-            <input type="text" name="totalMarge" id="margeT" value="<?php echo $commande['cmd_margeT']?>" readonly>  €  <br>
+            <input type="text" name="totalMarge" id="margeT" value="<?php echo $commande['cmd_devis_margeT']?>" readonly>  €  <br>
     
             <div class="center"><input class="createButton" type="submit" value="Modifier" /></div>
             <br>

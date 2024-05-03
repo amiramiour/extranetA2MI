@@ -50,7 +50,7 @@ try {
             echo "<br>";
             echo "<a href='../bi/bi_form.php?membre_id=$client_id' class='btn btn-primary'>Créer BI</a>";
             echo "<br>";
-            echo "<a href='../commandes/ajouter_commande.php?id=$client_id' class='btn btn-primary'>Créer Commande</a>";
+            echo "<a href='../commandes/ajouter_commandes_devis.php?id=$client_id' class='btn btn-primary'>Créer Commande</a>";
             echo "<br>";
             echo "<a href='../pret/pret.php?id=$client_id'class='btn btn-primary'>Créer Pret</a>";
             echo "<br>";
