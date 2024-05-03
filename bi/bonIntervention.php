@@ -99,8 +99,11 @@ try {
                 <td><?= $bi['bi_regle'] ?></td>
                 <td>
                     <a href="../bi/modification_bi.php?bi_id=<?= $bi['bi_id'] ?>" class="btn btn-primary">Modifier</a>
+<<<<<<< HEAD
                 </td>
                 <td>
+=======
+>>>>>>> Amir
                     <form action="" method="post" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce bon d\'intervention ?');">
                         <input type="hidden" name="action" value="supprimer">
                         <input type="hidden" name="bi_id" value="<?= $bi['bi_id'] ?>">

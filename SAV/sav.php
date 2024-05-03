@@ -44,6 +44,7 @@ try {
             sav.sav_tarifmaterielttc, 
             sav.sav_typemateriel,
             sav_etats.etat_intitule,
+            sav.active,
             membres_technicien.membre_nom AS technicien_nom
         FROM 
             sav
@@ -55,8 +56,7 @@ try {
             sauvgarde_etat_info sei ON sav.sav_avancement = sei.id_sauvgarde_etat
         LEFT JOIN
             membres AS membres_technicien ON sav.sav_technicien = membres_technicien.membre_id
-        WHERE
-            sav.active = 1";
+        ";
 
     // Clause WHERE conditionnelle pour filtrer par état si un état est sélectionné
     if (!empty($etat)) {
@@ -163,6 +163,8 @@ try {
             <th scope="col">Technicien</th>
             <th scope="col">Type matériel</th>
             <th scope="col">État</th>
+            <th scope="col">Active</th>
+
         </tr>
         </thead>
         <tbody>
@@ -203,7 +205,11 @@ try {
                 <td><?= $row['technicien_nom'] ?></td>
                 <td><?= $row['sav_typemateriel'] ?></td>
                 <td><?= $row['etat_intitule'] ?></td>
+                <td><?= $row['active'] ?></td>
+
                 <td><a href="modifier-sav.php?sav_id=<?= $row['sav_id'] ?>" class="btn btn-primary"><i class="la la-pencil"></i> Modifier</a></td>
+                <td><a href="supprimer-sav.php?sav_id=<?= $row['sav_id'] ?>" class="btn btn-primary"><i class="la la-pencil"></i> Supprimer</a></td>
+
             </tr>
         <?php endforeach; ?>
         </tbody>

@@ -47,9 +47,10 @@ $membres = $query->fetchAll();
 <div class="container mt-3">
     <!-- Boutons de tri -->
     <div class="d-flex justify-content-between centered-buttons">
-        <!-- Ajout de la classe centered-buttons -->
         <a href="?sort=nom" class="btn btn-primary" style="background-color: #C8356C;">Trier par nom</a>
         <a href="?sort=entreprise" class="btn btn-primary" style="background-color: #C8356C;">Trier par entreprise</a>
+        <!-- Bouton "Ajouter client" -->
+        <a href="../connexion/create_account.php" class="btn btn-primary" style="background-color: #C8356C;">Ajouter client</a>
     </div>
 
     <!-- Nombre de clients -->
