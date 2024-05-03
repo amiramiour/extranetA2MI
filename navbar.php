@@ -29,16 +29,13 @@
                     <a class="nav-link" href="/SAV/sav.php">SAV</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/bi/liste_interventions.php">BI pour chaque client</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="/bi/bonIntervention.php">Tout les bons d'interventions</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/pret/liste_prets.php">Prêts</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Historique</a>
+                    <a class="nav-link" href="/historique.php">Historique</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Liste d'administrateurs</a>

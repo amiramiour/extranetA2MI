@@ -15,11 +15,12 @@ $db = connexionbdd();
 
 // Requête SQL pour récupérer les données des prêts avec les noms et prénoms des membres
 $query = "
-    SELECT p.pret_id, p.pret_materiel, p.pret_caution, p.pret_datein, p.pret_dateout, p.membre_id, m.membre_nom, m.membre_prenom, p.pret_etat, p.commentaire
+    SELECT p.pret_id, p.pret_materiel, p.pret_caution, p.pret_datein, p.pret_dateout, p.membre_id, m.membre_nom, m.membre_prenom, pe.etat_intitule, p.commentaire
     FROM pret p
     INNER JOIN membres m ON p.membre_id = m.membre_id
+    INNER JOIN pret_etat pe ON p.pret_etat = pe.id_etat_pret
     WHERE p.pret_active = 1
-    ORDER BY p.pret_dateout DESC"; // Tri par date de sortie du prêt, du plus récent au plus ancien
+    ORDER BY p.pret_dateout DESC";
 
 // Préparation et exécution de la requête
 $stmt = $db->query($query);
@@ -49,28 +50,38 @@ $prets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <thead>
             <tr>
                 <th scope="col">ID</th>
-                <th scope="col">Matériel</th>
-                <th scope="col">Caution</th>
-                <th scope="col">Date de sortie</th>
-                <th scope="col">Date de retour</th>
                 <th scope="col">Emprunteur</th>
                 <th scope="col">État</th>
+                <th scope="col">Date de Debut</th>
+                <th scope="col">Date de Sotie</th>
+                <th scope="col">Caution</th>
                 <th scope="col">Commentaire</th>
+                <th scope="col">Matériel</th>
+
             </tr>
             </thead>
             <tbody>
             <?php foreach ($prets as $pret) : ?>
                 <tr>
                     <td><?= $pret['pret_id'] ?></td>
-                    <td><?= $pret['pret_materiel'] ?></td>
-                    <td><?= $pret['pret_caution'] ?></td>
-                    <td><?= date('d/m/Y', $pret['pret_datein']) ?></td>
-                    <td><?= date('d/m/Y', $pret['pret_dateout']) ?></td>
                     <td><a href="../profile/profile_client.php?id=<?= $pret['membre_id'] ?>"><?= $pret['membre_nom'] . ' ' . $pret['membre_prenom'] ?></a></td>
-                    <td><?= $pret['pret_etat'] ?></td>
+                    <td><?= $pret['etat_intitule'] ?></td>
+                    <td><?= date('Y/m/d', $pret['pret_datein']) ?></td>
+                    <td><?= date('Y/m/d', $pret['pret_dateout']) ?></td>
+                    <td><?= $pret['pret_caution'] ?></td>
                     <td><?= $pret['commentaire'] ?></td>
+                    <td><?= $pret['pret_materiel'] ?></td>
+
+                    <td>
+                        <a href="../pret/modifier_pret.php?id=<?= $pret['pret_id'] ?>" class="btn btn-primary">Modifier</a>
+                    </td>
+                    <td>
+                        <a href="#" class="btn btn-danger" onclick="confirmSuppression(<?= $pret['pret_id'] ?>)">Supprimer</a>
+                    </td>
+
                 </tr>
             <?php endforeach; ?>
+
             </tbody>
         </table>
     </div>
@@ -78,6 +89,17 @@ $prets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!-- Inclusion du JavaScript Bootstrap -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/js/bootstrap.min.js"></script>
+<script>
+    function confirmSuppression(pretId) {
+        // Demander confirmation à l'utilisateur
+        if (confirm("Êtes-vous sûr de vouloir supprimer ce prêt ?")) {
+            // Rediriger vers le script PHP de suppression avec l'ID du prêt
+            window.location.href = "../pret/supprimer_pret.php?id=" + pretId;
+        }
+    }
+</script>
+
+
 </body>
 
 </html>

@@ -35,12 +35,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Récupération de l'ID du technicien en charge depuis la session
     // À remplacer par la gestion de sessions
 // Récupérer l'ID de l'utilisateur connecté depuis la session
-    $sav_technicien_id = $_SESSION['user_id'];
+    $pret_technicien_id = $_SESSION['user_id'];
 
     // Récupération des informations du technicien
-    $query_technicien = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :sav_technicien_id";
+    $query_technicien = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :pret_technicien_id";
     $stmt_technicien = $db->prepare($query_technicien);
-    $stmt_technicien->bindParam(':sav_technicien_id', $sav_technicien_id);
+    $stmt_technicien->bindParam(':pret_technicien_id', $pret_technicien_id);
     $stmt_technicien->execute();
     $technicien_info = $stmt_technicien->fetch(PDO::FETCH_ASSOC);
 
@@ -123,7 +123,6 @@ function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_p
             $body .= "Valeur du matériel : {$pret_info['valeurMat']}\n";
             $body .= "Caution : {$pret_info['pret_caution']}\n";
             $body .= "Mode : {$pret_info['pret_mode']}\n";
-            $body .= "Date de début : " . date('d/m/Y', $pret_info['pret_datein']) . "\n";
             $body .= "Date de fin : " . date('d/m/Y', $pret_info['pret_dateout']) . "\n";
             $body .= "Commentaire : {$pret_info['commentaire']}\n\n";
         } else {
@@ -133,7 +132,6 @@ function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_p
             $body .= "Valeur du matériel : {$pret_info['valeurMat']}\n";
             $body .= "Caution : {$pret_info['pret_caution']}\n";
             $body .= "Mode : {$pret_info['pret_mode']}\n";
-            $body .= "Date de début : " . date('d/m/Y', $pret_info['pret_datein']) . "\n";
             $body .= "Date de fin : " . date('d/m/Y', $pret_info['pret_dateout']) . "\n";
             $body .= "Commentaire : {$pret_info['commentaire']}\n\n";
         }
