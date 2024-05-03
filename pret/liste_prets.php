@@ -49,28 +49,38 @@ $prets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <thead>
             <tr>
                 <th scope="col">ID</th>
-                <th scope="col">Matériel</th>
-                <th scope="col">Caution</th>
-                <th scope="col">Date de sortie</th>
-                <th scope="col">Date de retour</th>
                 <th scope="col">Emprunteur</th>
                 <th scope="col">État</th>
+                <th scope="col">Date de debut</th>
+                <th scope="col">Date de retour</th>
+                <th scope="col">Caution</th>
                 <th scope="col">Commentaire</th>
+                <th scope="col">Matériel</th>
+
             </tr>
             </thead>
             <tbody>
             <?php foreach ($prets as $pret) : ?>
                 <tr>
                     <td><?= $pret['pret_id'] ?></td>
-                    <td><?= $pret['pret_materiel'] ?></td>
-                    <td><?= $pret['pret_caution'] ?></td>
-                    <td><?= date('d/m/Y', $pret['pret_datein']) ?></td>
-                    <td><?= date('d/m/Y', $pret['pret_dateout']) ?></td>
                     <td><a href="../profile/profile_client.php?id=<?= $pret['membre_id'] ?>"><?= $pret['membre_nom'] . ' ' . $pret['membre_prenom'] ?></a></td>
                     <td><?= $pret['pret_etat'] ?></td>
+                    <td><?= date('d/m/Y', $pret['pret_datein']) ?></td>
+                    <td><?= date('d/m/Y', $pret['pret_dateout']) ?></td>
+                    <td><?= $pret['pret_caution'] ?></td>
                     <td><?= $pret['commentaire'] ?></td>
+                    <td><?= $pret['pret_materiel'] ?></td>
+
+                    <td>
+                        <a href="../pret/modifier_pret.php?id=<?= $pret['pret_id'] ?>" class="btn btn-primary">Modifier</a>
+                    </td>
+                    <td>
+                        <a href="#" class="btn btn-danger" onclick="confirmSuppression(<?= $pret['pret_id'] ?>)">Supprimer</a>
+                    </td>
+
                 </tr>
             <?php endforeach; ?>
+
             </tbody>
         </table>
     </div>
@@ -78,6 +88,17 @@ $prets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!-- Inclusion du JavaScript Bootstrap -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/js/bootstrap.min.js"></script>
+<script>
+    function confirmSuppression(pretId) {
+        // Demander confirmation à l'utilisateur
+        if (confirm("Êtes-vous sûr de vouloir supprimer ce prêt ?")) {
+            // Rediriger vers le script PHP de suppression avec l'ID du prêt
+            window.location.href = "../pret/supprimer_pret.php?id=" + pretId;
+        }
+    }
+</script>
+
+
 </body>
 
 </html>
