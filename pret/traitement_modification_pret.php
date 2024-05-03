@@ -91,8 +91,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pret_id'])) {
                 $client_email = $client_info['membre_mail'];
 
                 // Envoi de l'e-mail au technicien
+                // Envoi de l'e-mail au technicien
                 sendPretEmail($technicien_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info, true);
-                sendPretEmail($technicien_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info, false);
+
+                // Envoi de l'e-mail au client
+                sendPretEmail($client_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info, false);
+
 
 
                 // Envoi de l'e-mail au client
