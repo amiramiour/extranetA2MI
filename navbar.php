@@ -12,10 +12,7 @@
                     <a class="nav-link" href="/">Accueil</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/connexion/create_account.php">Créer un compte client</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/clients/liste_clients.php">Liste des clients</a>
+                    <a class="nav-link" href="/clients/liste_clients.php">Liste des utilisateurs</a>
                 </li>
                 <li class="nav-item">
                 </li>

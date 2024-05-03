@@ -204,6 +204,8 @@ try {
                 <td><?= $row['sav_typemateriel'] ?></td>
                 <td><?= $row['etat_intitule'] ?></td>
                 <td><a href="modifier-sav.php?sav_id=<?= $row['sav_id'] ?>" class="btn btn-primary"><i class="la la-pencil"></i> Modifier</a></td>
+                <td><a href="supprimer-sav.php?sav_id=<?= $row['sav_id'] ?>" class="btn btn-primary"><i class="la la-pencil"></i> Supprimer</a></td>
+
             </tr>
         <?php endforeach; ?>
         </tbody>
