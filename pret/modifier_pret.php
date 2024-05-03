@@ -25,7 +25,7 @@ try {
     $db = connexionbdd();
 
     // Requête SQL pour récupérer les détails du prêt à modifier
-    $query = "SELECT pret_caution, pret_mode, pret_dateout, commentaire FROM pret WHERE pret_id = :id";
+    $query = "SELECT pret_caution, pret_mode, pret_dateout, commentaire, pret_etat FROM pret WHERE pret_id = :id";
 
     // Préparer la requête SQL
     $stmt = $db->prepare($query);
@@ -38,7 +38,6 @@ try {
 
     // Récupération du résultat
     $pret = $stmt->fetch(PDO::FETCH_ASSOC);
-    $client_id = $_GET['id']; //la on recupere l'id passé dans l'url
 
     // Vérifier si le prêt existe
     if($pret) {
@@ -54,14 +53,10 @@ try {
             <link rel="stylesheet" type="text/css" href="../css/style.css">
         </head>
         <body>
-        <?php
-        // Inclure la barre de navigation
-        include('../navbar.php');
-        ?>
+        <?php include('../navbar.php'); ?>
         <div class="container mt-3">
             <h1>Modifier Prêt</h1>
             <form action="traitement_modification_pret.php" method="post">
-                <input type="hidden" name="client_id" value="<?php echo $client_id; ?>">
                 <div class="form-group">
                     <label for="caution">Caution</label>
                     <input type="text" class="form-control" id="caution" name="caution" value="<?php echo $pret['pret_caution']; ?>">
@@ -75,6 +70,13 @@ try {
                     <input type="date" class="form-control" id="date_rendu" name="date_rendu" value="<?php echo $pret['pret_dateout']; ?>">
                 </div>
                 <div class="form-group">
+                    <label for="etat">État</label>
+                    <select class="form-control" id="etat" name="etat">
+                        <option value="1" <?php if ($pret['pret_etat'] == 1) echo "selected"; ?>>En cours</option>
+                        <option value="2" <?php if ($pret['pret_etat'] == 2) echo "selected"; ?>>Terminé</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="commentaire">Commentaire</label>
                     <textarea class="form-control" id="commentaire" name="commentaire"><?php echo $pret['commentaire']; ?></textarea>
                 </div>
@@ -84,6 +86,7 @@ try {
         </div>
         </body>
         </html>
+
         <?php
     } else {
         // Afficher un message d'erreur si le prêt n'est pas trouvé
