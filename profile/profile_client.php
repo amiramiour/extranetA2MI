@@ -157,6 +157,21 @@ try {
         $stmt_prets->execute();
         $prets = $stmt_prets->fetchAll(PDO::FETCH_ASSOC);
 
+        // Traitement de la suppression des prêts
+        if(isset($_POST['action']) && $_POST['action'] === 'supprimer_pret' && isset($_POST['pret_id'])) {
+            // Récupérer l'ID du prêt à supprimer
+            $pret_id = $_POST['pret_id'];
+
+            // Mettre à jour l'attribut pret_active dans la base de données pour marquer comme supprimé
+            $update_query_pret = $db->prepare("UPDATE pret SET pret_active = 0 WHERE pret_id = ?");
+            $update_query_pret->execute([$pret_id]);
+
+            // Répondre avec un message indiquant que la suppression a été effectuée
+            echo "Le prêt a été supprimé avec succès.";
+            exit; // Arrêter le script après la réponse AJAX
+        }
+
+
 // Vérification si des prêts sont disponibles
         if (!empty($prets)) {
             // Affichage des prêts
@@ -174,8 +189,11 @@ try {
                 echo "<p class='card-text'>Date de retour : " . date('d/m/Y', $pret['pret_dateout']) . "</p>";
                 echo "<p class='card-text'>Commentaire : " . $pret['commentaire'] . "</p>";
                 echo "<p class='card-text'>Technicien : " . $pret['technicien_nom'] . " " . $pret['technicien_prenom'] . "</p>";
-                echo "<a href='/pret/modifier_pret.php?id=" . $pret['pret_id'] . "' class='btn btn-primary'>Modifier</a>";
-                echo "<a href='../pret/supprimer_pret.php?id=" . $pret['pret_id'] . "' class='btn btn-primary'>Supprimer</a>";
+                echo "<a href='../pret/modifier_pret.php?id=" . $pret['pret_id'] . "' class='btn btn-primary'>Modifier</a>";
+                echo "<a href='#' class='btn btn-primary btn-supprimer-pret' data-pret-id='" . $pret['pret_id'] . "'>Supprimer</a>";
+
+
+
 
                 echo "</div>";
                 echo "</div>";
@@ -275,7 +293,34 @@ if(isset($_POST['action']) && $_POST['action'] === 'supprimer' && isset($_POST['
             });
         }
     });
+
+    // Ecouteur d'événement sur les boutons "Supprimer" des prêts
+    $(".btn-supprimer-pret").click(function() {
+        // Récupérer l'ID du prêt à supprimer
+        var pret_id = $(this).data("pret-id");
+        // Demander confirmation à l'utilisateur
+        if (confirm("Êtes-vous sûr de vouloir supprimer ce prêt ?")) {
+            // Supprimer l'élément de la page HTML
+            $(this).closest(".col-md-6").remove();
+            // Envoyer une requête AJAX pour supprimer le prêt de la base de données
+            $.ajax({
+                url: "",
+                type: "POST",
+                data: { action: 'supprimer_pret', pret_id: pret_id },
+                success: function(response) {
+                    // Afficher uniquement le message de succès
+                    alert("La suppression a été un succès.");
+                }
+            });
+        }
+    });
+
+
 </script>
+
+
+
+
 
 </body>
 </html>
