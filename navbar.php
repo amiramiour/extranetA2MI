@@ -37,9 +37,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/historique.php">Historique</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Liste d'administrateurs</a>
-                </li>
+
             </ul>
         </div>
     </div>
