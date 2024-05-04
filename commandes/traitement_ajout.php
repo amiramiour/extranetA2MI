@@ -36,7 +36,6 @@ $query->execute();
 $client = $query->fetch(PDO::FETCH_ASSOC);
 
 //récupérer les information du technicien qui a effectué la commande
-//id du technicien connecté (session)
 $id_technicien = $_SESSION['user_id'];
 //var_dump($id_technicien);
 $query = $pdo->prepare("SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :id_technicien");
@@ -67,8 +66,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $etat_commande = $query->fetchColumn();
 
     if ($type == '2') { //devis
-        $photos = $_POST['photos'];
+        $photos = $_FILES['photos'];
         //var_dump($photos);
+        
         $commentaire = $_POST['commentaire'];
 
         $stmt = $pdo->prepare("INSERT INTO commande_devis (cmd_devis_reference, cmd_devis_designation, cmd_devis_datein, cmd_devis_dateout, 
@@ -79,14 +79,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $id_commande_devis = $pdo->lastInsertId();
 
-        //On vérifie d'abord si des photos ont été ajoutées
-        if (!empty($photos)){
-            foreach ($photos as $photo) {
-                $stmt = $pdo->prepare("INSERT INTO photos_devis (photo, id_devis) VALUES (?, ?)");
-                $stmt->execute([$photo, $id_commande_devis]);
+        
+        // On vérifie d'abord si des photos ont été ajoutées
+        if (!empty($photos['name'])) {
+            foreach ($photos['name'] as $key => $photo_name) {
+                // Chemin temporaire du fichier
+                $file_tmp = $photos['tmp_name'][$key];
+
+                // Générer un nom de fichier unique en utilisant la date, l'heure, min, sec et l'index du fichier
+                $current_datetime = date("Y-m-d_H-i-s");
+                $file_extension = pathinfo($photo_name, PATHINFO_EXTENSION); // Extension du fichier
+                $new_filename = "image_" . $current_datetime . "_" . $key . "." . $file_extension;
+                
+                // Chemin de destination
+                $file_destination = DEVIS_IMAGE_PATH . $new_filename;
+                
+                // Déplacer le fichier téléchargé vers le dossier de destination
+                if (move_uploaded_file($file_tmp, $file_destination)) {
+                    // Insertion de l'image dans la base de données
+                    $stmt = $pdo->prepare("INSERT INTO photos_devis (photo, id_devis) VALUES (?, ?)");
+                    $stmt->execute([$new_filename, $id_commande_devis]);
+                }
             }
         }
-        
+
+
         //On insère les produits dans devis_produit
         foreach ($_POST['dynamic'] as $produit) {
             $reference = $produit[0];
@@ -144,12 +161,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->execute();
 
     // Envoi de l'email au technicien 
-    if(sendEmail($client['membre_nom'], $client['membre_prenom'], $totalTTC, $technicien['membre_mail'], $technicien['membre_nom'], $technicien['membre_prenom'], date('d/m/Y',$dateP) , date('d/m/Y'), date('d/m/Y', $dateS) , $etat_commande, $type)) {
+    /*if(sendEmail($client['membre_nom'], $client['membre_prenom'], $totalTTC, $technicien['membre_mail'], $technicien['membre_nom'], $technicien['membre_prenom'], date('d/m/Y',$dateP) , date('d/m/Y'), date('d/m/Y', $dateS) , $etat_commande, $type)) {
         $success_count++;
         echo('Email envoyé avec succès');
     } else {
         $error_count++;
-    }
+    }*/
 
     header("Location: commandes_client.php?id=$id_client");
     exit();

@@ -12,4 +12,7 @@ define('SMTP_SECURE', 'tls');
 // Adresse email expéditeur
 define('SENDER_EMAIL', 'masdouarania02@gmail.com');
 define('SENDER_NAME', 'A2MI');
+
+// Chemin vers le dossier d'images des devis
+define('DEVIS_IMAGE_PATH', '../images/images_devis/');
 ?>

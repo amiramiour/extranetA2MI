@@ -50,7 +50,7 @@ if (isset($_GET['id'])) {
     <div class="container">
         <h2>Ajouter une Commande / Devis</h2>
         <!-- <form action="traitement_commande.php?id=<?php echo $id; ?>" method="post" name="commande">-->
-        <form action="<?php echo isset($id) ? 'traitement_ajout.php?id=' . $id : 'traitement_ajout.php'; ?>" method="post" name="commande">
+        <form action="<?php echo isset($id) ? 'traitement_ajout.php?id=' . $id : 'traitement_ajout.php'; ?>" method="post" name="commande" enctype="multipart/form-data">
             <!-- Liste déroulante pour selectionner si le formulaire est pour créer une commande ou un devis -->
             <select name="type" required onchange="afficherChampsSupplementaires()">
                 <option value="1">Commande</option>
@@ -493,12 +493,15 @@ if (isset($_GET['id'])) {
         function afficherChampsSupplementaires() {
             var type = document.querySelector('select[name="type"]').value;
             var champsDevis = document.getElementById('champsDevis');
+            var commentaire = document.getElementById('commentaire');
 
             // Si l'utilisateur choisit un devis, affichez les champs supplémentaires, sinon masquez-les
             if (type === '2') {
                 champsDevis.style.display = 'block';
+                commentaire.required = true;
             } else {
                 champsDevis.style.display = 'none';
+                commentaire.required = false;
             }
         }
 
