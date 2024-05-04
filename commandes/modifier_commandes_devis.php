@@ -143,7 +143,7 @@ if ($commande['type_cmd_devis'] == '1') {
                         foreach ($photos as $photo) { $i++; ?>
                             <div class="photo">
                                 <label><b>Photo n°<?php echo $i ?></b></label><br>
-                                <img src="<?php echo '../images/images_devis/' . $photo['photo']; ?>" alt="photo" style="width: 100px; height: 100px;">
+                                <img src="<?php echo DEVIS_IMAGE_PATH . $photo['photo']; ?>" alt="photo" style="width: 100px; height: 100px;">
                             </div> 
                         <?php } ?>
                     </div>

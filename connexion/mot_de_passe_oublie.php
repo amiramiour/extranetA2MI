@@ -1,5 +1,5 @@
 <?php
-// Inclure le fichier de connexion à la base de données
+require_once '../config.php';
 include('../ConnexionBD.php');
 require '../vendor/autoload.php';
 
@@ -55,30 +55,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['validate']) && $_POST
 
 // Fonction pour envoyer un e-mail avec le nouveau mot de passe
 function sendNewPasswordEmail($email, $password) {
+    $subject = "=?UTF-8?B?" . base64_encode("Réinitialisation de votre mot de passe") . "?=";
 
-    // Utilisation de la classe PHPMailer
-
+    $body = "Bonjour, \n\n";
+    $body .= "Votre mot de passe a été réinitialisé avec succès. Voici votre nouveau mot de passe : " . $password . "\n\n";
+    $body .= "Vous pouvez vous connecter à votre compte en utilisant le lien suivant : http://localhost/extranetA2MI/connexion/connexion.php\n\n";
+    $body .= "Cordialement,\n\n";
+    $body .= "A2MI";
 
     try {
         $mail = new PHPMailer(true);
 
         // Paramètres du serveur SMTP
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = SMTP_HOST;
         $mail->SMTPAuth = true;
-        $mail->Username = 'masdouarania02@gmail.com';  // Adresse email de l'expéditeur
-        $mail->Password = 'wmeffiafffoqvkvl';           // Mot de passe de l'expéditeur
-        $mail->SMTPSecure = 'tls';
-        $mail->Port = 587;
+        $mail->Username = SMTP_USERNAME;  // Adresse email de l'expéditeur
+        $mail->Password = SMTP_PASSWORD;           // Mot de passe de l'expéditeur
+        $mail->SMTPSecure = SMTP_SECURE;
+        $mail->Port = SMTP_PORT;
 
         // Destinataire
-        $mail->setFrom('masdouarania02@gmail.com', 'Masdoua');
+        $mail->setFrom(SENDER_EMAIL, SENDER_NAME);
         $mail->addAddress($email);   // Adresse e-mail du destinataire
 
         // Contenu de l'e-mail
-        $mail->isHTML(true);
-        $mail->Subject = 'Réinitialisation de votre mot de passe';
-        $mail->Body = 'Bonjour,<br><br>Votre mot de passe a été réinitialisé avec succès. Voici votre nouveau mot de passe : <strong>' . $password . '</strong><br><br>Cordialement,<br>Votre Nom';
+        $mail->CharSet = 'UTF-8'; 
+        $mail->isHTML(false);
+        $mail->Subject = $subject;
+        $mail->Body = $body;
 
         // Envoi de l'e-mail
         $mail->send();

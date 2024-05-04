@@ -116,8 +116,8 @@ if (isset($_GET['id'])) {
 
             <div id="champsDevis" style="display: none;">
                 <div id="photos">
-                    <label for="photo">Prendre une photo :</label>
-                    <input type="file" accept="image/*" capture="camera" name="photos[]" multiple>
+                    <label for="picture">Prendre une photo :</label>
+                    <input type="file" id="picture" accept="image/*" capture="environment" name="photos[]" multiple>
                 </div>
                 <br><br>
                 <button type="button" onclick="ajouterPhoto()">Ajouter une autre photo</button>
@@ -514,8 +514,8 @@ if (isset($_GET['id'])) {
         function ajouterPhoto() {
             var divPhotos = document.getElementById('photos');
             var nouveauChamp = document.createElement('div');
-            nouveauChamp.innerHTML = '<label for="photo">Prendre une photo :</label>' +
-                                    '<input type="file" accept="image/*" capture="camera" name="photos[]" multiple>';
+            nouveauChamp.innerHTML = '<label for="picture">Prendre une photo :</label>' +
+                                    '<input type="file" accept="image/*" id="picture" capture="environment" name="photos[]" multiple>';
             divPhotos.appendChild(nouveauChamp);
         }
 
