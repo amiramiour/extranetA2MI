@@ -21,64 +21,66 @@ try {
     $etat = isset($_GET['etat']) ? $_GET['etat'] : '';
 
     // Requête SQL de base pour récupérer les données de la table SAV avec les jointures et le tri
+    // Requête SQL de base pour récupérer les données de la table SAV avec les jointures et le tri
     $query = "
-        SELECT 
-            sav.sav_id, 
-            membres.membre_id,
-            membres.membre_nom AS client_nom,
-            membres.membre_prenom AS client_prenom,
-            membres.membre_entreprise AS client_entreprise,
-            sav.sav_accessoire, 
-            sei.sauvgarde_avancement,
-            sav.sav_datein,
-            sav.sav_dateout,
-            sav.sav_envoi, 
-            sav.sav_forfait, 
-            sav.sav_garantie, 
-            sav.sav_maindoeuvreht, 
-            sav.sav_maindoeuvrettc, 
-            sav.sav_mdpclient, 
-            sav.sav_probleme, 
-            sav.sav_regle, 
-            sav.sav_tarifmaterielht, 
-            sav.sav_tarifmaterielttc, 
-            sav.sav_typemateriel,
-            sav_etats.etat_intitule,
-            sav.active,
-            membres_technicien.membre_nom AS technicien_nom
-        FROM 
-            sav
-        LEFT JOIN 
-            sav_etats ON sav.sav_etats = sav_etats.id_etat_sav
-        LEFT JOIN
-            membres ON sav.membre_id = membres.membre_id
-        LEFT JOIN
-            sauvgarde_etat_info sei ON sav.sav_avancement = sei.id_sauvgarde_etat
-        LEFT JOIN
-            membres AS membres_technicien ON sav.sav_technicien = membres_technicien.membre_id
-        ";
+    SELECT 
+        sav.sav_id, 
+        membres.membre_id,
+        membres.membre_nom AS client_nom,
+        membres.membre_prenom AS client_prenom,
+        membres.membre_entreprise AS client_entreprise,
+        sav.sav_accessoire, 
+        sei.sauvgarde_avancement,
+        sav.sav_datein,
+        sav.sav_dateout,
+        sav.sav_envoi, 
+        sav.sav_forfait, 
+        sav.sav_garantie, 
+        sav.sav_maindoeuvreht, 
+        sav.sav_maindoeuvrettc, 
+        sav.sav_mdpclient, 
+        sav.sav_probleme, 
+        sav.sav_regle, 
+        sav.sav_tarifmaterielht, 
+        sav.sav_tarifmaterielttc, 
+        sav.sav_typemateriel,
+        sav_etats.etat_intitule,
+        sav.active,
+        membres_technicien.membre_nom AS technicien_nom
+    FROM 
+        sav
+    LEFT JOIN 
+        sav_etats ON sav.sav_etats = sav_etats.id_etat_sav
+    LEFT JOIN
+        membres ON sav.membre_id = membres.membre_id
+    LEFT JOIN
+        sauvgarde_etat_info sei ON sav.sav_avancement = sei.id_sauvgarde_etat
+    LEFT JOIN
+        membres AS membres_technicien ON sav.sav_technicien = membres_technicien.membre_id
+    WHERE 1=1"; // clause fictive pour commencer la clause WHERE
 
-    // Clause WHERE conditionnelle pour filtrer par état si un état est sélectionné
+// Clause WHERE conditionnelle pour filtrer par état si un état est sélectionné
     if (!empty($etat)) {
         $query .= " AND sav_etats.etat_intitule = :etat";
     }
 
-    // Ajout de la clause ORDER BY pour trier les résultats
+// Ajout de la clause ORDER BY pour trier les résultats
     $query .= " ORDER BY CASE WHEN membres.membre_entreprise = '' THEN 1 ELSE 0 END, $colonneTri";
 
-    // Préparation de la requête SQL
+// Préparation de la requête SQL
     $stmt = $db->prepare($query);
 
-    // Liaison des valeurs des paramètres de requête
+// Liaison des valeurs des paramètres de requête
     if (!empty($etat)) {
         $stmt->bindParam(':etat', $etat, PDO::PARAM_STR);
     }
 
-    // Exécution de la requête
+// Exécution de la requête
     $stmt->execute();
 
-    // Récupération des résultats
+// Récupération des résultats
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 } catch (PDOException $e) {
     echo "Erreur : " . $e->getMessage();
