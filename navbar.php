@@ -12,10 +12,7 @@
                     <a class="nav-link" href="/">Accueil</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/connexion/create_account.php">Créer un compte client</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/clients/liste_clients.php">Liste des clients</a>
+                    <a class="nav-link" href="/clients/liste_clients.php">Liste des utilisateurs</a>
                 </li>
                 <li class="nav-item">
                 </li>
@@ -23,7 +20,7 @@
                     <a class="nav-link" href="/fournisseurs/liste_fournisseurs.php">Liste fournisseurs</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/commandes/commandes.php">Commandes</a>
+                    <a class="nav-link" href="/commandes/commandes_devis.php">Commandes</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Devis</a>
@@ -32,20 +29,15 @@
                     <a class="nav-link" href="/SAV/sav.php">SAV</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/bi/liste_interventions.php">BI pour chaque client</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="/bi/bonIntervention.php">Tout les bons d'interventions</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/pret/liste_prets.php">Prêts</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Historique</a>
+                    <a class="nav-link" href="/historique.php">Historique</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Liste d'administrateurs</a>
-                </li>
+
             </ul>
         </div>
     </div>

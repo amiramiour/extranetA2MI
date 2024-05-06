@@ -1,4 +1,6 @@
 <?php
+// TVA
+define('TVA', (20/100)); // 20%
 
 // Paramètres SMTP
 define('SMTP_HOST', 'smtp.gmail.com');
@@ -11,4 +13,6 @@ define('SMTP_SECURE', 'tls');
 define('SENDER_EMAIL', 'masdouarania02@gmail.com');
 define('SENDER_NAME', 'A2MI');
 
+// Chemin vers le dossier d'images des devis
+define('DEVIS_IMAGE_PATH', '../images/images_devis/');
 ?>

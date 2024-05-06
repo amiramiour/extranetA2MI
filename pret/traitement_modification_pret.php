@@ -17,8 +17,6 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION
 
 $technicien_id = $_SESSION['user_id'];
 
-
-
 // Vérifier si le formulaire a été soumis et si l'identifiant du prêt est défini
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pret_id'])) {
 

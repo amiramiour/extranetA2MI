@@ -1,5 +1,7 @@
-
 <?php
+require_once '../config.php';
+//echo TVA;
+
 session_start();
 // Vérifier si l'utilisateur est connecté et est un technicien
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail'])  || $_SESSION['user_type'] === 'client') {
@@ -21,8 +23,8 @@ $jsonFournisseurs = json_encode($fournisseurs);
 
 file_put_contents('fournisseurs.json', $jsonFournisseurs);
 
-$req2 = $pdo->query("SELECT * FROM commande_etats");
-$commande_etats = $req2->fetchAll(PDO::FETCH_ASSOC);
+$req2 = $pdo->query("SELECT * FROM cmd_devis_etats");
+$cmd_devis_etats = $req2->fetchAll(PDO::FETCH_ASSOC);
 
 //vérifier si $id est récupéré
 if (isset($_GET['id'])) {
@@ -41,14 +43,20 @@ if (isset($_GET['id'])) {
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Commandes</title>
+    <title>Commandes / Devis</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container">
-        <h2>Ajouter une commande</h2>
+        <h2>Ajouter une Commande / Devis</h2>
         <!-- <form action="traitement_commande.php?id=<?php echo $id; ?>" method="post" name="commande">-->
-        <form action="<?php echo isset($id) ? 'traitement_commande.php?id=' . $id : 'traitement_commande.php'; ?>" method="post" name="commande">
+        <form action="<?php echo isset($id) ? 'traitement_ajout.php?id=' . $id : 'traitement_ajout.php'; ?>" method="post" name="commande" enctype="multipart/form-data">
+            <!-- Liste déroulante pour selectionner si le formulaire est pour créer une commande ou un devis -->
+            <select name="type" required onchange="afficherChampsSupplementaires()">
+                <option value="1">Commande</option>
+                <option value="2">Devis</option>
+            </select>
+            <br><br>
             <?php if (!isset($id)) { ?>
                 <label for="id">Client</label>
                 <select name="client_id" id="client_id" required>
@@ -105,8 +113,22 @@ if (isset($_GET['id'])) {
             <button type="button" onclick="ajouterProduit()">Ajouter un produit à la commande</button>
             <br><br>
             <!-- <button type="button" onclick="enleverProduit()">Enlever un produit à la commande</button> -->
+
+            <div id="champsDevis" style="display: none;">
+                <div id="photos">
+                    <label for="picture">Prendre une photo :</label>
+                    <input type="file" id="picture" accept="image/*" capture="environment" name="photos[]" multiple>
+                </div>
+                <br><br>
+                <button type="button" onclick="ajouterPhoto()">Ajouter une autre photo</button>
+                <br><br>
+                <label for="commentaire">Commentaire *</label><br>
+                <textarea name="commentaire" id="commentaire" rows="4" cols="50"></textarea><br><br>
+            </div>
             
-            <label for="reference" class="float" >Nom de la commande* </label>
+            <br>
+            
+            <label for="reference" class="float" >Reference* </label>
             <input type="text" name="nomC" id="reference" required autofocus/><br>
 
             <label for="designation" class="float">Désignation* </label>
@@ -115,7 +137,7 @@ if (isset($_GET['id'])) {
             <label class="float">Date de livraison prévue</label><input type="date" name="dateP" required autofocus><br>
             <label class="float">Date de livraison souhaitée</label><input type="date" name="dateS" required autofocus><br>
 
-            <label for="etat" class="float" >Statut commande* </label>
+            <label for="etat" class="float" >Statut * </label>
             <!-- <select name="etatC" required>
                 <option value="1">Commandé</option>
                 <option value="2">En attente</option>
@@ -124,8 +146,8 @@ if (isset($_GET['id'])) {
                 <option value="5">Livrer</option>
             </select><br> -->
             <select name="etatC" required>
-                <?php foreach ($commande_etats as $etat) { ?>
-                    <option value="<?php echo $etat['id_etat_cmd']; ?>"><?php echo $etat['commande_etat']; ?></option>
+                <?php foreach ($cmd_devis_etats as $etat) { ?>
+                    <option value="<?php echo $etat['id_etat_cmd_devis']; ?>"><?php echo $etat['cmd_devis_etat']; ?></option>
                 <?php } ?>
             </select><br>
 
@@ -139,11 +161,11 @@ if (isset($_GET['id'])) {
             <input type="text" name="totalMarge" id="margeT" readonly/><br>
 
             <div class="center"><input class="createButton" type="submit" value="Créer" /></div>
-            <br>
-            <div class="center"><input class="createButton" type="button" value="Annuler" onclick="window.history.back()"/>
         </form>
+        <div class="center"><input class="createButton" type="button" value="Annuler" onclick="window.history.back()"/>       
     </div>
     <script>
+        var TVA = <?php echo TVA; ?>;
         function calcul(){
             var i = document.querySelectorAll('.materiel').length;
 
@@ -174,7 +196,7 @@ if (isset($_GET['id'])) {
             pvTTC = Math.round(pvTTC * multiplier) / multiplier;
             document.getElementById("pvHT").value = pvHT;
     
-            var pvTTC = Number(pvHT+(pvHT*(20/100)));
+            var pvTTC = Number(pvHT+(pvHT * TVA));
             pvTTC = Math.round(pvTTC * multiplier) / multiplier;
             document.getElementById("pvTTC").value = pvTTC;
     
@@ -227,7 +249,7 @@ if (isset($_GET['id'])) {
             choix = Number(choix);
             document.getElementById("pvHT").value = choix;
 
-            var pvTTC = Number(choix+(choix*(20/100))); 
+            var pvTTC = Number(choix+(choix * TVA)); 
             pvTTC = Number(pvTTC);
             document.getElementById("pvTTC").value = pvTTC;
 
@@ -336,7 +358,7 @@ if (isset($_GET['id'])) {
             pvHT = Math.round(pvHT * multiplier) / multiplier;
             document.getElementById(pvHTs).value = pvHT;
 
-            var pvTTC = Number(pvHT + (pvHT * (20 / 100)));
+            var pvTTC = Number(pvHT + (pvHT * TVA));
             pvTTC = Math.round(pvTTC * multiplier) / multiplier;
             document.getElementById(pvTTCs).value = pvTTC;
 
@@ -376,7 +398,7 @@ if (isset($_GET['id'])) {
             choix = Number(choix);
             document.getElementById("pvHTs" + i).value = choix;
             
-            var pvTTC = Number(choix + (choix * (20 / 100)));
+            var pvTTC = Number(choix + (choix * TVA));
             pvTTC = Number(pvTTC);
             document.getElementById("pvTTCs" + i).value = pvTTC;
 
@@ -468,6 +490,36 @@ if (isset($_GET['id'])) {
                 alert("Vous ne pouvez pas supprimer le dernier produit.");
             }
         }
+
+        function afficherChampsSupplementaires() {
+            var type = document.querySelector('select[name="type"]').value;
+            var champsDevis = document.getElementById('champsDevis');
+            var commentaire = document.getElementById('commentaire');
+
+            // Si l'utilisateur choisit un devis, affichez les champs supplémentaires, sinon masquez-les
+            if (type === '2') {
+                champsDevis.style.display = 'block';
+                commentaire.required = true;
+            } else {
+                champsDevis.style.display = 'none';
+                commentaire.required = false;
+            }
+        }
+
+        // Écoutez les changements dans la liste déroulante pour afficher ou masquer les champs supplémentaires
+        document.querySelector('select[name="type"]').addEventListener('change', afficherChampsSupplementaires);
+
+        // Appelez la fonction une fois au chargement de la page pour vérifier l'état initial de la liste déroulante
+        afficherChampsSupplementaires();
+
+        function ajouterPhoto() {
+            var divPhotos = document.getElementById('photos');
+            var nouveauChamp = document.createElement('div');
+            nouveauChamp.innerHTML = '<label for="picture">Prendre une photo :</label>' +
+                                    '<input type="file" accept="image/*" id="picture" capture="environment" name="photos[]" multiple>';
+            divPhotos.appendChild(nouveauChamp);
+        }
+
     </script>
 </body>
 </html>

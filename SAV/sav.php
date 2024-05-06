@@ -10,74 +10,77 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION[
     exit();
 }
 
-// Vérification de la valeur du paramètre de tri
-$tri = isset($_GET['tri']) ? $_GET['tri'] : 'membre_nom';
-$colonneTri = ($tri === 'membre_entreprise') ? 'client_entreprise' : 'client_nom';
-
-$etat = isset($_GET['etat']) ? $_GET['etat'] : '';
-
 try {
     // Connexion à la base de données
     $db = connexionbdd();
 
+    // Vérification de la valeur du paramètre de tri
+    $tri = isset($_GET['tri']) ? $_GET['tri'] : 'membre_nom';
+    $colonneTri = ($tri === 'membre_entreprise') ? 'client_entreprise' : 'client_nom';
+
+    $etat = isset($_GET['etat']) ? $_GET['etat'] : '';
+
+    // Requête SQL de base pour récupérer les données de la table SAV avec les jointures et le tri
     // Requête SQL de base pour récupérer les données de la table SAV avec les jointures et le tri
     $query = "
-SELECT 
-    sav.sav_id, 
-    membres.membre_id,
-    membres.membre_nom AS client_nom,
-    membres.membre_prenom AS client_prenom,
-    membres.membre_entreprise AS client_entreprise,
-    sav.sav_accessoire, 
-    sei.sauvgarde_avancement,
-    sav.sav_datein,
-    sav.sav_dateout,
-    sav.sav_envoi, 
-    sav.sav_etat, 
-    sav.sav_forfait, 
-    sav.sav_garantie, 
-    sav.sav_maindoeuvreht, 
-    sav.sav_maindoeuvrettc, 
-    sav.sav_mdpclient, 
-    sav.sav_probleme, 
-    sav.sav_regle, 
-    sav.sav_tarifmaterielht, 
-    sav.sav_tarifmaterielttc, 
-    sav.sav_technicien,
-    sav.sav_typemateriel,
-    sav_etats.etat_intitule
-FROM 
-    sav
-LEFT JOIN 
-    sav_etats ON sav.sav_etats = sav_etats.id_etat_sav
-LEFT JOIN
-    membres ON sav.membre_id = membres.membre_id
-LEFT JOIN
-    sauvgarde_etat_info sei ON sav.sav_avancement = sei.id_sauvgarde_etat
-WHERE
-    sav.active = 1";
+    SELECT 
+        sav.sav_id, 
+        membres.membre_id,
+        membres.membre_nom AS client_nom,
+        membres.membre_prenom AS client_prenom,
+        membres.membre_entreprise AS client_entreprise,
+        sav.sav_accessoire, 
+        sei.sauvgarde_avancement,
+        sav.sav_datein,
+        sav.sav_dateout,
+        sav.sav_envoi, 
+        sav.sav_forfait, 
+        sav.sav_garantie, 
+        sav.sav_maindoeuvreht, 
+        sav.sav_maindoeuvrettc, 
+        sav.sav_mdpclient, 
+        sav.sav_probleme, 
+        sav.sav_regle, 
+        sav.sav_tarifmaterielht, 
+        sav.sav_tarifmaterielttc, 
+        sav.sav_typemateriel,
+        sav_etats.etat_intitule,
+        sav.active,
+        membres_technicien.membre_nom AS technicien_nom
+    FROM 
+        sav
+    LEFT JOIN 
+        sav_etats ON sav.sav_etats = sav_etats.id_etat_sav
+    LEFT JOIN
+        membres ON sav.membre_id = membres.membre_id
+    LEFT JOIN
+        sauvgarde_etat_info sei ON sav.sav_avancement = sei.id_sauvgarde_etat
+    LEFT JOIN
+        membres AS membres_technicien ON sav.sav_technicien = membres_technicien.membre_id
+    WHERE 1=1"; // clause fictive pour commencer la clause WHERE
 
-    // Clause WHERE conditionnelle pour filtrer par état si un état est sélectionné
+// Clause WHERE conditionnelle pour filtrer par état si un état est sélectionné
     if (!empty($etat)) {
         $query .= " AND sav_etats.etat_intitule = :etat";
     }
 
-    // Ajout de la clause ORDER BY pour trier les résultats
+// Ajout de la clause ORDER BY pour trier les résultats
     $query .= " ORDER BY CASE WHEN membres.membre_entreprise = '' THEN 1 ELSE 0 END, $colonneTri";
 
-    // Préparation de la requête SQL
+// Préparation de la requête SQL
     $stmt = $db->prepare($query);
 
-    // Liaison des valeurs des paramètres de requête
+// Liaison des valeurs des paramètres de requête
     if (!empty($etat)) {
         $stmt->bindParam(':etat', $etat, PDO::PARAM_STR);
     }
 
-    // Exécution de la requête
+// Exécution de la requête
     $stmt->execute();
 
-    // Récupération des résultats
+// Récupération des résultats
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 } catch (PDOException $e) {
     echo "Erreur : " . $e->getMessage();
@@ -100,7 +103,7 @@ WHERE
 <body>
 <?php include('../navbar.php'); ?>
 <div class="container">
-    <h2>Résultats de la table SAV</h2>
+    <h2>SAV</h2>
     <div class="row mb-3">
         <div class="col-sm-6">
             <form action="" method="GET">
@@ -147,8 +150,8 @@ WHERE
             <th scope="col">Entreprise</th>
             <th scope="col">Accessoire</th>
             <th scope="col">Avancement</th>
-            <th scope="col">Date de réception</th>
-            <th scope="col">Date de livraison</th>
+            <th scope="col">date d'entrée</th>
+            <th scope="col">date de fin</th>
             <th scope="col">Envoi</th>
             <th scope="col">Forfait</th>
             <th scope="col">Garantie</th>
@@ -162,19 +165,35 @@ WHERE
             <th scope="col">Technicien</th>
             <th scope="col">Type matériel</th>
             <th scope="col">État</th>
-            <th scope="col">Action</th>
+            <th scope="col">Active</th>
+
         </tr>
         </thead>
         <tbody>
-        <?php foreach ($results as $row) : ?>
+        <?php foreach ($results as $row) :
+            // Vérifier si la date d'entrée est un timestamp Unix
+            if (is_numeric($row['sav_datein'])) {
+                // Convertir le timestamp Unix en format de date
+                $datein = date('Y-m-d ', $row['sav_datein']);
+            } else {
+                // Si la date est déjà au bon format, l'utiliser directement
+                $datein = $row['sav_datein'];
+            }
+
+            // Faites de même pour la date de livraison
+            if (is_numeric($row['sav_dateout'])) {
+                $dateout = date('Y-m-d ', $row['sav_dateout']);
+            } else {
+                $dateout = $row['sav_dateout'];
+            }
+            ?>
             <tr>
                 <td><a href="../profile/profile_client.php?id=<?= $row['membre_id'] ?>"><?= $row['client_nom'] . ' ' . $row['client_prenom'] ?></a></td>
                 <td><?= $row['client_entreprise'] ?></td>
                 <td><?= $row['sav_accessoire'] ?></td>
                 <td><?= $row['sauvgarde_avancement'] ?></td>
-                <td><?= date('d/m/Y', strtotime(str_replace('/', '-', $row['sav_datein']))) ?></td>
-                <td><?= date('d/m/Y', strtotime(str_replace('/', '-', $row['sav_dateout']))) ?></td>
-                <td><?= $row['sav_envoi'] ?></td>
+                <td><?= $datein ?></td> <!-- Afficher la date d'entrée -->
+                <td><?= $dateout ?></td> <!-- Afficher la date de livraison -->
                 <td><?= $row['sav_envoi'] ?></td>
                 <td><?= $row['sav_forfait'] ?></td>
                 <td><?= $row['sav_garantie'] ?></td>
@@ -185,10 +204,17 @@ WHERE
                 <td><?= $row['sav_regle'] ?></td>
                 <td><?= $row['sav_tarifmaterielht'] ?></td>
                 <td><?= $row['sav_tarifmaterielttc'] ?></td>
-                <td><?= $row['sav_technicien'] ?></td>
+                <td><?= $row['technicien_nom'] ?></td>
                 <td><?= $row['sav_typemateriel'] ?></td>
                 <td><?= $row['etat_intitule'] ?></td>
+                <td><?= $row['active'] ?></td>
+
                 <td><a href="modifier-sav.php?sav_id=<?= $row['sav_id'] ?>" class="btn btn-primary"><i class="la la-pencil"></i> Modifier</a></td>
+                <td>
+                    <?php if ($_SESSION['user_type'] === 'admin') : ?>
+                        <a href="supprimer-sav.php?sav_id=<?= $row['sav_id'] ?>" class="btn btn-danger"><i class="la la-trash"></i> Supprimer</a>
+                    <?php endif; ?>
+                </td>
             </tr>
         <?php endforeach; ?>
         </tbody>
