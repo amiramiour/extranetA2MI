@@ -1,18 +1,10 @@
 <?php
+include '../gestion_session.php';
 require_once '../config.php';
-session_start();
-
-// Vérifier si l'utilisateur est connecté et est un technicien
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail'])  || $_SESSION['user_type'] === 'client') {
-    // Si l'utilisateur n'est pas connecté ou est un client, redirigez-le ou affichez un message d'erreur
-    header("Location: ../connexion/connexion.php");
-    exit;
-}
-
 include '../ConnexionBD.php';
-$pdo = connexionbdd();
-
 include '../navbar.php';
+
+$pdo = connexionbdd();
 
 //requete pour récupérer les fournisseurs
 
@@ -136,18 +128,24 @@ if ($commande['type_cmd_devis'] == '1') {
 
             <?php if ($commande['type_cmd_devis'] == '2') { ?>
                 <!-- Si c'est un devis, on affiche les photos et le commentaire-->
-                <fieldset><legend>Photos <small></small></legend>
-                    <div id="photos">
-                        <?php 
-                        $i=0;
-                        foreach ($photos as $photo) { $i++; ?>
-                            <div class="photo">
-                                <label><b>Photo n°<?php echo $i ?></b></label><br>
-                                <img src="<?php echo DEVIS_IMAGE_PATH . $photo['photo']; ?>" alt="photo" style="width: 100px; height: 100px;">
-                            </div> 
-                        <?php } ?>
-                    </div>
-                </fieldset>
+                <fieldset>
+    <legend>Photos <small></small></legend>
+    <div id="photos">
+        <?php 
+        foreach ($photos as $i => $photo) { 
+            ?>
+            <div class="photo">
+                <label><b><?php echo (pathinfo($photo['photo'], PATHINFO_EXTENSION) === 'pdf') ? 'PDF' : 'Photo'; ?> n°<?php echo $i + 1; ?></b></label><br>
+                <?php if (pathinfo($photo['photo'], PATHINFO_EXTENSION) === 'pdf') { ?>
+                    <a href="<?php echo DEVIS_IMAGE_PATH . $photo['photo']; ?>" download><?php echo basename($photo['photo']); ?></a>
+                <?php } else { ?>
+                    <img src="<?php echo DEVIS_IMAGE_PATH . $photo['photo']; ?>" alt="photo" style="width: 100px; height: 100px;">
+                <?php } ?>
+            </div> 
+        <?php } ?>
+    </div>
+</fieldset>
+
                 <br><br>
                 <button type="button" onclick="ajouterPhoto()">Ajouter une autre photo</button>
                 <br>
@@ -169,13 +167,18 @@ if ($commande['type_cmd_devis'] == '1') {
             <label class="float">Date de livraison souhaitée</label>
             <input type="date" name="dateS" value="<?php echo date('Y-m-d', $commande['cmd_devis_dateSouhait']) ?>" required autofocus readonly><br>
 
-            <label for="etat" class="float" >Statut commande </label>
-            <select name="etatC" required>
-                <?php foreach ($cmd_devis_etats as $etat) { ?>
-                    <option value="<?php echo $etat['id_etat_cmd_devis']; ?>"><?php echo $etat['cmd_devis_etat']; ?></option>
+            <label for="etat" class="float" >Statut *</label>
+            <select name="etatC" id="etatC" required>
+                <!-- Si c'est un devis afficher que les états 2 (En attente) et 6 (Terminé) -->
+                <?php if ($commande['type_cmd_devis'] == '2') { ?>
+                    <option value="2" <?php if ($commande['cmd_devis_etat'] == '2') { echo 'selected'; } ?>>En attente</option>
+                    <option value="6" <?php if ($commande['cmd_devis_etat'] == '6') { echo 'selected'; } ?>>Terminé</option>
+                <?php } else { ?>
+                    <?php foreach ($cmd_devis_etats as $etat) { ?>
+                        <option value="<?php echo $etat['id_etat_cmd_devis'] ?>" <?php if ($commande['cmd_devis_etat'] == $etat['id_etat_cmd_devis']) { echo 'selected'; } ?>><?php echo $etat['cmd_devis_etat'] ?></option>
+                    <?php } ?>
                 <?php } ?>
             </select>
-
             <br><br>
             <label for="reference" class="float">Total HT </label>
             <input type="text" name="totalHT" id="pvHTT" value="<?php echo $commande['cmd_devis_prixHT'] ?>" readonly> €<br>

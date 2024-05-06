@@ -1,24 +1,15 @@
 <?php
+include '../gestion_session.php';
 require_once '../config.php';
-
-session_start();
-// Vérifier si l'utilisateur est connecté et est un technicien
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail'])  || $_SESSION['user_type'] === 'client') {
-    // Si l'utilisateur n'est pas connecté ou est un client, redirigez-le ou affichez un message d'erreur
-    header("Location: ../connexion.php");
-    exit;
-}
-
 include '../ConnexionBD.php';
-$pdo = connexionbdd();
+include '../navbar.php';
 
 require '../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-$success_count = 0;
-$error_count = 0;
+$pdo = connexionbdd();
 
 //var_dump($_POST['client_id']);
 
@@ -67,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($type == '2') { //devis
         $photos = $_FILES['photos'];
-        //var_dump($photos);
+        var_dump($photos);
         
         $commentaire = $_POST['commentaire'];
 
@@ -161,14 +152,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->execute();
 
     // Envoi de l'email au technicien 
-    /*if(sendEmail($client['membre_nom'], $client['membre_prenom'], $totalTTC, $technicien['membre_mail'], $technicien['membre_nom'], $technicien['membre_prenom'], date('d/m/Y',$dateP) , date('d/m/Y'), date('d/m/Y', $dateS) , $etat_commande, $type)) {
-        $success_count++;
-        echo('Email envoyé avec succès');
-    } else {
-        $error_count++;
-    }*/
+    if(sendEmail($client['membre_nom'], $client['membre_prenom'], $totalTTC, $technicien['membre_mail'], $technicien['membre_nom'], $technicien['membre_prenom'], date('d/m/Y',$dateP) , date('d/m/Y'), date('d/m/Y', $dateS) , $etat_commande, $type));
 
-    header("Location: commandes_client.php?id=$id_client");
+    header("Location: commandes_devis.php");
     exit();
 
 }

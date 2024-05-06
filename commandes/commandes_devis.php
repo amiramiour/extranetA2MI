@@ -1,15 +1,8 @@
 <?php
-session_start();
-
-// Vérifier si l'utilisateur est connecté et est un technicien
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION['user_type'] === 'client') {
-    // Si l'utilisateur n'est pas connecté ou est un client, redirigez-le ou affichez un message d'erreur
-    header("Location: ../connexion/connexion.php");
-    exit;
-}
-
-include '../ConnexionBD.php'; // Fichier de configuration de la connexion PDO
-include('../navbar.php');
+include '../gestion_session.php';
+require_once '../config.php';
+include '../ConnexionBD.php';
+include '../navbar.php';
 
 $pdo = connexionbdd();
 
@@ -59,7 +52,6 @@ $clients = getClients($pdo, $type);
     <div class="container">
         <h2><?= $type === 'commandes' ? 'Commandes' : 'Devis' ?></h2>
         <div class="mb-3">
-            
             <select id="type" class="form-control" onchange="changeType(this.value)">
                 <option value="commandes" <?= $type === 'commandes' ? 'selected' : '' ?>>Commandes</option>
                 <option value="devis" <?= $type === 'devis' ? 'selected' : '' ?>>Devis</option>

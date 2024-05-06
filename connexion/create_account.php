@@ -30,6 +30,7 @@ if(isset($_POST['submit'])) {
     $cp = $_POST['cp'];
     $ville = $_POST['ville'];
     $tel = $_POST['tel'];
+    $tel_fix = $_POST['tel_fix'];
     $mail = $_POST['mail'];
     $type = $_POST['type'];
 
@@ -47,8 +48,8 @@ if(isset($_POST['submit'])) {
             $password = generateRandomString(10);
 
             // Insérer les informations du client dans la base de données
-            $query = $pdo->prepare("INSERT INTO membres (membre_entreprise,membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_inscription, membre_mail, membre_type) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, ?)");
-            $query->execute([$entreprise,$nom, $prenom, password_hash($password, PASSWORD_BCRYPT), $adresse, $adresse_comp, $cp, $ville, $tel, $mail, $type]);
+            $query = $pdo->prepare("INSERT INTO membres (membre_entreprise,membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_telfixe, membre_inscription, membre_mail, membre_type) VALUES (?,?, ?,?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, ?)");
+            $query->execute([$entreprise,$nom, $prenom, password_hash($password, PASSWORD_BCRYPT), $adresse, $adresse_comp, $cp, $ville, $tel, $tel_fix, $mail, $type]);
 
             // Envoi de l'email au client
             sendEmailToClient($mail, $nom, $prenom,$password);
@@ -163,6 +164,11 @@ function generateRandomString($length = 8) {
             <div class="form-group">
                 <label for="tel">Téléphone *</label>
                 <input type="text" id="tel" name="tel" class="form-control" pattern="[0-9]{10}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="tel">Téléphone fixe</label>
+                <input type="text" id="tel_fix" name="tel_fix" class="form-control" pattern="[0-9]{10}">
             </div>
 
             <div class="form-group">

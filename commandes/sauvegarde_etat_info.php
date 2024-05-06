@@ -1,5 +1,8 @@
 <?php
+include '../gestion_session.php';
+require_once '../config.php';
 include '../ConnexionBD.php';
+include '../navbar.php';
 $pdo = connexionbdd();
 
 $stmt = $pdo->query("SELECT * FROM sauvgarde_etat_info_commande");
