@@ -209,8 +209,11 @@ try {
                 <td><?= $row['active'] ?></td>
 
                 <td><a href="modifier-sav.php?sav_id=<?= $row['sav_id'] ?>" class="btn btn-primary"><i class="la la-pencil"></i> Modifier</a></td>
-                <td><a href="supprimer-sav.php?sav_id=<?= $row['sav_id'] ?>" class="btn btn-primary"><i class="la la-pencil"></i> Supprimer</a></td>
-
+                <td>
+                    <?php if ($_SESSION['user_type'] === 'admin') : ?>
+                        <a href="supprimer-sav.php?sav_id=<?= $row['sav_id'] ?>" class="btn btn-danger"><i class="la la-trash"></i> Supprimer</a>
+                    <?php endif; ?>
+                </td>
             </tr>
         <?php endforeach; ?>
         </tbody>

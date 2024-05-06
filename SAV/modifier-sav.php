@@ -243,6 +243,12 @@ try {
 
     // Récupération des résultats
     $sav = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Requête pour récupérer les avancements du SAV
+    $query_avancements = "SELECT sauvgarde_avancement FROM sauvgarde_etat_info WHERE sav_id = :sav_id";
+    $stmt_avancements = $connexion->prepare($query_avancements);
+    $stmt_avancements->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
+    $stmt_avancements->execute();
+    $avancements = $stmt_avancements->fetchAll(PDO::FETCH_ASSOC);
 
     // Vérifier si le SAV existe
     if (!$sav) {
@@ -314,7 +320,11 @@ function sendSAVModificationEmail($to_email, $client_nom, $client_prenom, $techn
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier SAV</title>
     <!-- Inclure Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Liens vers les icônes LSF (Line Awesome) -->
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+    <!-- Inclure le fichier CSS personnalisé -->
+    <link href="styles.css" rel="stylesheet">
     <!-- Ajouter un style personnalisé pour les boutons -->
     <style>
         .custom-btn {
@@ -330,19 +340,44 @@ function sendSAVModificationEmail($to_email, $client_nom, $client_prenom, $techn
 </head>
 
 <body>
+<?php include('../navbar.php'); ?>
+
 <div class="container mt-4">
-    <h2>Modifier SAV</h2>
+    <h2>Modifier SAV n°  <?= $sav['sav_id'] ?> </h2>
     <div class="mb-3">
+
         <h3>Informations détaillées du SAV</h3>
-        <p><strong>ID SAV:</strong> <?= $sav['sav_id'] ?></p>
         <p><strong>Accessoire:</strong> <?= $sav['sav_accessoire'] ?></p>
         <p><strong>Problème:</strong> <?= $sav['sav_probleme'] ?></p>
         <p><strong>Matériel (HT):</strong> <?= $sav['sav_tarifmaterielht'] ?></p>
         <p><strong>Matériel (TTC):</strong> <?= $sav['sav_tarifmaterielttc'] ?></p>
         <p><strong>Main d'œuvre (HT):</strong> <?= $sav['sav_maindoeuvreht'] ?></p>
         <p><strong>Main d'œuvre (TTC):</strong> <?= $sav['sav_maindoeuvrettc'] ?></p>
-        <p><strong>Date de fin:</strong> <?= $sav['sav_dateout'] ?></p>
+        <p><strong>Date de fin:</strong> <?php
+            if (is_numeric($sav['sav_dateout'])) {
+                $dateout = date('Y-m-d ', $sav['sav_dateout']);
+            } else {
+                $dateout = $sav['sav_dateout'];
+            }
+            echo $dateout; ?></p>
+
         <!-- Afficher d'autres informations du SAV selon vos besoins -->
+        <div class="mb-3">
+            <h3>Avancements du SAV</h3>
+            <ol>
+                <?php
+                try {
+                    // Affichage des avancements
+                    foreach ($avancements as $avancement) {
+                        echo "<li>" . htmlspecialchars($avancement['sauvgarde_avancement']) . "</li>";
+                    }
+                } catch (PDOException $e) {
+                    // Gestion des erreurs
+                    echo "Erreur : " . $e->getMessage();
+                }
+                ?>
+            </ol>
+        </div>
     </div>
     <form action="" method="post">
         <div class="mb-3">
@@ -378,7 +413,9 @@ function sendSAVModificationEmail($to_email, $client_nom, $client_prenom, $techn
     </form>
     <form action="" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer ce SAV ?');">
         <input type="hidden" name="delete" value="delete">
-        <button type="submit" class="btn btn-danger mt-3 custom-btn">Supprimer ce SAV</button>
+        <?php if ($_SESSION['user_type'] === 'admin') : ?>
+            <button type="submit" class="btn btn-danger mt-3">Supprimer ce SAV</button>
+        <?php endif; ?>
     </form>
     <?php if (isset($error)) : ?>
         <div class="alert alert-danger mt-3" role="alert">
