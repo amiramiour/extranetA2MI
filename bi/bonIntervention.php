@@ -74,7 +74,9 @@ try {
             <th scope="col">Heure de Départ</th>
             <th scope="col">Commentaire</th>
             <th scope="col">Réglé</th>
-            <th scope="col">Actions</th>
+            <?php if ($_SESSION['user_type'] === 'admin'): ?>
+                <th scope="col">Actions</th>
+            <?php endif; ?>
         </tr>
         </thead>
         <tbody>
@@ -98,14 +100,18 @@ try {
                 <td><?= $bi['bi_commentaire'] ?></td>
                 <td><?= $bi['bi_regle'] ?></td>
                 <td>
-                    <a href="../bi/modification_bi.php?bi_id=<?= $bi['bi_id'] ?>" class="btn btn-primary">Modifier</a>
+                    <?php if ($_SESSION['user_type'] === 'admin'): ?>
+                        <a href="../bi/modification_bi.php?bi_id=<?= $bi['bi_id'] ?>" class="btn btn-primary">Modifier</a>
+                    <?php endif; ?>
                 </td>
                 <td>
-                    <form action="" method="post" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce bon d\'intervention ?');">
-                        <input type="hidden" name="action" value="supprimer">
-                        <input type="hidden" name="bi_id" value="<?= $bi['bi_id'] ?>">
-                        <button type="submit" class="btn btn-danger">Supprimer</button>
-                    </form>
+                    <?php if ($_SESSION['user_type'] === 'admin'): ?>
+                        <form action="" method="post" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce bon d\'intervention ?');">
+                            <input type="hidden" name="action" value="supprimer">
+                            <input type="hidden" name="bi_id" value="<?= $bi['bi_id'] ?>">
+                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                        </form>
+                    <?php endif; ?>
                 </td>
             </tr>
         <?php endforeach; ?>

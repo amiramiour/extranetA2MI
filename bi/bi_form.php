@@ -85,26 +85,30 @@ $membre_id = $_GET['membre_id'];
             <legend>BI client <small>* champs obligatoires</small></legend>
             <div id="interventions" style="flex-direction: column;">
                 <div class="intervention">
-                    <label for="selectedIntervention" style="width: 250px;">Intervention *</label>
-                    <select id="selectedIntervention" name="selectedIntervention" class="form-control" onclick="showDropdown()" style="flex: 1; width: 300px;" required>
-                        <option value="" disabled selected>Sélectionner une intervention</option>
-                        <option value="Forfait intervention sur site PC">Forfait intervention sur site PC</option>
-                        <option value="Forfait intervention sur site MAC">Forfait intervention sur site MAC</option>
-                        <option value="Forfait assistance à domicile PC">Forfait assistance à domicile PC</option>
-                        <option value="Forfait assistance à domicile MAC">Forfait assistance à domicile MAC</option>
-                        <option value="Formation à domicile 1H30 PC">Formation à domicile 1H30 PC</option>
-                        <option value="Formation à domicile 1H30 MAC">Formation à domicile 1H30 MAC</option>
-                        <option value="Formation à domicile 2H PC">Formation à domicile 2H PC</option>
-                        <option value="Formation à domicile 2H MAC">Formation à domicile 2H MAC</option>
-                        <option value="Forfait éradication de virus">Forfait éradication de virus</option>
-                        <option value="Forfait 1H supplémentaire">Forfait 1H supplémentaire</option>
-                        <option value="Forfait 2H supplémentaires">Forfait 2H supplémentaires</option>
-                    </select>
-                    <label for="nbpiece_1" style="margin-right: 5px;">/ Pièces *</label>
-                    <input class="field" type="number" name="nb_pieces" id="nbpiece_1" size="5" placeholder="Pièces" pattern="\d+" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" style="width: 100px; margin-right: 5px;" required min="0"/>
-                    <label for="prixunit_1" style="margin-right: 5px;">/ Prix unitaire HT *</label>
-                    <input class="field prix-unitaire" type="text" name="prixUn" id="prixunit_1" size="9" placeholder="Prix" pattern="[0-9]+([\.,][0-9]+)?" onkeypress="return event.charCode >= 48 && event.charCode <= 57 || event.charCode == 44 || event.charCode == 46" style="width: 150px;" required/>
-                    <button type="button" class="btn btn-danger" onclick="supprimerChamp(this)">X</button>
+                    <div class="intervention" style="display: flex; align-items: center;">
+                        <label for="selectedIntervention" class="center-text" style="width: 250px;">Intervention *</label>
+                        <input type="text" id="selectedIntervention" name="selectedIntervention" class="form-control" list="interventionList" required>
+                    </div>
+                    <datalist id="interventionList">
+                        <option value="Forfait intervention sur site PC">
+                        <option value="Forfait intervention sur site MAC">
+                        <option value="Forfait assistance à domicile PC">
+                        <option value="Forfait assistance à domicile MAC">
+                        <option value="Formation à domicile 1H30 PC">
+                        <option value="Formation à domicile 1H30 MAC">
+                        <option value="Formation à domicile 2H PC">
+                        <option value="Formation à domicile 2H MAC">
+                        <option value="Forfait éradication de virus">
+                        <option value="Forfait 1H supplémentaire">
+                        <option value="Forfait 2H supplémentaires">
+                    </datalist>
+                    <div class="intervention" style="display: flex; align-items: center;">
+                        <label for="nbpiece_1" class="center-text" style="margin-right: 30px;">Pièces *</label>
+                        <input class="field" type="number" name="nb_pieces" id="nbpiece_1" size="5" placeholder="Pièces" pattern="\d+" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" style="width: 100px; margin-right: 20px;" required min="0"/>
+                        <label for="prixunit_1" class="center-text" style="margin-right: 5px;">Prix Unitaire HT *</label>
+                        <input class="field prix-unitaire" type="text" name="prixUn" id="prixunit_1" size="9" placeholder="Prix unitaire HT" pattern="[0-9]+([\.,][0-9]+)?" onkeypress="return event.charCode >= 48 && event.charCode <= 57 || event.charCode == 44 || event.charCode == 46" style="width: 150px;" required/>
+                    </div>
+                    <button type="button" class="btn btn-danger" style="margin-left: 10px;" onclick="supprimerChamp(this)">X</button>
                 </div>
             </div>
 
@@ -155,6 +159,15 @@ $membre_id = $_GET['membre_id'];
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
+<style>
+    .intervention {
+        display: inline-flex; /* Modifier cette ligne */
+        margin-right: 10px; /* Ajouter cette ligne */
+    }
+
+</style>
+
+
 <script>
     function selectIntervention(intervention) {
         document.getElementById('selectedIntervention').value = intervention;
@@ -178,10 +191,15 @@ $membre_id = $_GET['membre_id'];
 
         var facturation = document.querySelector('input[name="facturation"]:checked').value;
         var dateFacturation = document.getElementById("date_differee").value;
-        var paiement = document.querySelector('input[name="paiement"]:checked').value;
         var heureArrivee = document.getElementsByName("heure_arrive")[0].value;
         var heureDepart = document.getElementsByName("heure_depart")[0].value;
         var commentaire = document.getElementsByName("commentaire")[0].value;
+
+        // Déplacer la ligne de récupération de la valeur de paiement ici
+        var paiement = document.querySelector('input[name="paiement"]:checked').value;
+
+        // Ajout d'un euro supplémentaire si le mode de paiement est "chèque"
+        var montantSupplementaire = (paiement === 'cheque') ? 1 : 0;
 
         console.log("BI n° unique : " + generateUniqueID());
         console.log("Facturer : " + facturer);
@@ -219,6 +237,9 @@ $membre_id = $_GET['membre_id'];
             }
         });
 
+        // Ajout du montant supplémentaire pour le paiement par chèque
+        totalPrixHT += montantSupplementaire;
+
         var tauxTVA = 0.20; // Supposons une TVA de 20%
         var montantTVA = totalPrixHT * tauxTVA;
         var totalPrixTTC = totalPrixHT + montantTVA;
@@ -228,6 +249,7 @@ $membre_id = $_GET['membre_id'];
         console.log("Montant de la TVA : " + montantTVA.toFixed(2) + "€");
         console.log("Coût total TTC : " + totalPrixTTC.toFixed(2) + "€");
     }
+
 
     // Ajouter un écouteur d'événement pour le bouton "Ajouter"
     document.getElementById('btnAjouter').addEventListener('click', function() {
@@ -299,8 +321,15 @@ $membre_id = $_GET['membre_id'];
         // Ajouter le champ cloné à la liste des interventions
         document.getElementById('interventions').appendChild(clone);
 
+        // Ajouter une marge entre les champs clonés
+        clone.querySelectorAll('.intervention').forEach(function(intervention) {
+            intervention.style.marginTop = '10px'; // Ajouter une marge de 10px entre chaque champ cloné
+        });
+
         // Ajouter un écouteur d'événements sur le bouton "Supprimer" du champ ajouté
         var supprimerBtn = clone.querySelector('.btn-danger');
+        supprimerBtn.style.marginTop = '10px'; // Ajouter une marge de 5px au bouton "Supprimer"
+
         supprimerBtn.addEventListener('click', function() {
             supprimerChamp(this);
             // Mettre à jour les informations et effectuer les calculs
@@ -310,6 +339,8 @@ $membre_id = $_GET['membre_id'];
         // Mettre à jour les informations et effectuer les calculs
         afficherResultat();
     }
+
+
     // Supprimer un champ d'intervention
     function supprimerChamp(button) {
         var interventionsDiv = document.getElementById('interventions');
@@ -317,7 +348,7 @@ $membre_id = $_GET['membre_id'];
         var parentDiv = interventionDiv.parentElement;
 
         // Vérifier s'il y a plus d'un champ avant de permettre la suppression
-        if (interventionsDiv.children.length > 1) {
+        if (interventionsDiv.children.length >= 1) {
             parentDiv.removeChild(interventionDiv);
         } else {
             alert("Vous ne pouvez pas supprimer ce champ.");
@@ -354,9 +385,6 @@ $membre_id = $_GET['membre_id'];
             }
         }
     }
-
-
-
 
 </script>
 
