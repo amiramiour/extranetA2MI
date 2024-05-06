@@ -103,7 +103,7 @@ try {
 <body>
 <?php include('../navbar.php'); ?>
 <div class="container">
-    <h2>Résultats de la table SAV</h2>
+    <h2>SAV</h2>
     <div class="row mb-3">
         <div class="col-sm-6">
             <form action="" method="GET">
@@ -150,8 +150,8 @@ try {
             <th scope="col">Entreprise</th>
             <th scope="col">Accessoire</th>
             <th scope="col">Avancement</th>
-            <th scope="col">Date de réception</th>
-            <th scope="col">Date de livraison</th>
+            <th scope="col">date d'entrée</th>
+            <th scope="col">date de fin</th>
             <th scope="col">Envoi</th>
             <th scope="col">Forfait</th>
             <th scope="col">Garantie</th>
@@ -210,8 +210,11 @@ try {
                 <td><?= $row['active'] ?></td>
 
                 <td><a href="modifier-sav.php?sav_id=<?= $row['sav_id'] ?>" class="btn btn-primary"><i class="la la-pencil"></i> Modifier</a></td>
-                <td><a href="supprimer-sav.php?sav_id=<?= $row['sav_id'] ?>" class="btn btn-primary"><i class="la la-pencil"></i> Supprimer</a></td>
-
+                <td>
+                    <?php if ($_SESSION['user_type'] === 'admin') : ?>
+                        <a href="supprimer-sav.php?sav_id=<?= $row['sav_id'] ?>" class="btn btn-danger"><i class="la la-trash"></i> Supprimer</a>
+                    <?php endif; ?>
+                </td>
             </tr>
         <?php endforeach; ?>
         </tbody>
