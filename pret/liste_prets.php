@@ -81,7 +81,6 @@ $prets = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <a href="#" class="btn btn-danger" onclick="confirmSuppression(<?= $pret['pret_id'] ?>)">Supprimer</a>
                     </td>
                     <?php endif; ?>
-
                 </tr>
             <?php endforeach; ?>
 
