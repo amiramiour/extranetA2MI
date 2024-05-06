@@ -144,11 +144,11 @@ $client_id = $_GET['client_id']; //la on recupere l'id passé dans l'url
         <input type="hidden" name="total_service_ht" id="total_service_ht" value="0">
 
         <div class="form-group">
-            <label for="date_recu">Date de réception* :</label>
+            <label for="date_recu">Date d'entrée* :</label>
             <input type="date" id="date_recu" name="date_recu" class="form-control" required>
         </div>
         <div class="form-group">
-            <label for="date_livraison">Date de livraison* :</label>
+            <label for="date_livraison">Date de fin* :</label>
             <input type="date" id="date_livraison" name="date_livraison" class="form-control" required>
             <span id="date_error" style="color: red; display: none;">La date de réception ne peut pas être postérieure à la date de livraison.</span>
         </div>
@@ -166,7 +166,7 @@ $client_id = $_GET['client_id']; //la on recupere l'id passé dans l'url
             <label>Sous garantie* :</label>
             <select name="sous_garantie" class="form-control">
                 <option value="oui">Oui</option>
-                <option value="non">Non</option>
+                <option value="non" selected>Non</option>
             </select>
         </div>
 
@@ -244,6 +244,7 @@ $client_id = $_GET['client_id']; //la on recupere l'id passé dans l'url
             $html += '<input size="5" type="text" name="nombre[]" placeholder="Nombre">';
             $html += '<input size="9" type="text" name="prix_unité[]" placeholder="Prix unitaire">';
             // Champ pour afficher le total de ce matériel
+            $html += '<div class="form-group">';
             $html += '<div class="form-group">';
             $html += '<label>Prix Total HT Matériel : </label>';
             $html += '<input type="text" class="form-control total_materiel_ht" value="0" readonly>';
@@ -330,6 +331,49 @@ $client_id = $_GET['client_id']; //la on recupere l'id passé dans l'url
             return checkDates();
         });
     });
+    function ajouterJoursOuvrables(startDate, joursAjouter) {
+        var currentDate = new Date(startDate);
+        var joursAjoutés = 0;
+
+        while (joursAjoutés < joursAjouter) {
+            currentDate.setDate(currentDate.getDate() + 1); // Ajoute un jour
+            if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) { // Vérifie si le jour n'est pas un week-end
+                joursAjoutés++;
+            }
+        }
+
+        return currentDate;
+    }
+
+    document.getElementById("date_recu").addEventListener("change", function() {
+        var dateReception = new Date(this.value);
+        var dateLivraison = ajouterJoursOuvrables(dateReception, 3); // Ajoute 3 jours ouvrables
+        document.getElementById("date_livraison").value = formaterDate(dateLivraison);
+    });
+
+    // Fonction pour formater la date au format YYYY-MM-DD
+    function formaterDate(date) {
+        var dd = String(date.getDate()).padStart(2, '0');
+        var mm = String(date.getMonth() + 1).padStart(2, '0'); // Janvier est 0 !
+        var yyyy = date.getFullYear();
+
+        return yyyy + '-' + mm + '-' + dd;
+    }
+
+    // Obtenir la date actuelle
+    var aujourdHui = new Date();
+    var dd = String(aujourdHui.getDate()).padStart(2, '0');
+    var mm = String(aujourdHui.getMonth() + 1).padStart(2, '0'); // Janvier est 0 !
+    var yyyy = aujourdHui.getFullYear();
+
+    aujourdHui = yyyy + '-' + mm + '-' + dd;
+    document.getElementById("date_recu").value = aujourdHui;
+    aujourdHui = yyyy + '-' + mm + '-' + dd;
+    document.getElementById("date_recu").value = aujourdHui;
+
+    // Calculer la date de fin par défaut
+    var dateLivraisonDefaut = ajouterJoursOuvrables(aujourdHui, 3); // Ajoute 3 jours ouvrables
+    document.getElementById("date_livraison").value = formaterDate(dateLivraisonDefaut);
 
 </script>
 

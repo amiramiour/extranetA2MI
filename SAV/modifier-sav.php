@@ -180,11 +180,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_update_sav_state->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
             $stmt_update_sav_state->execute();
 
-
-            if($nouvel_etat_id==5){
                 // Envoyer un e-mail de modification au client
-                sendSAVModificationEmail($client_info['membre_mail'], $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, $etat_label, $nouvel_avancement, true);
-            }
+            sendSAVModificationEmail($client_info['membre_mail'], $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, $etat_label, $nouvel_avancement, true);
+
             // Envoyer un e-mail de modification au technicien
             sendSAVModificationEmail($technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, $etat_label, $nouvel_avancement, false);
 

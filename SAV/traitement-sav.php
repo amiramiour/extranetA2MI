@@ -124,30 +124,34 @@ VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, :
 // Récupérer l'ID du SAV nouvellement inséré
         $sav_id = $connexion->lastInsertId();
         /////inserion dans materiel_sav
+        ///
         // Récupérer les données des matériels
         $materiels_utilises = $_POST['materiel'];
         $nombres = $_POST['nombre'];
         $prix_unitaires = $_POST['prix_unité'];
-
-// Insérer chaque matériel dans la base de données
+        // Insérer chaque matériel dans la base de données
         for ($i = 0; $i < count($materiels_utilises); $i++) {
             // Récupérer les valeurs pour chaque matériel
             $materiel_utilise = $materiels_utilises[$i];
             $quantite = $nombres[$i];
             $cout_unitaire = $prix_unitaires[$i];
 
-            // Insérer ces valeurs dans la base de données
-            $sql_materiel = "INSERT INTO sav_materiel (materiel_utilise, sav_id, quantite, coutUnitaire) 
-                    VALUES (:materiel_utilise, :sav_id, :quantite, :cout_unitaire)";
+            // Vérifier si les champs ne sont pas vides
+            if (!empty($materiel_utilise) && !empty($quantite) && !empty($cout_unitaire)) {
+                // Insérer ces valeurs dans la base de données
+                $sql_materiel = "INSERT INTO sav_materiel (materiel_utilise, sav_id, quantite, coutUnitaire) 
+                VALUES (:materiel_utilise, :sav_id, :quantite, :cout_unitaire)";
 
-            $stmt_materiel = $connexion->prepare($sql_materiel);
-            $stmt_materiel->bindParam(':materiel_utilise', $materiel_utilise);
-            $stmt_materiel->bindParam(':sav_id', $sav_id);
-            $stmt_materiel->bindParam(':quantite', $quantite);
-            $stmt_materiel->bindParam(':cout_unitaire', $cout_unitaire);
+                $stmt_materiel = $connexion->prepare($sql_materiel);
+                $stmt_materiel->bindParam(':materiel_utilise', $materiel_utilise);
+                $stmt_materiel->bindParam(':sav_id', $sav_id);
+                $stmt_materiel->bindParam(':quantite', $quantite);
+                $stmt_materiel->bindParam(':cout_unitaire', $cout_unitaire);
 
-            $stmt_materiel->execute();
+                $stmt_materiel->execute();
+            }
         }
+
 
 
 // Enregistrer l'historique de sauvegarde

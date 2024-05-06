@@ -21,7 +21,6 @@ try {
     $etat = isset($_GET['etat']) ? $_GET['etat'] : '';
 
     // Requête SQL de base pour récupérer les données de la table SAV avec les jointures et le tri
-    // Requête SQL de base pour récupérer les données de la table SAV avec les jointures et le tri
     $query = "
     SELECT 
         sav.sav_id, 
@@ -103,7 +102,7 @@ try {
 <body>
 <?php include('../navbar.php'); ?>
 <div class="container">
-    <h2>Résultats de la table SAV</h2>
+    <h2>SAV</h2>
     <div class="row mb-3">
         <div class="col-sm-6">
             <form action="" method="GET">
@@ -150,8 +149,8 @@ try {
             <th scope="col">Entreprise</th>
             <th scope="col">Accessoire</th>
             <th scope="col">Avancement</th>
-            <th scope="col">Date de réception</th>
-            <th scope="col">Date de livraison</th>
+            <th scope="col">date d'entrée</th>
+            <th scope="col">date de fin</th>
             <th scope="col">Envoi</th>
             <th scope="col">Forfait</th>
             <th scope="col">Garantie</th>
