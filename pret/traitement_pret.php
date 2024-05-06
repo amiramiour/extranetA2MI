@@ -45,9 +45,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt_technicien->execute();
     $technicien_info = $stmt_technicien->fetch(PDO::FETCH_ASSOC);
 
-    $technicien_nom = $technicien_info['membre_nom'];
-    $technicien_prenom = $technicien_info['membre_prenom'];
-    $technicien_email = $technicien_info['membre_mail'];
+    // Vérification si les informations du technicien ont été récupérées avec succès
+    if ($technicien_info) {
+        // Assignation du nom et du prénom du technicien
+        $technicien_nom = $technicien_info['membre_nom'];
+        $technicien_prenom = $technicien_info['membre_prenom'];
+    } else {
+        // Gestion de l'erreur si les informations du technicien ne sont pas disponibles
+        echo "Erreur : Impossible de récupérer les informations du technicien.";
+        exit();
+    }
 
     // Récupérer les données du formulaire
     $pret_materiel = $_POST["pret_materiel"];
@@ -119,6 +126,7 @@ function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_p
         $body .= "Un nouveau prêt a été créé ";
         if ($is_client) {
             $body .= "pour vous :\n\n";
+            $body .= "Technicien responsable : $technicien_nom $technicien_prenom\n\n";
             $body .= "Détails du prêt :\n";
             $body .= "Matériel : {$pret_info['pret_materiel']}\n";
             $body .= "Valeur du matériel : {$pret_info['valeurMat']}\n";
@@ -136,7 +144,7 @@ function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_p
             $body .= "Date de fin : " . date('d/m/Y', $pret_info['pret_dateout']) . "\n";
             $body .= "Commentaire : {$pret_info['commentaire']}\n\n";
         }
-        $body .= "Cordialement,\nVotre société";
+        $body .= "Cordialement,\nA2MI INFORMATIQUE";
 
         // Instancier un nouvel objet PHPMailer
         $mail = new PHPMailer(true);

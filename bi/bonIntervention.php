@@ -32,7 +32,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'supprimer' && isset($_POST[
 try {
     $db = connexionbdd();
 
-    $query = $db->prepare("SELECT bi.*, membres.membre_nom, membres.membre_prenom FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id WHERE bi.bi_active = ?");
+    $query = $db->prepare("SELECT bi.*, membres.membre_nom AS membre_nom, membres.membre_prenom AS membre_prenom, technicien.membre_nom AS technicien_nom, technicien.membre_prenom AS technicien_prenom FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id INNER JOIN membres AS technicien ON bi.bi_technicien = technicien.membre_id WHERE bi.bi_active = ?");
     $query->execute([1]);
     $resultats = $query->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -83,9 +83,10 @@ try {
         <?php foreach ($resultats as $bi): ?>
             <tr>
                 <td><?= $bi['bi_id'] ?></td>
-                <td><a href="../profile/profile_client.php?id=<?= $bi['membre_id'] ?>"><?= $bi['membre_nom'] . ' ' . $bi['membre_prenom'] ?></a></td>
+                <td><a href="../profile/profile_client.php?id=<?= $bi['membre_id'] ?>">
+                        <?= $bi['membre_nom'] ?? '' ?> <?= $bi['membre_prenom'] ?? '' ?></a></td>
                 <td><?= $bi['bi_active'] ?></td>
-                <td><?= $bi['bi_technicien'] ?></td>
+                <td><?= $bi['technicien_nom'] ?? '' ?> <?= $bi['technicien_prenom'] ?? '' ?></td>
                 <td><?= $bi['bi_facture'] ?></td>
                 <td><?= $bi['bi_garantie'] ?></td>
                 <td><?= $bi['bi_contrat'] ?></td>
@@ -115,6 +116,7 @@ try {
                 </td>
             </tr>
         <?php endforeach; ?>
+
         </tbody>
     </table>
 </div>
