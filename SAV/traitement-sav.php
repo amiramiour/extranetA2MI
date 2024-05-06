@@ -123,31 +123,44 @@ VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, :
 
 // Récupérer l'ID du SAV nouvellement inséré
         $sav_id = $connexion->lastInsertId();
+        // Récupération des détails du SAV
+        $query_sav_details = "SELECT sav_datein, sav_dateout, sav_probleme, sav_typemateriel, sav_accessoire, 
+                      sav_garantie, sav_maindoeuvrettc, sav_tarifmaterielttc 
+                      FROM sav WHERE sav_id = :sav_id";
+        $stmt_sav_details = $connexion->prepare($query_sav_details);
+        $stmt_sav_details->bindParam(':sav_id', $sav_id);
+        $stmt_sav_details->execute();
+        $sav_details = $stmt_sav_details->fetch(PDO::FETCH_ASSOC);
+
         /////inserion dans materiel_sav
+        ///
         // Récupérer les données des matériels
         $materiels_utilises = $_POST['materiel'];
         $nombres = $_POST['nombre'];
         $prix_unitaires = $_POST['prix_unité'];
-
-// Insérer chaque matériel dans la base de données
+        // Insérer chaque matériel dans la base de données
         for ($i = 0; $i < count($materiels_utilises); $i++) {
             // Récupérer les valeurs pour chaque matériel
             $materiel_utilise = $materiels_utilises[$i];
             $quantite = $nombres[$i];
             $cout_unitaire = $prix_unitaires[$i];
 
-            // Insérer ces valeurs dans la base de données
-            $sql_materiel = "INSERT INTO sav_materiel (materiel_utilise, sav_id, quantite, coutUnitaire) 
-                    VALUES (:materiel_utilise, :sav_id, :quantite, :cout_unitaire)";
+            // Vérifier si les champs ne sont pas vides
+            if (!empty($materiel_utilise) && !empty($quantite) && !empty($cout_unitaire)) {
+                // Insérer ces valeurs dans la base de données
+                $sql_materiel = "INSERT INTO sav_materiel (materiel_utilise, sav_id, quantite, coutUnitaire) 
+                VALUES (:materiel_utilise, :sav_id, :quantite, :cout_unitaire)";
 
-            $stmt_materiel = $connexion->prepare($sql_materiel);
-            $stmt_materiel->bindParam(':materiel_utilise', $materiel_utilise);
-            $stmt_materiel->bindParam(':sav_id', $sav_id);
-            $stmt_materiel->bindParam(':quantite', $quantite);
-            $stmt_materiel->bindParam(':cout_unitaire', $cout_unitaire);
+                $stmt_materiel = $connexion->prepare($sql_materiel);
+                $stmt_materiel->bindParam(':materiel_utilise', $materiel_utilise);
+                $stmt_materiel->bindParam(':sav_id', $sav_id);
+                $stmt_materiel->bindParam(':quantite', $quantite);
+                $stmt_materiel->bindParam(':cout_unitaire', $cout_unitaire);
 
-            $stmt_materiel->execute();
+                $stmt_materiel->execute();
+            }
         }
+
 
 
 // Enregistrer l'historique de sauvegarde
@@ -169,13 +182,12 @@ VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, :
             $error = "Erreur : " . $e->getMessage();
         }
 
-
-
         // Envoi de l'e-mail de confirmation au client
-        sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, null, null, $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, true);
+        sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, null, null, $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, $sav_details, true);
 
 // Envoi de l'e-mail de confirmation au technicien
-        sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, false);
+        sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, $sav_details, false);
+
 
         header('Location: sav.php');
         exit();
@@ -191,7 +203,8 @@ VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, :
 }
 
 // Fonction pour envoyer un e-mail de confirmation
-function sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $client_nom, $client_prenom, $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, $is_client) {
+// Fonction pour envoyer un e-mail de confirmation
+function sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $client_nom, $client_prenom, $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, $sav_details, $is_client) {
     // Récupérer l'adresse e-mail du client depuis la base de données
     $connexion = connexionbdd();
     $query = $connexion->prepare("SELECT membre_mail FROM membres WHERE membre_id = ?");
@@ -203,18 +216,23 @@ function sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $c
     $body = "Bonjour,\n\n";
     if ($is_client) {
         $body .= "Un SAV a été créé pour vous avec les détails suivants :\n\n";
-        $body .= "Prix total : $prix_total_ttc euros\n";
-        $body .= "Technicien en charge : $technicien_nom $technicien_prenom\n";
-        $body .= "Date de création : $date_recu\n";
-        $body .= "État : $etat_intitule\n\n";
     } else {
         $body .= "Un SAV a été créé pour : $client_nom $client_prenom avec les détails suivants :\n\n";
-        $body .= "Prix total : $prix_total_ttc euros\n";
-        $body .= "Technicien en charge : $technicien_nom $technicien_prenom\n";
-        $body .= "Date de création : $date_recu\n";
-        $body .= "État : $etat_intitule\n\n";
     }
-    $body .= "Cordialement,\nVotre société";
+    $body .= "Prix total : $prix_total_ttc euros\n";
+    $body .= "Technicien en charge : $technicien_nom $technicien_prenom\n";
+    $body .= "Date de création : $date_recu\n";
+    $body .= "État : $etat_intitule\n\n";
+    $body .= "Détails du SAV :\n";
+    $body .= "Date de réception : " . $sav_details['sav_datein'] . "\n";
+    $body .= "Date de livraison : " . $sav_details['sav_dateout'] . "\n";
+    $body .= "Problème : " . $sav_details['sav_probleme'] . "\n";
+    $body .= "Type de matériel : " . $sav_details['sav_typemateriel'] . "\n";
+    $body .= "Accessoire : " . $sav_details['sav_accessoire'] . "\n";
+    $body .= "Garantie : " . $sav_details['sav_garantie']  . "\n";
+    $body .= "Main d'œuvre TTC : " . $sav_details['sav_maindoeuvrettc'] . " euros\n";
+    $body .= "Tarif matériel TTC : " . $sav_details['sav_tarifmaterielttc'] . " euros\n";
+    $body .= "\nCordialement,\nA2MI informatique";
 
     try {
         $mail = new PHPMailer(true);
@@ -253,5 +271,6 @@ function sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $c
         return false;
     }
 }
+
 
 ?>

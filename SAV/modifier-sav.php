@@ -15,6 +15,7 @@ require_once '../config.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
 // Vérifier si l'ID du SAV est passé en paramètre dans l'URL
 if (!isset($_GET['sav_id']) || empty($_GET['sav_id'])) {
     header('Location: sav.php'); // Rediriger si l'ID n'est pas présent
@@ -37,7 +38,6 @@ if (isset($_POST['delete']) && $_POST['delete'] === 'delete') {
         $stmt_sav_info->execute();
         $sav_info = $stmt_sav_info->fetch(PDO::FETCH_ASSOC);
 
-
         // Mettre à jour le champ active à 0 dans la table SAV
         $query_delete_sav = "UPDATE sav SET active = 0 WHERE sav_id = :sav_id";
         $stmt_delete_sav = $connexion->prepare($query_delete_sav);
@@ -51,23 +51,21 @@ if (isset($_POST['delete']) && $_POST['delete'] === 'delete') {
         $stmt_last_creation_date->execute();
         $last_creation_date = $stmt_last_creation_date->fetchColumn();
 
-// Si aucune entrée n'a été trouvée, utilisez la date actuelle
+        // Si aucune entrée n'a été trouvée, utilisez la date actuelle
         if (!$last_creation_date) {
             $last_creation_date = date('Y-m-d H:i:s');
         }
 
-// Insérer une entrée dans la table sauvgarde_etat_info pour enregistrer la désactivation
+        // Insérer une entrée dans la table sauvgarde_etat_info pour enregistrer la désactivation
         $query_insert_sav_history = "INSERT INTO sauvgarde_etat_info (sav_id, sauvgarde_etat, sauvgarde_avancement, date_creation, date_update, created_by, updated_by) 
                             VALUES (:sav_id, :sauvgarde_etat, 'Supprimé', :date_creation, NOW(), :created_by, :updated_by)";
         $stmt_insert_sav_history = $connexion->prepare($query_insert_sav_history);
         $stmt_insert_sav_history->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
         $stmt_insert_sav_history->bindParam(':sauvgarde_etat', $sav_info['sav_etats'], PDO::PARAM_INT);
         $stmt_insert_sav_history->bindParam(':date_creation', $last_creation_date, PDO::PARAM_STR);
-
         $stmt_insert_sav_history->bindParam(':created_by', $sav_info['sav_technicien'], PDO::PARAM_INT); // Utiliser l'ID de la personne qui a créé le SAV
         $stmt_insert_sav_history->bindParam(':updated_by', $_SESSION['user_id'], PDO::PARAM_INT); // Utiliser l'ID de la personne connectée
         $stmt_insert_sav_history->execute();
-
 
         // Rediriger vers la page d'accueil après "suppression"
         header('Location: sav.php');
@@ -83,10 +81,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['nouvel_etat_id']) && isset($_POST['nouvel_avancement'])) {
         $nouvel_etat_id = $_POST['nouvel_etat_id'];
         $nouvel_avancement = $_POST['nouvel_avancement'];
+        $nouvelle_date_fin = !empty($_POST['nouvelle_date_fin']) ? $_POST['nouvelle_date_fin'] : null;
+        $nouveau_tarif_materiel_ht = isset($_POST['nouveau_tarif_materiel_ht']) ? floatval($_POST['nouveau_tarif_materiel_ht']) : 0;
+        $nouveau_tarif_materiel_ttc = $nouveau_tarif_materiel_ht * (1 + 0.2);
+        $nouvelle_main_oeuvre_ht = isset($_POST['nouvelle_main_oeuvre_ht']) ? floatval($_POST['nouvelle_main_oeuvre_ht']) : 0;
+        $nouvelle_main_oeuvre_ttc = $nouvelle_main_oeuvre_ht * (1 + 0.2);
+
 
         try {
             // Connexion à la base de données en utilisant la fonction connexionbdd()
             $connexion = connexionbdd();
+
+
+            // Récupérer les anciens prix depuis la base de données
+            $query_old_prices = "SELECT sav_tarifmaterielht, sav_tarifmaterielttc, sav_maindoeuvreht, sav_maindoeuvrettc FROM sav WHERE sav_id = :sav_id";
+            $stmt_old_prices = $connexion->prepare($query_old_prices);
+            $stmt_old_prices->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
+            $stmt_old_prices->execute();
+            $old_prices = $stmt_old_prices->fetch(PDO::FETCH_ASSOC);
+
+            // Calculer les totaux
+            $total_materiel_ht = $old_prices['sav_tarifmaterielht'] + $nouveau_tarif_materiel_ht;
+            $total_materiel_ttc = $old_prices['sav_tarifmaterielttc'] + $nouveau_tarif_materiel_ttc;
+            $total_main_oeuvre_ht = $old_prices['sav_maindoeuvreht'] + $nouvelle_main_oeuvre_ht;
+            $total_main_oeuvre_ttc = $old_prices['sav_maindoeuvrettc'] + $nouvelle_main_oeuvre_ttc;
+
+            // Mettre à jour les prix dans la base de données
+            $query_update_prices = "UPDATE sav SET 
+        sav_tarifmaterielht = :total_materiel_ht,
+        sav_tarifmaterielttc = :total_materiel_ttc,
+        sav_maindoeuvreht = :total_main_oeuvre_ht,
+        sav_maindoeuvrettc = :total_main_oeuvre_ttc
+        WHERE sav_id = :sav_id";
+            $stmt_update_prices = $connexion->prepare($query_update_prices);
+            $stmt_update_prices->bindParam(':total_materiel_ht', $total_materiel_ht, PDO::PARAM_INT);
+            $stmt_update_prices->bindParam(':total_materiel_ttc', $total_materiel_ttc, PDO::PARAM_INT);
+            $stmt_update_prices->bindParam(':total_main_oeuvre_ht', $total_main_oeuvre_ht, PDO::PARAM_INT);
+            $stmt_update_prices->bindParam(':total_main_oeuvre_ttc', $total_main_oeuvre_ttc, PDO::PARAM_INT);
+            $stmt_update_prices->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
+            $stmt_update_prices->execute();
 
             // Récupération des informations du client
             $query_client = "SELECT m.membre_nom, m.membre_prenom, m.membre_mail 
@@ -121,6 +154,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_etat_label->bindParam(':nouvel_etat_id', $nouvel_etat_id, PDO::PARAM_INT);
             $stmt_etat_label->execute();
             $etat_label = $stmt_etat_label->fetchColumn();
+
+            $query_update_date_fin = "UPDATE sav SET sav_dateout = :nouvelle_date_fin WHERE sav_id = :sav_id";
+            $stmt_update_date_fin = $connexion->prepare($query_update_date_fin);
+            $stmt_update_date_fin->bindParam(':nouvelle_date_fin', $nouvelle_date_fin, PDO::PARAM_STR);
+            $stmt_update_date_fin->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
+            $stmt_update_date_fin->execute();
+
             // Récupération de la date de création
             $query_created_by = "SELECT sav_technicien, sav_datein FROM sav WHERE sav_id = :sav_id";
             $stmt_created_by = $connexion->prepare($query_created_by);
@@ -130,17 +170,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $created_by = $sav_info['sav_technicien']; // ID de la personne qui a créé le SAV
             $date_creation =  $sav_info['sav_datein'];
 
-// Récupération de la date de création
-            // Récupération de la date de création
-            $query_created_by = "SELECT sav_technicien, sav_datein FROM sav WHERE sav_id = :sav_id";
-            $stmt_created_by = $connexion->prepare($query_created_by);
-            $stmt_created_by->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
-            $stmt_created_by->execute();
-            $sav_info = $stmt_created_by->fetch(PDO::FETCH_ASSOC);
-            $created_by = $sav_info['sav_technicien']; // ID de la personne qui a créé le SAV
-            $date_creation =  $sav_info['sav_datein'];
-
-// Vérifier le format de la date
+            // Vérifier le format de la date
             if (is_numeric($date_creation)) {
                 // Si la date est un timestamp Unix, convertissez-la en format 'YYYY-MM-DD HH:MM:SS'
                 $date_creation_formatted = date('Y-m-d H:i:s', $date_creation);
@@ -149,7 +179,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $date_creation_formatted = $date_creation;
             }
 
-// Insérer un nouvel enregistrement dans la table sauvegarde_etat_info
+            // Insérer un nouvel enregistrement dans la table sauvegarde_etat_info
             $query_insert_new_state = "INSERT INTO sauvgarde_etat_info (sav_id, sauvgarde_etat, sauvgarde_avancement, date_creation, date_update, created_by, updated_by) 
     VALUES (:sav_id, :nouvel_etat_id, :nouvel_avancement, :date_creation, NOW(), :created_by, :updated_by)";
             $stmt_insert_new_state = $connexion->prepare($query_insert_new_state);
@@ -160,8 +190,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_insert_new_state->bindParam(':created_by', $created_by, PDO::PARAM_INT); // Utiliser l'ID de la personne qui a créé le SAV
             $stmt_insert_new_state->bindParam(':updated_by', $sav_technicien_id, PDO::PARAM_INT);
             $stmt_insert_new_state->execute();
-
-
 
             // Récupérer l'ID de la dernière insertion
             $last_inserted_id = $connexion->lastInsertId();
@@ -180,11 +208,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_update_sav_state->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
             $stmt_update_sav_state->execute();
 
+            // Envoyer un e-mail de modification au client
+            sendSAVModificationEmail($client_info['membre_mail'], $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, $etat_label, $nouvel_avancement, true);
 
-            if($nouvel_etat_id==5){
-                // Envoyer un e-mail de modification au client
-                sendSAVModificationEmail($client_info['membre_mail'], $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, $etat_label, $nouvel_avancement, true);
-            }
             // Envoyer un e-mail de modification au technicien
             sendSAVModificationEmail($technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, $etat_label, $nouvel_avancement, false);
 
@@ -217,6 +243,12 @@ try {
 
     // Récupération des résultats
     $sav = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Requête pour récupérer les avancements du SAV
+    $query_avancements = "SELECT sauvgarde_avancement FROM sauvgarde_etat_info WHERE sav_id = :sav_id";
+    $stmt_avancements = $connexion->prepare($query_avancements);
+    $stmt_avancements->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
+    $stmt_avancements->execute();
+    $avancements = $stmt_avancements->fetchAll(PDO::FETCH_ASSOC);
 
     // Vérifier si le SAV existe
     if (!$sav) {
@@ -288,7 +320,11 @@ function sendSAVModificationEmail($to_email, $client_nom, $client_prenom, $techn
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier SAV</title>
     <!-- Inclure Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Liens vers les icônes LSF (Line Awesome) -->
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+    <!-- Inclure le fichier CSS personnalisé -->
+    <link href="styles.css" rel="stylesheet">
     <!-- Ajouter un style personnalisé pour les boutons -->
     <style>
         .custom-btn {
@@ -304,15 +340,51 @@ function sendSAVModificationEmail($to_email, $client_nom, $client_prenom, $techn
 </head>
 
 <body>
+<?php include('../navbar.php'); ?>
+
 <div class="container mt-4">
-    <h2>Modifier SAV</h2>
+    <h2>Modifier SAV n°  <?= $sav['sav_id'] ?> </h2>
     <div class="mb-3">
+
         <h3>Informations détaillées du SAV</h3>
-        <p><strong>ID SAV:</strong> <?= $sav['sav_id'] ?></p>
         <p><strong>Accessoire:</strong> <?= $sav['sav_accessoire'] ?></p>
+        <p><strong>Problème:</strong> <?= $sav['sav_probleme'] ?></p>
+        <p><strong>Matériel (HT):</strong> <?= $sav['sav_tarifmaterielht'] ?></p>
+        <p><strong>Matériel (TTC):</strong> <?= $sav['sav_tarifmaterielttc'] ?></p>
+        <p><strong>Main d'œuvre (HT):</strong> <?= $sav['sav_maindoeuvreht'] ?></p>
+        <p><strong>Main d'œuvre (TTC):</strong> <?= $sav['sav_maindoeuvrettc'] ?></p>
+        <p><strong>Date de fin:</strong> <?php
+            if (is_numeric($sav['sav_dateout'])) {
+                $dateout = date('Y-m-d ', $sav['sav_dateout']);
+            } else {
+                $dateout = $sav['sav_dateout'];
+            }
+            echo $dateout; ?></p>
+
         <!-- Afficher d'autres informations du SAV selon vos besoins -->
+        <div class="mb-3">
+            <h3>Avancements du SAV</h3>
+            <ol>
+                <?php
+                try {
+                    // Affichage des avancements
+                    foreach ($avancements as $avancement) {
+                        echo "<li>" . htmlspecialchars($avancement['sauvgarde_avancement']) . "</li>";
+                    }
+                } catch (PDOException $e) {
+                    // Gestion des erreurs
+                    echo "Erreur : " . $e->getMessage();
+                }
+                ?>
+            </ol>
+        </div>
     </div>
     <form action="" method="post">
+        <div class="mb-3">
+            <label for="nouvelle_date_fin" class="form-label">Date de fin :</label>
+            <!-- Champ pour la nouvelle date de fin -->
+            <input type="date" class="form-control" name="nouvelle_date_fin" id="nouvelle_date_fin" value="<?= $sav['sav_dateout'] ?>">
+        </div>
         <div class="mb-3">
             <label for="nouvel_etat_id" class="form-label">Nouvel état :</label>
             <select name="nouvel_etat_id" id="nouvel_etat_id" class="form-select" required>
@@ -320,9 +392,17 @@ function sendSAVModificationEmail($to_email, $client_nom, $client_prenom, $techn
                 <option value="2" <?= ($sav['sav_etats'] == 2) ? 'selected' : ''; ?>>En cours</option>
                 <option value="1" <?= ($sav['sav_etats'] == 1) ? 'selected' : ''; ?>>En attente</option>
                 <option value="5" <?= ($sav['sav_etats'] == 5) ? 'selected' : ''; ?>>Terminé</option>
-                <option value="5" <?= ($sav['sav_etats'] == 4) ? 'selected' : ''; ?>>Rendu au client</option>
+                <option value="4" <?= ($sav['sav_etats'] == 4) ? 'selected' : ''; ?>>Rendu au client</option>
                 <!-- Ajoutez d'autres états si nécessaire -->
             </select>
+        </div>
+        <div class="mb-3">
+            <label for="nouvelle_main_oeuvre_ht" class="form-label">Main d'œuvre (HT) :</label>
+            <input type="number" step="0.01" class="form-control" name="nouvelle_main_oeuvre_ht" id="nouvelle_main_oeuvre_ht">
+        </div>
+        <div class="mb-3">
+            <label for="nouveau_materiel_ht" class="form-label">Matériel (HT) :</label>
+            <input type="number" step="0.01" class="form-control" name="nouveau_tarif_materiel_ht" id="nouveau_materiel_ht">
         </div>
         <div class="mb-3">
             <label for="nouvel_avancement" class="form-label">Nouvel avancement :</label>
@@ -333,7 +413,9 @@ function sendSAVModificationEmail($to_email, $client_nom, $client_prenom, $techn
     </form>
     <form action="" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer ce SAV ?');">
         <input type="hidden" name="delete" value="delete">
-        <button type="submit" class="btn btn-danger mt-3 custom-btn">Supprimer ce SAV</button>
+        <?php if ($_SESSION['user_type'] === 'admin') : ?>
+            <button type="submit" class="btn btn-danger mt-3">Supprimer ce SAV</button>
+        <?php endif; ?>
     </form>
     <?php if (isset($error)) : ?>
         <div class="alert alert-danger mt-3" role="alert">
