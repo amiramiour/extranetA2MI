@@ -1,4 +1,9 @@
 <?php
+// Inclure la classe PHPMailer
+require '../vendor/autoload.php';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 session_start();
 
 require_once '../config.php';
@@ -10,13 +15,14 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION
     exit;
 }
 
-// Inclure la classe PHPMailer
-require '../vendor/autoload.php';
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+$technicien_id = $_SESSION['user_id'];
+
+
 
 // Vérifier si le formulaire a été soumis et si l'identifiant du prêt est défini
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pret_id'])) {
+
+
     // Récupérer les valeurs des champs du formulaire
     $pret_id = $_POST['pret_id'];
     $caution = $_POST['caution'];
@@ -91,8 +97,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pret_id'])) {
                 $client_email = $client_info['membre_mail'];
 
                 // Envoi de l'e-mail au technicien
-                sendPretEmail($technicien_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info, true);
-                sendPretEmail($client_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info, false);
+                sendPretEmail($technicien_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info,  true);
+                sendPretEmail($client_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info,  false);
 
 
                 // Envoi de l'e-mail au client
