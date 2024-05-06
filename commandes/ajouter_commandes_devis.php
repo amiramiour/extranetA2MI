@@ -122,7 +122,7 @@ if (isset($_GET['id'])) {
                 <br><br>
                 <button type="button" onclick="ajouterPhoto()">Ajouter une autre photo</button>
                 <br><br>
-                <label for="commentaire">Commentaire </label><br>
+                <label for="commentaire">Commentaire *</label><br>
                 <textarea name="commentaire" id="commentaire" rows="4" cols="50"></textarea><br><br>
             </div>
             
@@ -162,6 +162,7 @@ if (isset($_GET['id'])) {
 
             <div class="center"><input class="createButton" type="submit" value="Créer" /></div>
         </form>
+        <div class="center"><input class="createButton" type="button" value="Annuler" onclick="window.history.back()"/>       
     </div>
     <script>
         var TVA = <?php echo TVA; ?>;

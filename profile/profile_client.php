@@ -134,10 +134,15 @@ try {
         }
 
         // Requête SQL pour récupérer les commandes du client
-        $query_commandes = "SELECT cmd_id, cmd_reference, cmd_designation, cmd_datein, cmd_dateout, cmd_prixventettc, commande_etat
-                                FROM commande
-                                JOIN commande_etats ON commande.cmd_etat = commande_etats.id_etat_cmd
-                                WHERE membre_id = :id_client";
+        $query_commandes = "SELECT c.cmd_devis_id, c.cmd_devis_reference, c.cmd_devis_designation, 
+                            c.cmd_devis_datein, c.cmd_devis_dateout, c.cmd_devis_prixventettc, 
+                            l.membre_nom AS nom_technicien, 
+                            c.cmd_devis_dateSouhait, e.cmd_devis_etat
+                            FROM commande_devis c 
+                            JOIN membres l ON c.cmd_devis_technicien = l.membre_id 
+                            JOIN cmd_devis_etats e ON c.cmd_devis_etat = e.id_etat_cmd_devis
+                            WHERE c.membre_id = :id_client";
+                    
         $stmt_commandes = $db->prepare($query_commandes);
         $stmt_commandes->bindParam(':id_client', $client_id, PDO::PARAM_INT);
         $stmt_commandes->execute();
@@ -209,18 +214,24 @@ try {
         // Vérification si des commandes sont disponibles
         if(!empty($commandes)) {
             // Affichage des commandes
-            echo "<h2>Historique des Commandes</h2>";
+            echo "<h2>Commandes</h2>";
             echo "<div class='row' id='commandes'>";
             foreach($commandes as $commande) {
-                echo "<div class='col-md-4'>";
+                echo "<div class='col-md-6'>";
                 echo "<div class='card mb-3'>";
-                echo "<div class='card-body bg-info'>";
-                echo "<h5 class='card-title'>Commande n° " . $commande['cmd_id'] . "</h5>";
-                echo "<p>Date de création : " . date('d/m/Y', strtotime($commande['cmd_datein'])) . "</p>";
-                echo "<p>État : " . $commande['commande_etat'] . "</p>";
+                echo "<div class='card-body'>";
+                echo "<h5 class='card-title'>" . $commande['cmd_devis_reference'] . "</h5>";
+                echo "<p>Designation : " . $commande['cmd_devis_designation'] . "</p>";
+                echo "<p>Date de création : " . date('d/m/Y', strtotime($commande['cmd_devis_datein'])) . "</p>";
+                echo "<p>Date de livraison : " . date('d/m/Y', strtotime($commande['cmd_devis_dateout'])) . "</p>";
+                echo "<p>Date de livraison souhaitée : " . date('d/m/Y', strtotime($commande['cmd_devis_dateSouhait'])) . "</p>";
+                echo "<p>Prix de vente TTC : " . $commande['cmd_devis_prixventettc'] . "€</p>";
+                echo "<p>Technicien : " . $commande['nom_technicien'] . "</p>";
+                echo "<p>État : " . $commande['cmd_devis_etat'] . "</p>";
+
                 // Bouton pour modifier la commande
                 if($_SESSION['user_type'] === 'admin' || $_SESSION['user_type'] === 'sousadmin'){
-                    echo "<a href='../commandes/modifier_commande.php?id=" . $commande['cmd_id'] . "' class='btn btn-primary custom-btn'>Modifier</a>";
+                    echo "<a href='../commandes/modifier_commandes_devis.php?id=" . $commande['cmd_devis_id'] . "' class='btn btn-primary custom-btn'>Modifier</a>";
                 }
                 echo "</div>";
                 echo "</div>";
@@ -265,7 +276,6 @@ if(isset($_POST['action']) && $_POST['action'] === 'supprimer' && isset($_POST['
     <link rel="stylesheet" type="text/css" href="../css/style.css">
 </head>
 <body>
-<a href="../connexion/deconnexion.php" class="btn btn-danger">Déconnexion</a>
 <!-- Inclure le fichier JavaScript de Bootstrap à la fin du corps -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 

@@ -76,7 +76,7 @@ if ($commande['type_cmd_devis'] == '1') {
 <body>
     <div class="container">
         <h2>Modifier une commande / Devis</h2>
-        <form action="traitement_modification.php?idcommande=<?php echo $idCommande ?>&idclient=<?php echo $commande['membre_id']?>" method="post">
+        <form action="traitement_modification.php?idcommande=<?php echo $idCommande ?>&idclient=<?php echo $commande['membre_id']?>" method="post" enctype="multipart/form-data">
             <fieldset><legend>Produit <small></small></legend>
                 <div id="materiels">
                     <?php 
@@ -148,6 +148,8 @@ if ($commande['type_cmd_devis'] == '1') {
                         <?php } ?>
                     </div>
                 </fieldset>
+                <br><br>
+                <button type="button" onclick="ajouterPhoto()">Ajouter une autre photo</button>
                 <br>
                 <fieldset><legend>Commentaire <small></small></legend>
                     <textarea name="commentaire" rows="4" cols="50"><?php echo $commande['commentaire'] ?></textarea>
@@ -366,6 +368,14 @@ if ($commande['type_cmd_devis'] == '1') {
             }else{
                 alert("Vous ne pouvez pas supprimer le dernier produit.");
             }
+        }
+
+        function ajouterPhoto() {
+            var divPhotos = document.getElementById('photos');
+            var nouveauChamp = document.createElement('div');
+            nouveauChamp.innerHTML = '<label for="picture">Prendre une photo :</label>' +
+                                    '<input type="file" accept="image/*" id="picture" capture="environment" name="photos[]" multiple>';
+            divPhotos.appendChild(nouveauChamp);
         }
 </script>
 </body>

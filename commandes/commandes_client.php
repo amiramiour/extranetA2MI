@@ -56,7 +56,7 @@ $commande_etat = $req->fetchAll();
 <body>
     <div class="container">
         <h2>Liste des commandes de <?= $client['membre_nom'] . ' ' . $client['membre_prenom'] ?></h2>
-        <a href="commandes.php" class="btn btn-primary mb-3">Retour</a>
+        <a href="commandes_devis.php" class="btn btn-primary mb-3">Retour</a>
         <br>
         <a href="ajouter_commandes_devis.php?id=<?= $id_client ?>" class="btn btn-primary">Ajouter</a>
         <br><br>
