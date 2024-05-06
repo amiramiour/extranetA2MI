@@ -1,4 +1,9 @@
 <?php
+// Inclure la classe PHPMailer
+require '../vendor/autoload.php';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 session_start();
 
 require_once '../config.php';
@@ -10,10 +15,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION
     exit;
 }
 
-// Inclure la classe PHPMailer
-require '../vendor/autoload.php';
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+$technicien_id = $_SESSION['user_id'];
 
 // Vérifier si le formulaire a été soumis et si l'identifiant du prêt est défini
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pret_id'])) {

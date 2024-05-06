@@ -25,6 +25,7 @@ $technicien_email = $_SESSION['user_mail'];
 // Vérifier si les données du formulaire ont été soumises
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $db = connexionbdd();
+
     // Récupérer les informations du client
     $membre_id = $_POST['client_id'];
     $query_client = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :membre_id";
