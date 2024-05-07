@@ -4,16 +4,7 @@ require '../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-session_start();
-
-require_once '../config.php';
-
-// Vérifier si l'utilisateur est connecté et est un technicien
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'sousadmin')) {
-    // Si l'utilisateur n'est pas connecté en tant qu'admin ou sous-admin, redirigez-le ou affichez un message d'erreur
-    header("Location: ../connexion.php");
-    exit;
-}
+include "../gestion_session.php";
 
 $technicien_id = $_SESSION['user_id'];
 
@@ -27,6 +18,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pret_id'])) {
     // Mode de paiement est en lecture seule, donc pas besoin de récupérer sa valeur
     $date_rendu = $_POST['date_rendu'];
     $commentaire = $_POST['commentaire'];
+    $etat = $_POST['etat'];
+
 
     // Convertir la date au format YYYY-MM-DD
     $date_rendu = strtotime(str_replace('/', '-', $_POST["date_rendu"]));
@@ -95,8 +88,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pret_id'])) {
                 $client_email = $client_info['membre_mail'];
 
                 // Envoi de l'e-mail au technicien
-                sendPretEmail($technicien_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info,  true);
-                sendPretEmail($client_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info,  false);
+                sendPretEmail($technicien_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info,$etat,  true);
+                sendPretEmail($client_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info,$etat,  false);
 
 
                 // Envoi de l'e-mail au client
@@ -126,19 +119,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pret_id'])) {
 }
 
 // Fonction pour envoyer un e-mail de modification de prêt
-function sendPretEmail($recipient_email, $recipient_nom, $recipient_prenom, $sender_nom, $sender_prenom, $pret_info, $is_technicien) {
+function sendPretEmail($recipient_email, $recipient_nom, $recipient_prenom, $sender_nom, $sender_prenom, $pret_info,$etat, $is_technicien) {
     // Récupérer l'email du technicien depuis la session
     $technicien_email = $_SESSION['user_mail'];
-
     try {
         // Composez le contenu de l'e-mail
         $subject = "Création de prêt - Notification";
         $body = "Bonjour,\n\n";
         if ($is_technicien) {
             $body .= "Un prêt a été modifier pour $sender_nom $sender_prenom\n";
+            $body .= "État du prêt : ";
+            if ($etat == 1) {
+                $body .= "En cours\n";
+            } else {
+                $body .= "Terminé\n";
+            }
         } else {
             $body .= "Un prêt a été modifier pour vous\n";
             $body .= "Votre prêt a été modifié par $recipient_nom $recipient_prenom.\n\n";
+            $body .= "État du prêt : ";
+            if ($etat == 1) {
+                $body .= "En cours\n";
+            } else {
+                $body .= "Terminé\n";
+            }
         }
         $body .= "Détails du prêt :\n";
         $body .= "Matériel : {$pret_info['pret_materiel']}\n";

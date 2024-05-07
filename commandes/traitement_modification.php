@@ -1,15 +1,16 @@
 <?php 
-include '../gestion_session.php';
 require_once '../config.php';
+include "../gestion_session.php";
+
 include '../ConnexionBD.php';
-include '../navbar.php';
+$pdo = connexionbdd();
+
 
 require '../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-$pdo = connexionbdd();
 
 $idCommande = $_GET['idcommande'];
 $idClient = $_GET['idclient'];
@@ -95,8 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $etatProduit = $produit[8];
     
             //var_dump($produit);
-            
-            //On recup les produits de la commande à partir du formulaire, si le produit existe déjà : il sera mis à jour, sinon il sera ajouté
+    
             $stmt = $pdo->prepare("SELECT * FROM commande_produit WHERE reference = :reference AND id_commande = :idCommande");
             $stmt->bindValue(':reference', $reference);
             $stmt->bindValue(':idCommande', $idCommande);
@@ -275,14 +275,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Gérer le cas où la commande n'existe pas
         echo "La commande avec l'ID $idCommande n'existe pas.";
     }
+
+    //récupérer les produits de la commande à partir du formulaire, si le produit existe déjà : il sera mis à jour, sinon il sera ajouté
     
-    if($etatC == '4') { //si la commande est à livrer on envoie un mail au client 
+    /*if($etatC == '4') { //si la commande est livrée on envoie un mail au client 
         sendEmail($idClient,$client["membre_mail"],$client['membre_nom'], $client['membre_prenom'], $totalTTC, $technicien['membre_mail'], $technicien['membre_nom'], $technicien['membre_prenom'], date('d/m/Y',$dateP) , date('d/m/Y'), date('d/m/Y', $dateS) , $etat_commande,true);
     }
 
     sendEmail($idClient,$client["membre_mail"],$client['membre_nom'], $client['membre_prenom'], $totalTTC, $technicien['membre_mail'], $technicien['membre_nom'], $technicien['membre_prenom'], date('d/m/Y',$dateP) , date('d/m/Y'), date('d/m/Y', $dateS) , $etat_commande,false);
 
-    header("Location: commandes_devis.php");
+    header("Location: commandes_client.php?id=$idClient");*/
 }
 function sendEmail($idClient, $mail_client,$client_nom, $client_prenom,$pvTTC, $technicien_email,$technicien_nom,$technicien_prenom, $date_livraison, $date_creation,$dateSouhait,$etat_commande,$isClient) {
     

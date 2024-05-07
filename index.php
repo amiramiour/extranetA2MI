@@ -1,6 +1,6 @@
 <?php
-session_start();
 header('Content-type: text/html; charset=utf-8');
+include "gestion_session.php";
 
 include('ConnexionBD.php');
 

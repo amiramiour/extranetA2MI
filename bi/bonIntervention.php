@@ -1,12 +1,5 @@
 <?php
-session_start();
-
-// Vérifier si l'utilisateur est connecté en tant qu'administrateur ou sous-administrateur
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'sousadmin')) {
-    // Redirection vers une page d'erreur si l'utilisateur n'est pas connecté en tant qu'admin ou sous-admin
-    header('Location: ../index.php');
-    exit();
-}
+include "../gestion_session.php";
 include '../ConnexionBD.php';
 
 // Si une action de suppression est effectuée
