@@ -60,9 +60,8 @@ if(isset($_POST['submit'])) {
                     // Déplacer le fichier vers le dossier de destination
                     if(move_uploaded_file($logo_tmp_name, $logo_destination)) {
                         // Insérer les informations du client dans la base de données avec le nom du logo
-                        $query = $pdo->prepare("INSERT INTO membres (membre_entreprise, membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_inscription, membre_mail, membre_type, membre_logo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, ?, ?)");
-                        $query->execute([$entreprise, $nom, $prenom, password_hash($password, PASSWORD_BCRYPT), $adresse, $adresse_comp, $cp, $ville, $tel, $mail, $type, $logo_name]);
-
+                        $query = $pdo->prepare("INSERT INTO membres (membre_entreprise, membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_telfixe, membre_inscription, membre_mail, membre_type, membre_logo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, ?, ?)");
+                        $query->execute([$entreprise, $nom, $prenom, password_hash($password, PASSWORD_BCRYPT), $adresse, $adresse_comp, $cp, $ville, $tel, $tel_fix, $mail, $type, $logo_name]);
                         // Envoi de l'email au client
                         sendEmailToClient($mail, $nom, $prenom,$password);
 
@@ -79,8 +78,8 @@ if(isset($_POST['submit'])) {
                 }
             } else {
                 // Si aucun fichier n'a été téléchargé, exécuter la requête sans le logo
-                $query = $pdo->prepare("INSERT INTO membres (membre_entreprise, membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_inscription, membre_mail, membre_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, ?)");
-                $query->execute([$entreprise, $nom, $prenom, password_hash($password, PASSWORD_BCRYPT), $adresse, $adresse_comp, $cp, $ville, $tel, $mail, $type]);
+                $query = $pdo->prepare("INSERT INTO membres (membre_entreprise, membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_telfixe, membre_inscription, membre_mail, membre_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, ?)");
+                $query->execute([$entreprise, $nom, $prenom, password_hash($password, PASSWORD_BCRYPT), $adresse, $adresse_comp, $cp, $ville, $tel, $tel_fix, $mail, $type]);
 
                 // Envoi de l'email au client
                 sendEmailToClient($mail, $nom, $prenom,$password);
