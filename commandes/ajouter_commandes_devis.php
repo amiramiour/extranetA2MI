@@ -5,9 +5,11 @@ require_once '../config.php';
 include "../gestion_session.php";
 
 include '../ConnexionBD.php';
-$db = connexionbdd();
+$pdo = connexionbdd();
 
 include '../navbar.php';
+
+$db = connexionbdd();
 
 //requete pour récupérer les fournisseurs
 $req = $db->query("SELECT * FROM fournisseur");
@@ -25,7 +27,7 @@ if (isset($_GET['id'])) {
     $id = $_GET['id'];
 } else {
     // on fait une requete pour récupérer les clients
-    $query = $db->query("SELECT DISTINCT m.membre_id, m.membre_nom, m.membre_prenom, m.membre_entreprise
+    $query = $db->query("SELECT DISTINCT *
                     FROM membres m 
                     where m.membre_type = 'client'
                     order by m.membre_nom, m.membre_prenom asc ");

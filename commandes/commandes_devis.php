@@ -3,14 +3,14 @@ include "../gestion_session.php";
 include '../ConnexionBD.php'; // Fichier de configuration de la connexion PDO
 include('../navbar.php');
 
-$pdo = connexionbdd();
+$db = connexionbdd();
 
 $type = isset($_GET['type']) ? $_GET['type'] : 'commandes';
 
 // Fonction pour récupérer les clients en fonction du type sélectionné
-function getClients($pdo, $type) {
+function getClients($db, $type) {
     if ($type === 'commandes') {
-        $query = $pdo->prepare("SELECT c.membre_id, m.membre_nom AS nom_client , 
+        $query = $db->prepare("SELECT c.membre_id, m.membre_nom AS nom_client , 
                                 m.membre_prenom, c.cmd_devis_id, c.cmd_devis_reference, c.cmd_devis_designation, 
                                 c.cmd_devis_datein, c.cmd_devis_dateout, c.cmd_devis_prixventettc,
                                 c.cmd_devis_prixHT,l.membre_nom AS nom_technicien, 
@@ -21,7 +21,7 @@ function getClients($pdo, $type) {
                                 WHERE c.type_cmd_devis = '1'
                                 ORDER BY c.cmd_devis_datein DESC");
     } elseif ($type === 'devis') {
-        $query = $pdo->prepare("SELECT c.membre_id, m.membre_nom AS nom_client , 
+        $query = $db->prepare("SELECT c.membre_id, m.membre_nom AS nom_client , 
                                 m.membre_prenom, c.cmd_devis_id, c.cmd_devis_reference, c.cmd_devis_designation, 
                                 c.cmd_devis_datein, c.cmd_devis_dateout, c.cmd_devis_prixventettc,
                                 c.cmd_devis_prixHT, l.membre_nom AS nom_technicien, 
@@ -37,7 +37,7 @@ function getClients($pdo, $type) {
     return $query->fetchAll(PDO::FETCH_ASSOC);
 }
 
-$clients = getClients($pdo, $type);
+$clients = getClients($db, $type);
 ?>
 
 <!DOCTYPE html>
@@ -88,11 +88,13 @@ $clients = getClients($pdo, $type);
                         <td>
                             <a href="ajouter_commandes_devis.php?id=<?= $client['membre_id']?>" class="btn btn-primary">Ajouter</a>
                             <br><br>
-                            <a href="modifier_commandes_devis.php?id=<?= $client['cmd_devis_id']?>" class="btn btn-warning">Modifier</a>
+                                <?php if (isset($_SESSION['admin'])): ?>
+                                <a href="modifier_commandes_devis.php?id=<?= $client['cmd_devis_id']?>" class="btn btn-warning">Modifier</a>
+                                <br><br>
+                                <a href="#" class="btn btn-danger">Supprimer</a>
+                                <?php endif; ?>
                             <br><br>
-                            <a href="#" class="btn btn-danger">Supprimer</a>
-                            <br><br>
-                            <a href="#" class="btn btn-info">PDF</a>
+                            <a href="cmd_devis_pdf.php?id=<?= $client['membre_id']?>" class="btn btn-info">PDF</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>

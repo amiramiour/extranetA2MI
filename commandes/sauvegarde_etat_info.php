@@ -2,9 +2,9 @@
 include '../ConnexionBD.php';
 include "../gestion_session.php";
 
-$pdo = connexionbdd();
+$db = connexionbdd();
 
-$stmt = $pdo->query("SELECT * FROM sauvgarde_etat_info_commande");
+$stmt = $db->query("SELECT * FROM sauvgarde_etat_info_commande");
 $sauvegardes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 

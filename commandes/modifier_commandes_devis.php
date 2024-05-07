@@ -2,13 +2,13 @@
 require_once '../config.php';
 include "../gestion_session.php";
 include '../ConnexionBD.php';
-$pdo = connexionbdd();
-
 include '../navbar.php';
+
+$db = connexionbdd();
 
 //requete pour récupérer les fournisseurs
 
-$req = $pdo->query("SELECT * FROM fournisseur");
+$req = $db->query("SELECT * FROM fournisseur");
 $fournisseurs = $req->fetchAll(PDO::FETCH_ASSOC);
 
 $jsonFournisseurs = json_encode($fournisseurs);
@@ -17,12 +17,12 @@ file_put_contents('fournisseurs.json', $jsonFournisseurs);
 
 $idCommande = $_GET['id'];
 
-$req = $pdo->query("SELECT * FROM cmd_devis_etats");
+$req = $db->query("SELECT * FROM cmd_devis_etats");
 $cmd_devis_etats = $req->fetchAll(PDO::FETCH_ASSOC);
 
 
 //requete pour récupérer les informations de la commande
-$query = $pdo->prepare("SELECT c.cmd_devis_id, c.cmd_devis_reference, c.cmd_devis_designation, 
+$query = $db->prepare("SELECT c.cmd_devis_id, c.cmd_devis_reference, c.cmd_devis_designation, 
                         c.cmd_devis_dateout, c.cmd_devis_prixventettc, c.membre_id,
                         c.cmd_devis_dateSouhait, e.cmd_devis_etat, c.cmd_devis_etat, 
                         c.cmd_devis_prixHT, c.cmd_devis_margeT, c.type_cmd_devis, c.commentaire
@@ -35,7 +35,7 @@ $commande = $query->fetch(PDO::FETCH_ASSOC);
 
 if ($commande['type_cmd_devis'] == '1') {
     //On récupère les informations des produits de la commande
-    $query2 = $pdo->prepare("SELECT cp.reference, cp.designation, cp.fournisseur, 
+    $query2 = $db->prepare("SELECT cp.reference, cp.designation, cp.fournisseur, 
                             cp.paHT, cp.marge, cp.pvHT, cp.pvTTC, cp.etat, f.nomFournisseur
                             FROM commande_produit cp
                             JOIN fournisseur f ON cp.fournisseur = f.idFournisseur
@@ -44,7 +44,7 @@ if ($commande['type_cmd_devis'] == '1') {
     $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
 } else {
     //On récupère les informations des produits du devis 
-    $query2 = $pdo->prepare("SELECT dp.reference, dp.designation, dp.fournisseur, 
+    $query2 = $db->prepare("SELECT dp.reference, dp.designation, dp.fournisseur, 
                             dp.paHT, dp.marge, dp.pvHT, dp.pvTTC, dp.etat, f.nomFournisseur
                             FROM devis_produit dp
                             JOIN fournisseur f ON dp.fournisseur = f.idFournisseur
@@ -53,7 +53,7 @@ if ($commande['type_cmd_devis'] == '1') {
     $produits = $query2->fetchAll(PDO::FETCH_ASSOC);
 
     //On récupère les photo du devis 
-    $query3 = $pdo->prepare("SELECT photo FROM photos_devis WHERE id_devis = :id");
+    $query3 = $db->prepare("SELECT photo FROM photos_devis WHERE id_devis = :id");
     $query3->execute(array(":id"=> $idCommande));
     $photos = $query3->fetchAll(PDO::FETCH_ASSOC);
 }
