@@ -63,9 +63,11 @@ $prets = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td><?= $pret['pret_caution'] ?></td>
                     <td><?= $pret['commentaire'] ?></td>
                     <td><?= $pret['pret_materiel'] ?></td>
+                    <?php if ($_SESSION['user_type'] === 'admin'): ?>
                     <td>
                             <a href="../pret/modifier_pret.php?id=<?= $pret['pret_id'] ?>" class="btn btn-primary">Modifier</a>
                     </td>
+                    <?php endif; ?>
                     <?php if ($_SESSION['user_type'] === 'admin'): ?>
                     <td>
                             <a href="#" class="btn btn-danger" onclick="confirmSuppression(<?= $pret['pret_id'] ?>)">Supprimer</a>
