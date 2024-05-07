@@ -247,7 +247,26 @@ try {
         } else {
             echo "<p>Aucun prêt en cours pour ce client.</p>";
         }
+        $query_commandes = "SELECT cmd_devis_id, 
+                           cmd_devis_reference, 
+                           cmd_devis_designation, 
+                           cmd_devis_datein, 
+                           cmd_devis_dateout, 
+                           cmd_devis_dateSouhait,
+                           cmd_devis_prixventettc, 
+                           technicien.membre_nom AS nom_technicien,
+                           technicien.membre_prenom AS prenom_technicien,
+                        cmd_devis_etats.cmd_devis_etat
+                    FROM commande_devis
+                    JOIN cmd_devis_etats ON commande_devis.cmd_devis_etat = cmd_devis_etats.id_etat_cmd_devis
+                    JOIN membres AS technicien ON commande_devis.cmd_devis_technicien = technicien.membre_id
 
+                    WHERE commande_devis.membre_id = :id_client";
+
+        $stmt_commandes = $db->prepare($query_commandes);
+        $stmt_commandes->bindParam(':id_client', $client_id, PDO::PARAM_INT);
+        $stmt_commandes->execute();
+        $commandes = $stmt_commandes->fetchAll(PDO::FETCH_ASSOC);
 
 
         // Vérification si des commandes sont disponibles
@@ -265,7 +284,7 @@ try {
                 echo "<p>Date de livraison : " . date('d/m/Y', strtotime($commande['cmd_devis_dateout'])) . "</p>";
                 echo "<p>Date de livraison souhaitée : " . date('d/m/Y', strtotime($commande['cmd_devis_dateSouhait'])) . "</p>";
                 echo "<p>Prix de vente TTC : " . $commande['cmd_devis_prixventettc'] . "€</p>";
-                echo "<p>Technicien : " . $commande['nom_technicien'] . "</p>";
+                echo "<p>Technicien : " . $commande['nom_technicien'] . " " . $commande['prenom_technicien'] . ".</p>";
                 echo "<p>État : " . $commande['cmd_devis_etat'] . "</p>";
 
                 // Bouton pour modifier la commande
