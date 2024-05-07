@@ -280,9 +280,9 @@ try {
                 echo "<div class='card-body'>";
                 echo "<h5 class='card-title'>" . $commande['cmd_devis_reference'] . "</h5>";
                 echo "<p>Designation : " . $commande['cmd_devis_designation'] . "</p>";
-                echo "<p>Date de création : " . date('d/m/Y', strtotime($commande['cmd_devis_datein'])) . "</p>";
-                echo "<p>Date de livraison : " . date('d/m/Y', strtotime($commande['cmd_devis_dateout'])) . "</p>";
-                echo "<p>Date de livraison souhaitée : " . date('d/m/Y', strtotime($commande['cmd_devis_dateSouhait'])) . "</p>";
+                echo "<p>Date de création : " . date('d/m/Y', $commande['cmd_devis_datein']) . "</p>";
+                echo "<p>Date de livraison : " . date('d/m/Y', $commande['cmd_devis_dateout']) . "</p>";
+                echo "<p>Date de livraison souhaitée : " . date('d/m/Y', $commande['cmd_devis_dateSouhait']) . "</p>";
                 echo "<p>Prix de vente TTC : " . $commande['cmd_devis_prixventettc'] . "€</p>";
                 echo "<p>Technicien : " . $commande['nom_technicien'] . " " . $commande['prenom_technicien'] . ".</p>";
                 echo "<p>État : " . $commande['cmd_devis_etat'] . "</p>";

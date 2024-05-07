@@ -162,7 +162,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error_count++;
     }*/
 
-    header("Location: commandes_client.php?id=$id_client");
+    header("Location: ../profile/profile_client.php?id=".$id_client);
     exit();
 
 }

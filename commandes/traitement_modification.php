@@ -280,13 +280,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     //récupérer les produits de la commande à partir du formulaire, si le produit existe déjà : il sera mis à jour, sinon il sera ajouté
     
-    /*if($etatC == '4') { //si la commande est livrée on envoie un mail au client 
+    if($etatC == '4') { //si la commande est livrée on envoie un mail au client
         sendEmail($idClient,$client["membre_mail"],$client['membre_nom'], $client['membre_prenom'], $totalTTC, $technicien['membre_mail'], $technicien['membre_nom'], $technicien['membre_prenom'], date('d/m/Y',$dateP) , date('d/m/Y'), date('d/m/Y', $dateS) , $etat_commande,true);
     }
 
     sendEmail($idClient,$client["membre_mail"],$client['membre_nom'], $client['membre_prenom'], $totalTTC, $technicien['membre_mail'], $technicien['membre_nom'], $technicien['membre_prenom'], date('d/m/Y',$dateP) , date('d/m/Y'), date('d/m/Y', $dateS) , $etat_commande,false);
 
-    header("Location: commandes_client.php?id=$idClient");*/
+    header("Location: ../profile/profile_client.php?id=".$idClient);
 }
 function sendEmail($idClient, $mail_client,$client_nom, $client_prenom,$pvTTC, $technicien_email,$technicien_nom,$technicien_prenom, $date_livraison, $date_creation,$dateSouhait,$etat_commande,$isClient) {
     
