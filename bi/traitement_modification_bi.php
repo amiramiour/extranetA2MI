@@ -2,6 +2,7 @@
 // Inclure la connexion à la base de données
 include('../ConnexionBD.php');
 include "../gestion_session.php";
+
 // Etablir la connexion à la base de données
 $db = connexionbdd();
 
