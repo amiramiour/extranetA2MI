@@ -1,6 +1,8 @@
 <?php
 // Inclure la classe PHPMailer
 require '../vendor/autoload.php';
+require_once '../config.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -88,8 +90,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pret_id'])) {
                 $client_email = $client_info['membre_mail'];
 
                 // Envoi de l'e-mail au technicien
-                sendPretEmail($technicien_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info,$etat,  true);
-                sendPretEmail($client_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info,$etat,  false);
+                sendPretEmail($technicien_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info, $etat, true);
+                sendPretEmail($client_email, $technicien_nom, $technicien_prenom, $client_nom, $client_prenom, $pret_info, $etat, false);
 
 
                 // Envoi de l'e-mail au client

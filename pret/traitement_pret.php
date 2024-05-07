@@ -131,7 +131,7 @@ function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_p
             $body .= "Matériel : {$pret_info['pret_materiel']}\n";
             $body .= "Valeur du matériel : {$pret_info['valeurMat']}\n";
             $body .= "Caution : {$pret_info['pret_caution']}\n";
-            $body .= "Mode : {$pret_info['pret_mode']}\n";
+            $body .= "Mode de paiement : {$pret_info['pret_mode']}\n";
             $body .= "Date de fin : " . date('d/m/Y', $pret_info['pret_dateout']) . "\n";
             $body .= "Commentaire : {$pret_info['commentaire']}\n\n";
         } else {
@@ -146,7 +146,7 @@ function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_p
             $body .= "Matériel : {$pret_info['pret_materiel']}\n";
             $body .= "Valeur du matériel : {$pret_info['valeurMat']}\n";
             $body .= "Caution : {$pret_info['pret_caution']}\n";
-            $body .= "Mode : {$pret_info['pret_mode']}\n";
+            $body .= "Mode de paiement : {$pret_info['pret_mode']}\n";
             $body .= "Date de fin : " . date('d/m/Y', $pret_info['pret_dateout']) . "\n";
             $body .= "Commentaire : {$pret_info['commentaire']}\n\n";
         }

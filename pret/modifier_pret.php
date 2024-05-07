@@ -1,5 +1,6 @@
 <?php
 include "../gestion_session.php";
+require_once '../config.php';
 
 // Vérifier si l'identifiant du prêt à modifier est spécifié dans l'URL
 if(isset($_GET['id'])) {
