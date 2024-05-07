@@ -22,24 +22,24 @@ $sav_id = $_GET['sav_id'];
 if (isset($_POST['delete']) && $_POST['delete'] === 'delete') {
     try {
         // Connexion à la base de données en utilisant la fonction connexionbdd()
-        $connexion = connexionbdd();
+        $db = connexionbdd();
 
         // Récupérer les informations du SAV avant la désactivation
         $query_sav_info = "SELECT s.sav_etats, s.sav_technicien, e.etat_intitule FROM sav s INNER JOIN sav_etats e ON s.sav_etats = e.id_etat_sav WHERE s.sav_id = :sav_id";
-        $stmt_sav_info = $connexion->prepare($query_sav_info);
+        $stmt_sav_info = $db->prepare($query_sav_info);
         $stmt_sav_info->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
         $stmt_sav_info->execute();
         $sav_info = $stmt_sav_info->fetch(PDO::FETCH_ASSOC);
 
         // Mettre à jour le champ active à 0 dans la table SAV
         $query_delete_sav = "UPDATE sav SET active = 0 WHERE sav_id = :sav_id";
-        $stmt_delete_sav = $connexion->prepare($query_delete_sav);
+        $stmt_delete_sav = $db->prepare($query_delete_sav);
         $stmt_delete_sav->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
         $stmt_delete_sav->execute();
 
         // Récupérer la date de création de la dernière entrée dans la table sauvgarde_etat_info
         $query_last_creation_date = "SELECT date_creation FROM sauvgarde_etat_info WHERE sav_id = :sav_id ORDER BY id_sauvgarde_etat DESC LIMIT 1";
-        $stmt_last_creation_date = $connexion->prepare($query_last_creation_date);
+        $stmt_last_creation_date = $db->prepare($query_last_creation_date);
         $stmt_last_creation_date->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
         $stmt_last_creation_date->execute();
         $last_creation_date = $stmt_last_creation_date->fetchColumn();
@@ -52,7 +52,7 @@ if (isset($_POST['delete']) && $_POST['delete'] === 'delete') {
         // Insérer une entrée dans la table sauvgarde_etat_info pour enregistrer la désactivation
         $query_insert_sav_history = "INSERT INTO sauvgarde_etat_info (sav_id, sauvgarde_etat, sauvgarde_avancement, date_creation, date_update, created_by, updated_by) 
                             VALUES (:sav_id, :sauvgarde_etat, 'Supprimé', :date_creation, NOW(), :created_by, :updated_by)";
-        $stmt_insert_sav_history = $connexion->prepare($query_insert_sav_history);
+        $stmt_insert_sav_history = $db->prepare($query_insert_sav_history);
         $stmt_insert_sav_history->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
         $stmt_insert_sav_history->bindParam(':sauvgarde_etat', $sav_info['sav_etats'], PDO::PARAM_INT);
         $stmt_insert_sav_history->bindParam(':date_creation', $last_creation_date, PDO::PARAM_STR);

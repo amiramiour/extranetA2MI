@@ -7,10 +7,10 @@ include "../gestion_session.php";
 
 // Code pour la première requête
 try {
-    $pdo = connexionbdd();
+    $db = connexionbdd();
 
     // Modification de la requête pour trier par date de création décroissante
-    $stmt1 = $pdo->query("SELECT * FROM sauvgarde_etat_info_commande ORDER BY date_update DESC");
+    $stmt1 = $db->query("SELECT * FROM sauvgarde_etat_info_commande ORDER BY date_update DESC");
     $sauvegardes1 = $stmt1->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error1 = "Erreur : " . $e->getMessage();
