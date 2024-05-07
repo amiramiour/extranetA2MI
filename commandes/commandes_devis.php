@@ -92,7 +92,7 @@ $clients = getClients($pdo, $type);
                             <br><br>
                             <a href="#" class="btn btn-danger">Supprimer</a>
                             <br><br>
-                            <a href="#" class="btn btn-info">PDF</a>
+                            <a href="cmd_devis_pdf.php?id=<?= $client['membre_id']?>" class="btn btn-info">PDF</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>

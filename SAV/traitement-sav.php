@@ -41,6 +41,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $technicien_email = $technicien_info['membre_mail'];
 
         // Récupération des données du formulaire
+
+
+        ///test photo
+        // Récupérer l'image capturée
+        // Récupérer l'image capturée
+        $photo_temp = $_FILES['photo']['tmp_name'];
+
+// Vérifier si une image a été capturée
+        if (!empty($photo_temp)) {
+            // Générer un nom unique pour l'image
+            $photo_nom = uniqid('photo_') . '.jpg'; // Vous pouvez choisir un format différent selon vos besoins
+
+            // Définir le chemin de destination
+            $dossier_destination = '../images/imagesSAV/'; // Chemin vers le dossier de destination
+
+            // Vérifier si le dossier de destination existe, sinon le créer
+            if (!file_exists($dossier_destination)) {
+                mkdir($dossier_destination, 0777, true); // Création récursive du dossier
+            }
+
+            // Déplacer l'image capturée vers le dossier de destination
+            move_uploaded_file($photo_temp, $dossier_destination . $photo_nom);
+
+            // Stocker le chemin complet dans une variable
+            $chemin_complet = $dossier_destination . $photo_nom;
+
+
+        } else {
+            // Aucune image capturée, vous pouvez gérer cette situation ici
+            echo "Aucune photo capturée.";
+        }
+
+        ///////
         $probleme = $_POST['probleme'];
         $mot_de_passe = $_POST['mot_de_passe'];
         $type_materiel = $_POST['type_materiel'];
@@ -92,8 +125,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $etat_id = $etat_row['id_etat_sav'];
 
         // Enregistrement dans la base de données
-        $sql = "INSERT INTO sav (membre_id, sav_accessoire, sav_datein, sav_dateout, sav_envoi,  sav_etats, sav_forfait, sav_garantie, sav_maindoeuvreht, sav_maindoeuvrettc, sav_mdpclient, sav_probleme, sav_regle, sav_tarifmaterielht, sav_tarifmaterielttc, sav_typemateriel, sav_technicien) 
-VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, :etat_id, :forfait, :garantie, :maindoeuvreht, :maindoeuvrettc, :mdpclient, :probleme, :facture_reglee, :tarifmaterielht, :tarifmaterielttc, :typemateriel, :sav_technicien_id)";
+        $sql = "INSERT INTO sav (membre_id, sav_accessoire, sav_datein, sav_dateout, sav_envoi,  sav_etats, sav_forfait, sav_garantie, sav_maindoeuvreht, sav_maindoeuvrettc, sav_mdpclient, sav_probleme, sav_regle, sav_tarifmaterielht, sav_tarifmaterielttc, sav_typemateriel, sav_technicien,sav_image) 
+VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, :etat_id, :forfait, :garantie, :maindoeuvreht, :maindoeuvrettc, :mdpclient, :probleme, :facture_reglee, :tarifmaterielht, :tarifmaterielttc, :typemateriel, :sav_technicien_id,:photo_nom)";
 
         $stmt = $connexion->prepare($sql);
         $stmt->bindParam(':membre_id', $membre_id);
@@ -113,6 +146,8 @@ VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, :
         $stmt->bindParam(':typemateriel', $type_materiel);
         $stmt->bindParam(':facture_reglee', $facture_reglee);
         $stmt->bindParam(':envoi_facture', $envoi_facture);
+        $stmt->bindParam(':photo_nom', $chemin_complet); // Utiliser la variable contenant le chemin complet
+
 
         $stmt->execute();
 

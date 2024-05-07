@@ -20,11 +20,13 @@ $client_id = $_GET['client_id']; //la on recupere l'id passé dans l'url
 
 <div class="container">
     <h2 class="text-center mb-4">Formulaire de création d'un SAV client</h2>
-    <form action="traitement-sav.php" method="post">
+    <form action="traitement-sav.php" method="post" enctype="multipart/form-data">
         <!-- Champ caché pour passer l'ID du client -->
         <input type="hidden" name="client_id" value="<?php echo $client_id; ?>">
-        <input type="hidden" name="client_id" value="<?php echo $client_id; ?>">
-
+        <div class="form-group">
+            <label for="photo">Prendre une photo :</label>
+            <input type="file" id="photo" name="photo" class="form-control" accept="image/*" capture="camera">
+        </div>
         <div class="form-group">
             <label for="probleme">Problème* :</label>
             <textarea id="probleme" name="probleme" rows="4" class="form-control" required></textarea>

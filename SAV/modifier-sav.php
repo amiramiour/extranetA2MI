@@ -22,24 +22,24 @@ $sav_id = $_GET['sav_id'];
 if (isset($_POST['delete']) && $_POST['delete'] === 'delete') {
     try {
         // Connexion à la base de données en utilisant la fonction connexionbdd()
-        $connexion = connexionbdd();
+        $db = connexionbdd();
 
         // Récupérer les informations du SAV avant la désactivation
         $query_sav_info = "SELECT s.sav_etats, s.sav_technicien, e.etat_intitule FROM sav s INNER JOIN sav_etats e ON s.sav_etats = e.id_etat_sav WHERE s.sav_id = :sav_id";
-        $stmt_sav_info = $connexion->prepare($query_sav_info);
+        $stmt_sav_info = $db->prepare($query_sav_info);
         $stmt_sav_info->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
         $stmt_sav_info->execute();
         $sav_info = $stmt_sav_info->fetch(PDO::FETCH_ASSOC);
 
         // Mettre à jour le champ active à 0 dans la table SAV
         $query_delete_sav = "UPDATE sav SET active = 0 WHERE sav_id = :sav_id";
-        $stmt_delete_sav = $connexion->prepare($query_delete_sav);
+        $stmt_delete_sav = $db->prepare($query_delete_sav);
         $stmt_delete_sav->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
         $stmt_delete_sav->execute();
 
         // Récupérer la date de création de la dernière entrée dans la table sauvgarde_etat_info
         $query_last_creation_date = "SELECT date_creation FROM sauvgarde_etat_info WHERE sav_id = :sav_id ORDER BY id_sauvgarde_etat DESC LIMIT 1";
-        $stmt_last_creation_date = $connexion->prepare($query_last_creation_date);
+        $stmt_last_creation_date = $db->prepare($query_last_creation_date);
         $stmt_last_creation_date->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
         $stmt_last_creation_date->execute();
         $last_creation_date = $stmt_last_creation_date->fetchColumn();
@@ -52,7 +52,7 @@ if (isset($_POST['delete']) && $_POST['delete'] === 'delete') {
         // Insérer une entrée dans la table sauvgarde_etat_info pour enregistrer la désactivation
         $query_insert_sav_history = "INSERT INTO sauvgarde_etat_info (sav_id, sauvgarde_etat, sauvgarde_avancement, date_creation, date_update, created_by, updated_by) 
                             VALUES (:sav_id, :sauvgarde_etat, 'Supprimé', :date_creation, NOW(), :created_by, :updated_by)";
-        $stmt_insert_sav_history = $connexion->prepare($query_insert_sav_history);
+        $stmt_insert_sav_history = $db->prepare($query_insert_sav_history);
         $stmt_insert_sav_history->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
         $stmt_insert_sav_history->bindParam(':sauvgarde_etat', $sav_info['sav_etats'], PDO::PARAM_INT);
         $stmt_insert_sav_history->bindParam(':date_creation', $last_creation_date, PDO::PARAM_STR);
@@ -83,12 +83,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         try {
             // Connexion à la base de données en utilisant la fonction connexionbdd()
-            $connexion = connexionbdd();
+            $db = connexionbdd();
 
 
             // Récupérer les anciens prix depuis la base de données
             $query_old_prices = "SELECT sav_tarifmaterielht, sav_tarifmaterielttc, sav_maindoeuvreht, sav_maindoeuvrettc FROM sav WHERE sav_id = :sav_id";
-            $stmt_old_prices = $connexion->prepare($query_old_prices);
+            $stmt_old_prices = $db->prepare($query_old_prices);
             $stmt_old_prices->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
             $stmt_old_prices->execute();
             $old_prices = $stmt_old_prices->fetch(PDO::FETCH_ASSOC);
@@ -106,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         sav_maindoeuvreht = :total_main_oeuvre_ht,
         sav_maindoeuvrettc = :total_main_oeuvre_ttc
         WHERE sav_id = :sav_id";
-            $stmt_update_prices = $connexion->prepare($query_update_prices);
+            $stmt_update_prices = $db->prepare($query_update_prices);
             $stmt_update_prices->bindParam(':total_materiel_ht', $total_materiel_ht, PDO::PARAM_INT);
             $stmt_update_prices->bindParam(':total_materiel_ttc', $total_materiel_ttc, PDO::PARAM_INT);
             $stmt_update_prices->bindParam(':total_main_oeuvre_ht', $total_main_oeuvre_ht, PDO::PARAM_INT);
@@ -119,7 +119,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                              FROM sav s
                              INNER JOIN membres m ON s.membre_id = m.membre_id
                              WHERE s.sav_id = :sav_id";
-            $stmt_client = $connexion->prepare($query_client);
+            $stmt_client = $db->prepare($query_client);
             $stmt_client->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
             $stmt_client->execute();
             $client_info = $stmt_client->fetch(PDO::FETCH_ASSOC);
@@ -132,7 +132,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $query_technicien = "SELECT membre_nom, membre_prenom, membre_mail 
                                  FROM membres
                                  WHERE membre_id = :sav_technicien_id";
-            $stmt_technicien = $connexion->prepare($query_technicien);
+            $stmt_technicien = $db->prepare($query_technicien);
             $stmt_technicien->bindParam(':sav_technicien_id', $sav_technicien_id, PDO::PARAM_INT);
             $stmt_technicien->execute();
             $technicien_info = $stmt_technicien->fetch(PDO::FETCH_ASSOC);
@@ -143,20 +143,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Récupération du libellé du nouvel état
             $query_etat_label = "SELECT etat_intitule FROM sav_etats WHERE id_etat_sav = :nouvel_etat_id";
-            $stmt_etat_label = $connexion->prepare($query_etat_label);
+            $stmt_etat_label = $db->prepare($query_etat_label);
             $stmt_etat_label->bindParam(':nouvel_etat_id', $nouvel_etat_id, PDO::PARAM_INT);
             $stmt_etat_label->execute();
             $etat_label = $stmt_etat_label->fetchColumn();
 
             $query_update_date_fin = "UPDATE sav SET sav_dateout = :nouvelle_date_fin WHERE sav_id = :sav_id";
-            $stmt_update_date_fin = $connexion->prepare($query_update_date_fin);
+            $stmt_update_date_fin = $db->prepare($query_update_date_fin);
             $stmt_update_date_fin->bindParam(':nouvelle_date_fin', $nouvelle_date_fin, PDO::PARAM_STR);
             $stmt_update_date_fin->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
             $stmt_update_date_fin->execute();
 
             // Récupération de la date de création
             $query_created_by = "SELECT sav_technicien, sav_datein FROM sav WHERE sav_id = :sav_id";
-            $stmt_created_by = $connexion->prepare($query_created_by);
+            $stmt_created_by = $db->prepare($query_created_by);
             $stmt_created_by->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
             $stmt_created_by->execute();
             $sav_info = $stmt_created_by->fetch(PDO::FETCH_ASSOC);
@@ -175,7 +175,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Insérer un nouvel enregistrement dans la table sauvegarde_etat_info
             $query_insert_new_state = "INSERT INTO sauvgarde_etat_info (sav_id, sauvgarde_etat, sauvgarde_avancement, date_creation, date_update, created_by, updated_by) 
     VALUES (:sav_id, :nouvel_etat_id, :nouvel_avancement, :date_creation, NOW(), :created_by, :updated_by)";
-            $stmt_insert_new_state = $connexion->prepare($query_insert_new_state);
+            $stmt_insert_new_state = $db->prepare($query_insert_new_state);
             $stmt_insert_new_state->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
             $stmt_insert_new_state->bindParam(':nouvel_etat_id', $nouvel_etat_id, PDO::PARAM_INT);
             $stmt_insert_new_state->bindParam(':nouvel_avancement', $nouvel_avancement, PDO::PARAM_STR);
@@ -185,18 +185,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_insert_new_state->execute();
 
             // Récupérer l'ID de la dernière insertion
-            $last_inserted_id = $connexion->lastInsertId();
+            $last_inserted_id = $db->lastInsertId();
 
             // Mettre à jour l'avancement dans la table sav pour qu'il pointe vers la dernière valeur ajoutée dans sauvgarde_etat_info
             $query_update_sav = "UPDATE sav SET sav_avancement = :last_inserted_id WHERE sav_id = :sav_id";
-            $stmt_update_sav = $connexion->prepare($query_update_sav);
+            $stmt_update_sav = $db->prepare($query_update_sav);
             $stmt_update_sav->bindParam(':last_inserted_id', $last_inserted_id, PDO::PARAM_INT);
             $stmt_update_sav->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
             $stmt_update_sav->execute();
 
             // Mettre à jour l'état dans la table sav
             $query_update_sav_state = "UPDATE sav SET sav_etats = :nouvel_etat_id WHERE sav_id = :sav_id";
-            $stmt_update_sav_state = $connexion->prepare($query_update_sav_state);
+            $stmt_update_sav_state = $db->prepare($query_update_sav_state);
             $stmt_update_sav_state->bindParam(':nouvel_etat_id', $nouvel_etat_id, PDO::PARAM_INT);
             $stmt_update_sav_state->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
             $stmt_update_sav_state->execute();
@@ -220,13 +220,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Récupérer les informations détaillées du SAV
 try {
     // Connexion à la base de données en utilisant la fonction connexionbdd()
-    $connexion = connexionbdd();
+    $db = connexionbdd();
 
     // Préparer la requête SQL pour récupérer les informations détaillées du SAV
     $query = "SELECT * FROM sav WHERE sav_id = :sav_id";
 
     // Préparation de la requête SQL
-    $stmt = $connexion->prepare($query);
+    $stmt = $db->prepare($query);
 
     // Liaison des valeurs des paramètres de requête
     $stmt->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
@@ -238,7 +238,7 @@ try {
     $sav = $stmt->fetch(PDO::FETCH_ASSOC);
     // Requête pour récupérer les avancements du SAV
     $query_avancements = "SELECT sauvgarde_avancement FROM sauvgarde_etat_info WHERE sav_id = :sav_id";
-    $stmt_avancements = $connexion->prepare($query_avancements);
+    $stmt_avancements = $db->prepare($query_avancements);
     $stmt_avancements->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
     $stmt_avancements->execute();
     $avancements = $stmt_avancements->fetchAll(PDO::FETCH_ASSOC);
@@ -376,8 +376,15 @@ function sendSAVModificationEmail($to_email, $client_nom, $client_prenom, $techn
         <div class="mb-3">
             <label for="nouvelle_date_fin" class="form-label">Date de fin :</label>
             <!-- Champ pour la nouvelle date de fin -->
-            <input type="date" class="form-control" name="nouvelle_date_fin" id="nouvelle_date_fin" value="<?= $sav['sav_dateout'] ?>">
+            <input type="date" class="form-control" name="nouvelle_date_fin" id="nouvelle_date_fin" value="<?php if (is_numeric($sav['sav_dateout'])) {
+                // Si la date est un timestamp Unix, convertissez-la en format 'YYYY-MM-DD'
+                $date_fin_formatted = date('Y-m-d', $sav['sav_dateout']);
+            } else {
+                // Sinon, la date est déjà au bon format
+                $date_fin_formatted = $sav['sav_dateout'];
+            } echo $date_fin_formatted; ?>">
         </div>
+
         <div class="mb-3">
             <label for="nouvel_etat_id" class="form-label">Nouvel état :</label>
             <select name="nouvel_etat_id" id="nouvel_etat_id" class="form-select" required>
