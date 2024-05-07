@@ -5,19 +5,19 @@ require_once '../config.php';
 include "../gestion_session.php";
 
 include '../ConnexionBD.php';
-$pdo = connexionbdd();
+$db = connexionbdd();
 
 include '../navbar.php';
 
 //requete pour récupérer les fournisseurs
-$req = $pdo->query("SELECT * FROM fournisseur");
+$req = $db->query("SELECT * FROM fournisseur");
 $fournisseurs = $req->fetchAll(PDO::FETCH_ASSOC);
 
 $jsonFournisseurs = json_encode($fournisseurs);
 
 file_put_contents('fournisseurs.json', $jsonFournisseurs);
 
-$req2 = $pdo->query("SELECT * FROM cmd_devis_etats");
+$req2 = $db->query("SELECT * FROM cmd_devis_etats");
 $cmd_devis_etats = $req2->fetchAll(PDO::FETCH_ASSOC);
 
 //vérifier si $id est récupéré
@@ -25,7 +25,7 @@ if (isset($_GET['id'])) {
     $id = $_GET['id'];
 } else {
     // on fait une requete pour récupérer les clients
-    $query = $pdo->query("SELECT DISTINCT m.membre_id, m.membre_nom, m.membre_prenom, m.membre_entreprise
+    $query = $db->query("SELECT DISTINCT m.membre_id, m.membre_nom, m.membre_prenom, m.membre_entreprise
                     FROM membres m 
                     where m.membre_type = 'client'
                     order by m.membre_nom, m.membre_prenom asc ");

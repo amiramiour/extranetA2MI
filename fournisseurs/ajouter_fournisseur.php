@@ -2,7 +2,7 @@
 include "../gestion_session.php";
 // Inclusion du fichier de connexion à la base de données
 require_once '../ConnexionBD.php';
-$connexion = connexionbdd();
+$db = connexionbdd();
 
 // Traitement du formulaire d'ajout de fournisseur
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter"])) {
@@ -10,7 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter"])) {
 
     // Requête d'insertion du nouveau fournisseur
     $query = "INSERT INTO fournisseur (nomFournisseur) VALUES (:nomFournisseur)";
-    $stmt = $connexion->prepare($query);
+    $stmt = $db->prepare($query);
     $stmt->bindParam(':nomFournisseur', $nomFournisseur);
 
     // Exécution de la requête
@@ -67,5 +67,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter"])) {
 
 <?php
 // Fermeture de la connexion à la base de données
-$connexion = null;
+$db = null;
 ?>

@@ -10,7 +10,7 @@ use PHPMailer\PHPMailer\Exception;
 
 include '../ConnexionBD.php';
 include '../navbar.php';
-$pdo = connexionbdd();
+$db = connexionbdd();
 
 if(isset($_POST['submit'])) {
     $entreprise = $_POST['entreprise'];
@@ -29,7 +29,7 @@ if(isset($_POST['submit'])) {
         $type = 'danger';
     } else {
         // Vérifier si un compte avec la même adresse e-mail existe déjà
-        $query = $pdo->prepare("SELECT * FROM membres WHERE membre_mail = ?");
+        $query = $db->prepare("SELECT * FROM membres WHERE membre_mail = ?");
         $query->execute([$mail]);
         $existing_account = $query->fetch();
 
@@ -38,7 +38,7 @@ if(isset($_POST['submit'])) {
             $password = generateRandomString(10);
 
             // Insérer les informations du client dans la base de données
-            $query = $pdo->prepare("INSERT INTO membres (membre_entreprise,membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_inscription, membre_mail, membre_type) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, ?)");
+            $query = $db->prepare("INSERT INTO membres (membre_entreprise,membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_inscription, membre_mail, membre_type) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, ?)");
             $query->execute([$entreprise,$nom, $prenom, password_hash($password, PASSWORD_BCRYPT), $adresse, $adresse_comp, $cp, $ville, $tel, $mail, $type]);
 
             // Envoi de l'email au client

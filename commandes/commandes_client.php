@@ -4,18 +4,18 @@ include '../ConnexionBD.php';
 include('../navbar.php');
 
 
-$pdo = connexionbdd();
+$db = connexionbdd();
 
 $id_client = $_GET['id'];
 
 //requete pour recupérer le nom prénom du client
-$query = $pdo->prepare("SELECT membre_nom, membre_prenom FROM membres WHERE membre_id = :id_client");
+$query = $db->prepare("SELECT membre_nom, membre_prenom FROM membres WHERE membre_id = :id_client");
 $query->bindParam(':id_client', $id_client, PDO::PARAM_INT);
 $query->execute();
 $client = $query->fetch();
 //var_dump($client);
 
-$query = $pdo->prepare("SELECT c.membre_id, m.membre_nom AS nom_client , 
+$query = $db->prepare("SELECT c.membre_id, m.membre_nom AS nom_client , 
                       m.membre_prenom, c.cmd_devis_id, c.cmd_devis_reference, c.cmd_devis_designation, 
                       c.cmd_devis_datein, c.cmd_devis_dateout, c.cmd_devis_prixventettc, 
                       l.membre_nom AS nom_technicien, 
@@ -32,7 +32,7 @@ $commandes_client = $query->fetchAll();
 //var_dump($commandes_client);
 
 //requete pour récupréer les états des commandes
-$req = $pdo->prepare("SELECT cmd_devis_etat FROM cmd_devis_etats");
+$req = $db->prepare("SELECT cmd_devis_etat FROM cmd_devis_etats");
 $req->execute();
 $commande_etat = $req->fetchAll();
 //var_dump($commandes_client);
