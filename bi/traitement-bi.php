@@ -83,7 +83,6 @@ if (isset($_GET['membre_id'])) {
             $heureDepart = $_POST['heure_depart'];
             $commentaire = $_POST['commentaire'];
 
-
             // Insertion dans la table `bi` (Bon d'intervention)
             $query = $db->prepare("INSERT INTO bi (membre_id, bi_technicien, bi_facture, bi_garantie, bi_contrat, bi_service, bi_envoi, bi_facturation, bi_datefacturation, bi_paiement, bi_datein, bi_heurearrive, bi_heuredepart, bi_commentaire, bi_regle) 
             VALUES (:membre_id, :bi_technicien, :facturer, :garantie, :contrat, :service, :envoi, :facturation, :dateFacturation, :paiement, UNIX_TIMESTAMP(), :heureArrive, :heureDepart, :commentaire, :regle)");
