@@ -1,7 +1,6 @@
 <?php
 include "../gestion_session.php";
 include '../ConnexionBD.php';
-include('../navbar.php');
 
 
 $db = connexionbdd();
@@ -46,6 +45,8 @@ $commande_etat = $req->fetchAll();
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+<!-- Inclure le navbar -->
+<?php include('../navbar.php'); ?>
     <div class="container">
         <h2>Liste des commandes de <?= $client['membre_nom'] . ' ' . $client['membre_prenom'] ?></h2>
         <a href="commandes_devis.php" class="btn btn-primary mb-3">Retour</a>

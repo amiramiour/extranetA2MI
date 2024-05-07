@@ -16,6 +16,8 @@ $sauvegardes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Test de Sauvegarde Commande</title>
 </head>
 <body>
+<!-- Inclure le navbar -->
+<?php include('../navbar.php'); ?>
 <h1>Enregistrements dans la table sauvegarde_etat_info_commande</h1>
 <table border="1">
     <thead>

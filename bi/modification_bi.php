@@ -1,4 +1,3 @@
-<?php include('../navbar.php'); ?>
 <?php
 include "../gestion_session.php";
 // Inclure le fichier de connexion à la base de données
@@ -36,7 +35,9 @@ if(isset($_GET['bi_id'])) {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="../css/style.css">
 </head>
-
+<body>
+<!-- Inclure le navbar -->
+<?php include('../navbar.php'); ?>
 <div class="container">
     <!-- Affichage des détails du bon d'intervention -->
     <div class="card mt-5">
@@ -100,3 +101,4 @@ if(isset($_GET['bi_id'])) {
         </div>
     </div>
 </div>
+</body>

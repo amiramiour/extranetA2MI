@@ -65,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['validate']) && $_POST
 </head>
 <body>
 
-
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">

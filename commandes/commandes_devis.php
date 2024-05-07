@@ -1,7 +1,6 @@
 <?php
 include "../gestion_session.php";
 include '../ConnexionBD.php'; // Fichier de configuration de la connexion PDO
-include('../navbar.php');
 
 $db = connexionbdd();
 
@@ -48,6 +47,8 @@ $clients = getClients($db, $type);
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+<!-- Inclure le navbar -->
+<?php include('../navbar.php'); ?>
     <div class="container">
         <h2><?= $type === 'commandes' ? 'Commandes' : 'Devis' ?></h2>
         <div class="mb-3">

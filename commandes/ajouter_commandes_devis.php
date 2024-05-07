@@ -5,10 +5,6 @@ require_once '../config.php';
 include "../gestion_session.php";
 
 include '../ConnexionBD.php';
-$pdo = connexionbdd();
-
-include '../navbar.php';
-
 $db = connexionbdd();
 
 //requete pour récupérer les fournisseurs
@@ -43,6 +39,8 @@ if (isset($_GET['id'])) {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+<!-- Inclure le navbar -->
+<?php include('../navbar.php'); ?>
     <div class="container">
         <h2>Ajouter une Commande / Devis</h2>
         <!-- <form action="traitement_commande.php?id=<?php echo $id; ?>" method="post" name="commande">-->
