@@ -1,43 +1,44 @@
 <?php
-include "../gestion_session.php";
-include '../ConnexionBD.php'; // Fichier de configuration de la connexion PDO
-include('../navbar.php');
+include '../gestion_session.php';
+require_once '../config.php';
+include '../ConnexionBD.php';
+include '../navbar.php';
 
-$db = connexionbdd();
+$pdo = connexionbdd();
 
 $type = isset($_GET['type']) ? $_GET['type'] : 'commandes';
 
 // Fonction pour récupérer les clients en fonction du type sélectionné
-function getClients($db, $type) {
+function getClients($pdo, $type) {
     if ($type === 'commandes') {
-        $query = $db->prepare("SELECT c.membre_id, m.membre_nom AS nom_client , 
-                                m.membre_prenom, c.cmd_devis_id, c.cmd_devis_reference, c.cmd_devis_designation, 
+        $query = $pdo->prepare("SELECT c.membre_id, m.membre_nom AS nom_client , m.membre_entreprise,
+                                m.membre_prenom as client_prenom, c.cmd_devis_id, c.cmd_devis_reference, c.cmd_devis_designation, 
                                 c.cmd_devis_datein, c.cmd_devis_dateout, c.cmd_devis_prixventettc,
                                 c.cmd_devis_prixHT,l.membre_nom AS nom_technicien, 
                                 c.cmd_devis_dateSouhait, e.cmd_devis_etat
                                 FROM commande_devis c JOIN membres m ON m.membre_id = c.membre_id 
                                 JOIN membres l ON c.cmd_devis_technicien = l.membre_id 
                                 JOIN cmd_devis_etats e ON c.cmd_devis_etat = e.id_etat_cmd_devis
-                                WHERE c.type_cmd_devis = '1'
+                                WHERE c.type_cmd_devis = '1' and c.active_commande=1
                                 ORDER BY c.cmd_devis_datein DESC");
     } elseif ($type === 'devis') {
-        $query = $db->prepare("SELECT c.membre_id, m.membre_nom AS nom_client , 
-                                m.membre_prenom, c.cmd_devis_id, c.cmd_devis_reference, c.cmd_devis_designation, 
+        $query = $pdo->prepare("SELECT c.membre_id, m.membre_nom AS nom_client , m.membre_entreprise,
+                                m.membre_prenom as client_prenom , c.cmd_devis_id, c.cmd_devis_reference, c.cmd_devis_designation, 
                                 c.cmd_devis_datein, c.cmd_devis_dateout, c.cmd_devis_prixventettc,
                                 c.cmd_devis_prixHT, l.membre_nom AS nom_technicien, 
                                 c.cmd_devis_dateSouhait, e.cmd_devis_etat
                                 FROM commande_devis c JOIN membres m ON m.membre_id = c.membre_id 
                                 JOIN membres l ON c.cmd_devis_technicien = l.membre_id 
                                 JOIN cmd_devis_etats e ON c.cmd_devis_etat = e.id_etat_cmd_devis
-                                WHERE c.type_cmd_devis = '2'
-                                ORDER BY c.cmd_devis_datein DESC");
+                                WHERE c.type_cmd_devis = '2' and c.active_commande=1
+                                   ORDER BY c.cmd_devis_datein DESC");
     }
 
     $query->execute();
     return $query->fetchAll(PDO::FETCH_ASSOC);
 }
 
-$clients = getClients($db, $type);
+$clients = getClients($pdo, $type);
 ?>
 
 <!DOCTYPE html>
@@ -51,7 +52,6 @@ $clients = getClients($db, $type);
     <div class="container">
         <h2><?= $type === 'commandes' ? 'Commandes' : 'Devis' ?></h2>
         <div class="mb-3">
-            
             <select id="type" class="form-control" onchange="changeType(this.value)">
                 <option value="commandes" <?= $type === 'commandes' ? 'selected' : '' ?>>Commandes</option>
                 <option value="devis" <?= $type === 'devis' ? 'selected' : '' ?>>Devis</option>
@@ -64,6 +64,7 @@ $clients = getClients($db, $type);
                     <th>Id</th>
                     <th>Reference</th>
                     <th>Client</th>
+                    <th>Entreprise</th>
                     <th>Prix HT</th>
                     <th>Prix TTC</th>
                     <th>Date création</th>
@@ -78,7 +79,8 @@ $clients = getClients($db, $type);
                     <tr>
                         <td><?= $client['cmd_devis_id'] ?></td>
                         <td><?= $client['cmd_devis_reference'] ?></td>
-                        <td><a href="../profile/profile_client?id=<?= $client['membre_id'] ?>"><?= $client['nom_client'] . ' ' . $client['membre_prenom'] ?></a></td>
+                        <td><a href="../profile/profile_client.php?id=<?= $client['membre_id'] ?>"><?= $client['nom_client'] . ' ' . $client['client_prenom'] ?></a></td>
+                        <td><?= $client['membre_entreprise'] ?></td>
                         <td><?= $client['cmd_devis_prixHT'] ?></td>
                         <td><?= $client['cmd_devis_prixventettc'] ?></td>
                         <td><?= date('d/m/Y', $client['cmd_devis_datein']) ?></td>
@@ -88,13 +90,11 @@ $clients = getClients($db, $type);
                         <td>
                             <a href="ajouter_commandes_devis.php?id=<?= $client['membre_id']?>" class="btn btn-primary">Ajouter</a>
                             <br><br>
-                                <?php if (isset($_SESSION['admin'])): ?>
-                                <a href="modifier_commandes_devis.php?id=<?= $client['cmd_devis_id']?>" class="btn btn-warning">Modifier</a>
-                                <br><br>
-                                <a href="#" class="btn btn-danger">Supprimer</a>
-                                <?php endif; ?>
+                            <a href="modifier_commandes_devis.php?id=<?= $client['cmd_devis_id']?>" class="btn btn-warning">Modifier</a>
                             <br><br>
-                            <a href="cmd_devis_pdf.php?id=<?= $client['membre_id']?>" class="btn btn-info">PDF</a>
+                            <a href="supprimer_commande_devis.php?cmd_devis_id=<?= $client['cmd_devis_id']?>" class="btn btn-danger">Supprimer</a>
+                            <br><br>
+                            <a href="#" class="btn btn-info">PDF</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>

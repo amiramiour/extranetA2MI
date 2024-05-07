@@ -61,7 +61,8 @@ if ($commande['type_cmd_devis'] == '1') {
 }
 //var_dump($produits);
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>Commandes</title>

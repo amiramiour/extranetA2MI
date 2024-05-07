@@ -219,7 +219,7 @@ VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, :
         sendSAVCreationEmail($membre_id, $prix_total_ttc, $technicien_email, $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_nom, $technicien_prenom, $date_recu, $etat_intitule, $sav_details, false);
 
 
-        header('Location: sav.php');
+        header("Location: ../profile/profile_client.php?id=".$membre_id);
         exit();
 
     } catch (PDOException $e) {

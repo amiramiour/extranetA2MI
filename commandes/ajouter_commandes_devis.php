@@ -36,7 +36,8 @@ if (isset($_GET['id'])) {
 }
 
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>Commandes / Devis</title>
