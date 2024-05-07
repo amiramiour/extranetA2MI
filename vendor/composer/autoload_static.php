@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit910fa5c96866d92a744b9b1c6825706f
+class ComposerStaticInite26e1dfb7c02406f98640c3df48f508b
 {
     public static $prefixLengthsPsr4 = array (
         'P' => 
@@ -22,15 +22,14 @@ class ComposerStaticInit910fa5c96866d92a744b9b1c6825706f
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'FPDF' => __DIR__ . '/..' . '/setasign/fpdf/fpdf.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit910fa5c96866d92a744b9b1c6825706f::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit910fa5c96866d92a744b9b1c6825706f::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit910fa5c96866d92a744b9b1c6825706f::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInite26e1dfb7c02406f98640c3df48f508b::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInite26e1dfb7c02406f98640c3df48f508b::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInite26e1dfb7c02406f98640c3df48f508b::$classMap;
 
         }, null, ClassLoader::class);
     }
