@@ -185,20 +185,7 @@ try {
             echo "<p>Aucun bon d'intervention trouvé pour ce client.</p>";
         }
 
-        // Requête SQL pour récupérer les commandes du client
-        $query_commandes = "SELECT c.cmd_devis_id, c.cmd_devis_reference, c.cmd_devis_designation, 
-                            c.cmd_devis_datein, c.cmd_devis_dateout, c.cmd_devis_prixventettc, 
-                            l.membre_nom AS nom_technicien, 
-                            c.cmd_devis_dateSouhait, e.cmd_devis_etat
-                            FROM commande_devis c 
-                            JOIN membres l ON c.cmd_devis_technicien = l.membre_id 
-                            JOIN cmd_devis_etats e ON c.cmd_devis_etat = e.id_etat_cmd_devis
-                            WHERE c.membre_id = :id_client";
-                    
-        $stmt_commandes = $db->prepare($query_commandes);
-        $stmt_commandes->bindParam(':id_client', $client_id, PDO::PARAM_INT);
-        $stmt_commandes->execute();
-        $commandes = $stmt_commandes->fetchAll(PDO::FETCH_ASSOC);
+
 
         // Requête SQL pour récupérer les prêts du client
         $query_prets = "

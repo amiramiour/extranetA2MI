@@ -81,13 +81,15 @@ if (isset($_GET['membre_id'])) {
                 // Récupérer la date depuis le formulaire
                 $date_differee = $_POST['date_differee'];
                 // Convertir la date en timestamp UNIX
-                $dateFacturation = date("Y-m-d", strtotime($date_differee));
+                $dateFacturation = strtotime($date_differee);
             }
+
 
             $paiement = $_POST['paiement'];
             $heureArrive = $_POST['heure_arrive'];
             $heureDepart = $_POST['heure_depart'];
             $commentaire = $_POST['commentaire'];
+
 
             // Insertion dans la table `bi` (Bon d'intervention)
             $query = $db->prepare("INSERT INTO bi (membre_id, bi_technicien, bi_facture, bi_garantie, bi_contrat, bi_service, bi_envoi, bi_facturation, bi_datefacturation, bi_paiement, bi_datein, bi_heurearrive, bi_heuredepart, bi_commentaire, bi_regle) 
@@ -127,6 +129,10 @@ if (isset($_GET['membre_id'])) {
             $prixUnitaire = $_POST['prixUn'];
 
             $total = $nbPieces * $prixUnitaire; // Calculer le total
+
+            if ($paiement==='cheque'){
+                $total=$total+1;
+            }
 
             // Insertion dans la table `intervention`
             $query_intervention = $db->prepare("INSERT INTO intervention (inter_intervention, inter_nbpiece, inter_prixunit, inter_total, bi_id) 
@@ -216,9 +222,9 @@ function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_emai
         $body .= "Contrat/Pack : " . ucfirst($bi_details['bi_contrat']) . "\n";
         $body .= "Service à la personne : " . ucfirst($bi_details['bi_service']) . "\n";
         $body .= "Envoyer facture par : " . ucfirst($bi_details['bi_envoi']) . "\n";
-        $body .= "Facturation : " . $bi_details['bi_facturation'] . "\n";
+        $body .= "Facturation : " . $bi_details['bi_facturation'] . ", le : " . date('Y/m/d', $bi_details['bi_datefacturation'] ).  "\n";
         $body .= "Type de paiement : " . ucfirst($bi_details['bi_paiement']) . "\n";
-        $body .= "Date d'entrée : " . date('d/m/Y', $bi_details['bi_datein']) . "\n";
+        $body .= "Date d'entrée : " . date('Y/m/d', $bi_details['bi_datein']) . "\n";
         $body .= "Heure d'arrivée : " . $bi_details['bi_heurearrive'] . "\n";
         $body .= "Heure de départ : " . $bi_details['bi_heuredepart'] . "\n";
         $body .= "Commentaire : " . $bi_details['bi_commentaire'] . "\n\n";
@@ -241,9 +247,9 @@ function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_emai
         $body .= "Contrat/Pack : " . ucfirst($bi_details['bi_contrat']) . "\n";
         $body .= "Service à la personne : " . ucfirst($bi_details['bi_service']) . "\n";
         $body .= "Envoyer facture par : " . ucfirst($bi_details['bi_envoi']) . "\n";
-        $body .= "Facturation : " . $bi_details['bi_facturation'] . "\n";
+        $body .= "Facturation : " . $bi_details['bi_facturation'] . ", le : " . date('Y/m/d', $bi_details['bi_datefacturation'] ).  "\n";
         $body .= "Type de paiement : " . ucfirst($bi_details['bi_paiement']) . "\n";
-        $body .= "Date d'entrée : " . date('d/m/Y', $bi_details['bi_datein']) . "\n";
+        $body .= "Date d'entrée : " . date('Y/m/d', $bi_details['bi_datein']) . "\n";
         $body .= "Heure d'arrivée : " . $bi_details['bi_heurearrive'] . "\n";
         $body .= "Heure de départ : " . $bi_details['bi_heuredepart'] . "\n";
         $body .= "Commentaire : " . $bi_details['bi_commentaire'] . "\n\n";
@@ -251,6 +257,7 @@ function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_emai
         $body .= "Intervention : " . $intervention_details['inter_intervention'] . "\n";
         $body .= "Nb pièces : " . $intervention_details['inter_nbpiece'] . " | Prix/pièce : " . number_format($intervention_details['inter_prixunit'], 2) . "€ | Prix total : " . number_format($intervention_details['inter_total'], 2) . "€\n\n";
         $body .= "Coût total HT : " . number_format($intervention_details['inter_total'], 2) . "€\n";
+
         // Calculer le coût total TTC
         $tauxTVA = 0.20; // Exemple : taux de TVA à 20%
         $totalTTC = $intervention_details['inter_total'] * (1 + $tauxTVA);
