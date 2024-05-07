@@ -9,26 +9,26 @@ require '../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-$pdo = connexionbdd();
+$db = connexionbdd();
 
 $idCommande = $_GET['idcommande'];
 $idClient = $_GET['idclient'];
 
 //récupérer les informations du client
-$query = $pdo->prepare("SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :id_client");
+$query = $db->prepare("SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :id_client");
 $query->bindParam(':id_client', $idClient, PDO::PARAM_INT);
 $query->execute();
 $client = $query->fetch(PDO::FETCH_ASSOC);
 
 //récupérer les information du technicien qui a effectué la commande
 $id_technicien = $_SESSION['user_id'];
-$query = $pdo->prepare("SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :id_technicien");
+$query = $db->prepare("SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :id_technicien");
 $query->bindParam(':id_technicien', $id_technicien, PDO::PARAM_INT);
 $query->execute();
 $technicien = $query->fetch(PDO::FETCH_ASSOC);
 
 //on récupère le type de la commande 
-$query = $pdo->prepare("SELECT type_cmd_devis FROM commande_devis WHERE cmd_devis_id = :idCommande");
+$query = $db->prepare("SELECT type_cmd_devis FROM commande_devis WHERE cmd_devis_id = :idCommande");
 $query->bindParam(':idCommande', $idCommande, PDO::PARAM_INT);
 $query->execute();
 $type_cmd_devis = $query->fetchColumn();
@@ -46,14 +46,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $dateActuelle = time();
 
-    $query = $pdo->prepare("SELECT cmd_devis_etat FROM cmd_devis_etats WHERE id_etat_cmd_devis = :etatC");
+    $query = $db->prepare("SELECT cmd_devis_etat FROM cmd_devis_etats WHERE id_etat_cmd_devis = :etatC");
     $query->bindParam(':etatC', $etatC, PDO::PARAM_INT);
     $query->execute();
     $etat_commande = $query->fetchColumn();
 
     if ($type_cmd_devis == '1'){
 
-        $stmt = $pdo->prepare("UPDATE commande_devis 
+        $stmt = $db->prepare("UPDATE commande_devis 
                             SET cmd_devis_reference = :nomC, 
                                 cmd_devis_designation = :designation, 
                                 cmd_devis_datein = :dateActuelle, 
@@ -97,7 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             //var_dump($produit);
             
             //On recup les produits de la commande à partir du formulaire, si le produit existe déjà : il sera mis à jour, sinon il sera ajouté
-            $stmt = $pdo->prepare("SELECT * FROM commande_produit WHERE reference = :reference AND id_commande = :idCommande");
+            $stmt = $db->prepare("SELECT * FROM commande_produit WHERE reference = :reference AND id_commande = :idCommande");
             $stmt->bindValue(':reference', $reference);
             $stmt->bindValue(':idCommande', $idCommande);
             $stmt->execute();
@@ -105,7 +105,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
             if ($produitExiste) {
                 //echo "produit existe";
-                $stmt = $pdo->prepare("UPDATE commande_produit 
+                $stmt = $db->prepare("UPDATE commande_produit 
                                        SET reference = :reference, 
                                            designation = :designation, 
                                            paHT = :paHT, 
@@ -129,14 +129,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
                 $stmt->execute();
             } else {
-                $stmt = $pdo->prepare("INSERT INTO commande_produit (reference, designation, paHT, marge, pvHT, pvTTC, etat, id_commande, fournisseur) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt = $db->prepare("INSERT INTO commande_produit (reference, designation, paHT, marge, pvHT, pvTTC, etat, id_commande, fournisseur) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 $stmt->execute([$reference, $designation, $paHT, $marge, $pvHT, $pvTTC, $etatProduit, $idCommande, $fournisseur]);
             }
         }
     }else{ //Devis
         $commentaire = $_POST['commentaire'];
 
-        $stmt = $pdo->prepare("UPDATE commande_devis 
+        $stmt = $db->prepare("UPDATE commande_devis 
                             SET cmd_devis_reference = :nomC, 
                                 cmd_devis_designation = :designation, 
                                 cmd_devis_datein = :dateActuelle, 
@@ -181,7 +181,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
             //var_dump($produit);
     
-            $stmt = $pdo->prepare("SELECT * FROM devis_produit WHERE reference = :reference AND id_devis = :idCommande");
+            $stmt = $db->prepare("SELECT * FROM devis_produit WHERE reference = :reference AND id_devis = :idCommande");
             $stmt->bindValue(':reference', $reference);
             $stmt->bindValue(':idCommande', $idCommande);
             $stmt->execute();
@@ -189,7 +189,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
             if ($produitExiste) {
                 //echo "produit existe";
-                $stmt = $pdo->prepare("UPDATE devis_produit 
+                $stmt = $db->prepare("UPDATE devis_produit 
                                        SET reference = :reference, 
                                            designation = :designation, 
                                            paHT = :paHT, 
@@ -213,7 +213,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
                 $stmt->execute();
             } else {
-                $stmt = $pdo->prepare("INSERT INTO devis_produit (reference, designation, paHT, marge, pvHT, pvTTC, etat, id_devis, fournisseur) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt = $db->prepare("INSERT INTO devis_produit (reference, designation, paHT, marge, pvHT, pvTTC, etat, id_devis, fournisseur) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 $stmt->execute([$reference, $designation, $paHT, $marge, $pvHT, $pvTTC, $etatProduit, $idCommande, $fournisseur]);
             }
         }
@@ -236,7 +236,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     // Déplacer le fichier téléchargé vers le dossier de destination
                     if (move_uploaded_file($file_tmp, $file_destination)) {
                         // Insertion de l'image dans la base de données
-                        $stmt = $pdo->prepare("INSERT INTO photos_devis (photo, id_devis) VALUES (?, ?)");
+                        $stmt = $db->prepare("INSERT INTO photos_devis (photo, id_devis) VALUES (?, ?)");
                         $stmt->execute([$new_filename, $idCommande]);
                     }
                 }
@@ -245,7 +245,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     }
 
-    $stmt = $pdo->prepare("SELECT cmd_devis_datein, cmd_devis_technicien FROM commande_devis WHERE cmd_devis_id = :commande_id");
+    $stmt = $db->prepare("SELECT cmd_devis_datein, cmd_devis_technicien FROM commande_devis WHERE cmd_devis_id = :commande_id");
     $stmt->bindValue(':commande_id', $idCommande);
     $stmt->execute();
     $commande = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -257,7 +257,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $cmd_technicien = $commande['cmd_devis_technicien'];
 
         // Préparation de la requête d'insertion
-        $stmt = $pdo->prepare("INSERT INTO sauvgarde_etat_info_commande 
+        $stmt = $db->prepare("INSERT INTO sauvgarde_etat_info_commande 
                            (commande_id, sauvgarde_etat, created_by, date_creation, updated_by, date_update)
                            VALUES
                            (:commande_id, :sauvegarde_etat, :created_by, :date_creation, :updated_by, NOW())");
