@@ -1,7 +1,12 @@
 <?php
-include '../gestion_session.php';
 require_once '../config.php';
+//echo TVA;
+
+include "../gestion_session.php";
+
 include '../ConnexionBD.php';
+$pdo = connexionbdd();
+
 include '../navbar.php';
 
 $db = connexionbdd();
@@ -25,10 +30,9 @@ if (isset($_GET['id'])) {
     $query = $db->query("SELECT DISTINCT *
                     FROM membres m 
                     where m.membre_type = 'client'
-                    GROUP BY membre_nom
-                    ORDER BY membre_nom");
-    /*$query->execute();
-    $clients = $query->fetchAll();*/
+                    order by m.membre_nom, m.membre_prenom asc ");
+    $query->execute();
+    $clients = $query->fetchAll();
 }
 
 ?>
@@ -50,19 +54,12 @@ if (isset($_GET['id'])) {
             </select>
             <br><br>
             <?php if (!isset($id)) { ?>
-                <input type="search" name="client_id" placeholder="Rechercher" size="10" list="recherche">
-                <datalist id="recherche">
-                    <?php while ($donnees = $query->fetch(PDO::FETCH_ASSOC)) { ?>
-                        <!-- recherche par nom,n prenom, entreprise, tel, value = "<?php echo $client['membre_id']; ?>" pour récupérer l'id du client-->
-                        <option value="<?php echo $donnees['membre_id']; ?>">
-                            <?php echo mb_strtoupper(htmlspecialchars($donnees['membre_entreprise'], ENT_QUOTES)); ?>
-                            <?php echo mb_strtoupper(htmlspecialchars($donnees['membre_nom'], ENT_QUOTES)); ?>
-                            <?php echo mb_strtoupper(htmlspecialchars($donnees['membre_prenom'], ENT_QUOTES)); ?>
-                            <?php echo mb_strtoupper(htmlspecialchars($donnees['membre_ville'], ENT_QUOTES)); ?>
-                            <?php echo mb_strtoupper(htmlspecialchars($donnees['membre_tel'], ENT_QUOTES)); ?>
-                        </option>
+                <label for="id">Client</label>
+                <select name="client_id" id="client_id" required>
+                    <?php foreach ($clients as $client) { ?>
+                        <option value="<?php echo $client['membre_id']; ?>"><?php echo $client['membre_nom'] . ' ' . $client['membre_prenom']; ?></option>
                     <?php } ?>
-                </datalist>
+                </select>
             <?php } ?>
             <fieldset><legend>Produit <small>* champs obligatoires</small></legend>
                 <div id="materiels">
@@ -116,7 +113,7 @@ if (isset($_GET['id'])) {
             <div id="champsDevis" style="display: none;">
                 <div id="photos">
                     <label for="picture">Prendre une photo :</label>
-                    <input type="file" id="picture" accept="image/* , .pdf" capture="environment" name="photos[]" multiple>
+                    <input type="file" id="picture" accept="image/*" capture="environment" name="photos[]" multiple>
                 </div>
                 <br><br>
                 <button type="button" onclick="ajouterPhoto()">Ajouter une autre photo</button>
@@ -137,7 +134,18 @@ if (isset($_GET['id'])) {
             <label class="float">Date de livraison souhaitée</label><input type="date" name="dateS" required autofocus><br>
 
             <label for="etat" class="float" >Statut * </label>
-            <select name="etatC" id="etatC" required></select><br>
+            <!-- <select name="etatC" required>
+                <option value="1">Commandé</option>
+                <option value="2">En attente</option>
+                <option value="3">Reçu</option>
+                <option value="4">A livrer</option>
+                <option value="5">Livrer</option>
+            </select><br> -->
+            <select name="etatC" required>
+                <?php foreach ($cmd_devis_etats as $etat) { ?>
+                    <option value="<?php echo $etat['id_etat_cmd_devis']; ?>"><?php echo $etat['cmd_devis_etat']; ?></option>
+                <?php } ?>
+            </select><br>
 
             <label for="reference" class="float">Total HT </label>
             <input type="text" name="totalHT" id="pHTT" readonly/><br>
@@ -494,47 +502,20 @@ if (isset($_GET['id'])) {
             }
         }
 
+        // Écoutez les changements dans la liste déroulante pour afficher ou masquer les champs supplémentaires
         document.querySelector('select[name="type"]').addEventListener('change', afficherChampsSupplementaires);
 
+        // Appelez la fonction une fois au chargement de la page pour vérifier l'état initial de la liste déroulante
         afficherChampsSupplementaires();
 
         function ajouterPhoto() {
             var divPhotos = document.getElementById('photos');
             var nouveauChamp = document.createElement('div');
             nouveauChamp.innerHTML = '<label for="picture">Prendre une photo :</label>' +
-                                    '<input type="file" accept="image/* , .pdf" id="picture" capture="environment" name="photos[]" multiple>';
+                                    '<input type="file" accept="image/*" id="picture" capture="environment" name="photos[]" multiple>';
             divPhotos.appendChild(nouveauChamp);
         }
 
-        function filtrerEtats() {
-            var type = document.querySelector('select[name="type"]').value;
-            var selectEtat = document.getElementById('etatC');
-
-            // Supprimer toutes les options existantes
-            selectEtat.innerHTML = '';
-
-            if (type === '2') {  //Devis
-                var optionEnAttente = document.createElement('option');
-                optionEnAttente.value = '2'; 
-                optionEnAttente.textContent = 'En attente';
-                selectEtat.appendChild(optionEnAttente);
-
-                var optionTermine = document.createElement('option');
-                optionTermine.value = '6'; 
-                optionTermine.textContent = 'Terminé';
-                selectEtat.appendChild(optionTermine);
-            } else { //commande
-                <?php foreach ($cmd_devis_etats as $etat) { ?>
-                    var option<?php echo $etat['id_etat_cmd_devis']; ?> = document.createElement('option');
-                    option<?php echo $etat['id_etat_cmd_devis']; ?>.value = '<?php echo $etat['id_etat_cmd_devis']; ?>';
-                    option<?php echo $etat['id_etat_cmd_devis']; ?>.textContent = '<?php echo $etat['cmd_devis_etat']; ?>';
-                    selectEtat.appendChild(option<?php echo $etat['id_etat_cmd_devis']; ?>);
-                <?php } ?>
-            }
-        }
-        document.querySelector('select[name="type"]').addEventListener('change', filtrerEtats);
-
-        filtrerEtats();
     </script>
 </body>
 </html>

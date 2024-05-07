@@ -1,8 +1,7 @@
 <?php
-include '../gestion_session.php';
-require_once '../config.php';
-include '../ConnexionBD.php';
-include '../navbar.php';
+include "../gestion_session.php";
+include '../ConnexionBD.php'; // Fichier de configuration de la connexion PDO
+include('../navbar.php');
 
 $db = connexionbdd();
 
@@ -52,6 +51,7 @@ $clients = getClients($db, $type);
     <div class="container">
         <h2><?= $type === 'commandes' ? 'Commandes' : 'Devis' ?></h2>
         <div class="mb-3">
+            
             <select id="type" class="form-control" onchange="changeType(this.value)">
                 <option value="commandes" <?= $type === 'commandes' ? 'selected' : '' ?>>Commandes</option>
                 <option value="devis" <?= $type === 'devis' ? 'selected' : '' ?>>Devis</option>

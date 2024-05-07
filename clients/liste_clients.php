@@ -2,6 +2,7 @@
 // Inclure le fichier de connexion à la base de données
 global $db;
 include '../ConnexionBD.php';
+include "../gestion_session.php";
 
 $db = connexionbdd();
 

@@ -1,15 +1,18 @@
 <?php
-include '../gestion_session.php';
 require_once '../config.php';
+
+include "../gestion_session.php";
+
 include '../ConnexionBD.php';
-include '../navbar.php';
+$pdo = connexionbdd();
 
 require '../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-$pdo = connexionbdd();
+$success_count = 0;
+$error_count = 0;
 
 //var_dump($_POST['client_id']);
 
@@ -58,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($type == '2') { //devis
         $photos = $_FILES['photos'];
-        var_dump($photos);
+        //var_dump($photos);
         
         $commentaire = $_POST['commentaire'];
 
@@ -152,9 +155,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->execute();
 
     // Envoi de l'email au technicien 
-    if(sendEmail($client['membre_nom'], $client['membre_prenom'], $totalTTC, $technicien['membre_mail'], $technicien['membre_nom'], $technicien['membre_prenom'], date('d/m/Y',$dateP) , date('d/m/Y'), date('d/m/Y', $dateS) , $etat_commande, $type));
+    /*if(sendEmail($client['membre_nom'], $client['membre_prenom'], $totalTTC, $technicien['membre_mail'], $technicien['membre_nom'], $technicien['membre_prenom'], date('d/m/Y',$dateP) , date('d/m/Y'), date('d/m/Y', $dateS) , $etat_commande, $type)) {
+        $success_count++;
+        echo('Email envoyé avec succès');
+    } else {
+        $error_count++;
+    }*/
 
-    header("Location: commandes_devis.php");
+    header("Location: commandes_client.php?id=$id_client");
     exit();
 
 }

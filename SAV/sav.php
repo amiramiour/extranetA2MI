@@ -1,14 +1,8 @@
 <?php
 include('../ConnexionBD.php');
 
-session_start();
+include "../gestion_session.php";
 
-// Vérifier si l'utilisateur est déjà connecté
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION['user_type'] === 'client') {
-    // Rediriger vers une page d'erreur ou de connexion si l'utilisateur n'est pas connecté ou s'il est un client
-    header('Location: ../connexion.php');
-    exit();
-}
 
 try {
     // Connexion à la base de données

@@ -1,14 +1,7 @@
 <?php
 // Inclusion du fichier de connexion à la base de données
 include('../ConnexionBD.php');
-session_start();
-
-// Vérifier si l'utilisateur est déjà connecté
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION['user_type'] === 'client') {
-    // Rediriger vers une page d'erreur ou de connexion si l'utilisateur n'est pas connecté ou s'il est un client
-    header('Location: ../connexion.php');
-    exit();
-}
+include "../gestion_session.php";
 
 // Connexion à la base de données
 $db = connexionbdd();
@@ -75,7 +68,6 @@ $prets = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <a href="../pret/modifier_pret.php?id=<?= $pret['pret_id'] ?>" class="btn btn-primary">Modifier</a>
                     </td>
                     <?php endif; ?>
-
                     <?php if ($_SESSION['user_type'] === 'admin'): ?>
                     <td>
                             <a href="#" class="btn btn-danger" onclick="confirmSuppression(<?= $pret['pret_id'] ?>)">Supprimer</a>

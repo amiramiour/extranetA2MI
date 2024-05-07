@@ -1,8 +1,7 @@
 <?php
-include '../gestion_session.php';
-require_once '../config.php';
+include "../gestion_session.php";
 include '../ConnexionBD.php';
-include '../navbar.php';
+include('../navbar.php');
 
 
 $pdo = connexionbdd();

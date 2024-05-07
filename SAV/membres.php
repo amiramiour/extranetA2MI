@@ -1,6 +1,8 @@
 <?php
 // Inclure le fichier de connexion à la base de données
 include '../ConnexionBD.php';
+include "../gestion_session.php";
+
 $pdo = connexionbdd();
 
 // Récupérer les informations des membres depuis la base de données

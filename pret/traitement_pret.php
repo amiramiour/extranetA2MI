@@ -4,19 +4,13 @@ session_start(); // Démarrer la session si ce n'est pas déjà fait
 // Inclure la connexion à la base de données
 include('../ConnexionBD.php');
 require_once '../config.php';
-
+include "../gestion_session.php";
 
 // Inclure la classe PHPMailer
 require '../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Vérifier si l'utilisateur est connecté en tant qu'administrateur ou sous-administrateur
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'sousadmin')) {
-    // Redirection vers une page d'erreur si l'utilisateur n'est pas connecté en tant qu'admin ou sous-admin
-    header('Location: ../index.php');
-    exit();
-}
 
 // Récupération de l'ID et de l'adresse e-mail du technicien à partir de la session
 $technicien_id = $_SESSION['user_id'];
@@ -103,8 +97,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $success_count = 0;
     $error_count = 0;
 
-    sendPretCreationEmail($membre_id, $client_info['membre_mail'], $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_email, $technicien_nom, $technicien_prenom, $new_pret_info, true);
-    sendPretCreationEmail($membre_id, $client_info['membre_mail'], $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_email, $technicien_nom, $technicien_prenom, $new_pret_info, false);
+    sendPretCreationEmail($membre_id, $client_info['membre_mail'], $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_email, $technicien_nom, $technicien_prenom, $new_pret_info,$pret_etat, true);
+    sendPretCreationEmail($membre_id, $client_info['membre_mail'], $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_email, $technicien_nom, $technicien_prenom, $new_pret_info,$pret_etat, false);
 
 
 
@@ -118,7 +112,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 // Fonction pour envoyer un e-mail de création de prêt
-function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_prenom, $technicien_email, $technicien_nom, $technicien_prenom, $pret_info, $is_client) {
+function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_prenom, $technicien_email, $technicien_nom, $technicien_prenom, $pret_info,$pret_etat, $is_client) {
     try {
         // Composez le contenu de l'e-mail
         $subject = "Création de prêt - Notification";
@@ -127,6 +121,12 @@ function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_p
         if ($is_client) {
             $body .= "pour vous :\n\n";
             $body .= "Technicien responsable : $technicien_nom $technicien_prenom\n\n";
+            $body .= "État du prêt : ";
+            if ($pret_etat == 1) {
+                $body .= "En cours\n";
+            } else {
+                $body .= "Terminé\n";
+            }
             $body .= "Détails du prêt :\n";
             $body .= "Matériel : {$pret_info['pret_materiel']}\n";
             $body .= "Valeur du matériel : {$pret_info['valeurMat']}\n";
@@ -136,6 +136,12 @@ function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_p
             $body .= "Commentaire : {$pret_info['commentaire']}\n\n";
         } else {
             $body .= "pour le client $client_nom $client_prenom :\n\n";
+            $body .= "État du prêt : ";
+            if ($pret_etat == 1) {
+                $body .= "En cours\n";
+            } else {
+                $body .= "Terminé\n";
+            }
             $body .= "Détails du prêt :\n";
             $body .= "Matériel : {$pret_info['pret_materiel']}\n";
             $body .= "Valeur du matériel : {$pret_info['valeurMat']}\n";
