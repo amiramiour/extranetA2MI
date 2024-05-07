@@ -2,6 +2,8 @@
 
 session_start();
 require_once 'ConnexionBD.php';
+include "../gestion_session.php";
+
 
 // Code pour la première requête
 try {

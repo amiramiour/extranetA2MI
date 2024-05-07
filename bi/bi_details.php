@@ -1,14 +1,7 @@
 <?php
-// Inclure le fichier de connexion à la base de données
-session_start(); // Démarrer la session si ce n'est pas déjà fait
-
-// Vérifier si l'utilisateur est connecté et est un technicien
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION['user_type'] === 'client') {
-    // Si l'utilisateur n'est pas connecté ou est un client, redirigez-le ou affichez un message d'erreur
-    header("Location: ../connexion.php");
-    exit;
-}
+// Inclure le fichier de connexion à la base de données*
 include '../ConnexionBD.php';
+include "../gestion_session.php";
 
 $db = connexionbdd();
 $query = $db->prepare("SELECT membres.membre_id, membres.membre_nom, membres.membre_prenom, bi.bi_datein FROM bi INNER JOIN membres ON bi.membre_id = membres.membre_id");

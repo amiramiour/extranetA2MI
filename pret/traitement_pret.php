@@ -4,19 +4,13 @@ session_start(); // Démarrer la session si ce n'est pas déjà fait
 // Inclure la connexion à la base de données
 include('../ConnexionBD.php');
 require_once '../config.php';
-
+include "../gestion_session.php";
 
 // Inclure la classe PHPMailer
 require '../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Vérifier si l'utilisateur est connecté en tant qu'administrateur ou sous-administrateur
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'sousadmin')) {
-    // Redirection vers une page d'erreur si l'utilisateur n'est pas connecté en tant qu'admin ou sous-admin
-    header('Location: ../index.php');
-    exit();
-}
 
 // Récupération de l'ID et de l'adresse e-mail du technicien à partir de la session
 $technicien_id = $_SESSION['user_id'];

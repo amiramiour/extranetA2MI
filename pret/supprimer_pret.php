@@ -1,13 +1,8 @@
 <?php
 // Inclure le fichier de connexion à la base de données
 include('../ConnexionBD.php');
-session_start();
-// Vérifier si l'utilisateur est connecté en tant qu'administrateur ou sous-administrateur
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'sousadmin')) {
-    // Redirection vers une page d'erreur si l'utilisateur n'est pas connecté en tant qu'admin ou sous-admin
-    header('Location: ../connexion.php');
-    exit();
-}
+include "../gestion_session.php";
+
 // Vérifier si l'ID du prêt est présent dans l'URL
 if(isset($_GET['id'])) {
     // Récupérer l'ID du prêt depuis l'URL

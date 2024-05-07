@@ -2,13 +2,8 @@
 require_once '../ConnexionBD.php';
 require_once '../config.php';
 
-session_start(); // Démarrer la session
+include "../gestion_session.php";
 
-// Vérifier si l'utilisateur est connecté et n'est pas un client
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || $_SESSION['user_type'] === 'client') {
-    header("Location: ../connexion.php");
-    exit; // Assurez-vous de terminer le script après la redirection
-}
 
 require '../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;

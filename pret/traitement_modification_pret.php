@@ -4,16 +4,7 @@ require '../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-session_start();
-
-require_once '../config.php';
-
-// Vérifier si l'utilisateur est connecté et est un technicien
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_mail']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'sousadmin')) {
-    // Si l'utilisateur n'est pas connecté en tant qu'admin ou sous-admin, redirigez-le ou affichez un message d'erreur
-    header("Location: ../connexion.php");
-    exit;
-}
+include "../gestion_session.php";
 
 $technicien_id = $_SESSION['user_id'];
 
@@ -131,7 +122,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pret_id'])) {
 function sendPretEmail($recipient_email, $recipient_nom, $recipient_prenom, $sender_nom, $sender_prenom, $pret_info,$etat, $is_technicien) {
     // Récupérer l'email du technicien depuis la session
     $technicien_email = $_SESSION['user_mail'];
-
     try {
         // Composez le contenu de l'e-mail
         $subject = "Création de prêt - Notification";
