@@ -103,8 +103,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $success_count = 0;
     $error_count = 0;
 
-    sendPretCreationEmail($membre_id, $client_info['membre_mail'], $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_email, $technicien_nom, $technicien_prenom, $new_pret_info, true);
-    sendPretCreationEmail($membre_id, $client_info['membre_mail'], $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_email, $technicien_nom, $technicien_prenom, $new_pret_info, false);
+    sendPretCreationEmail($membre_id, $client_info['membre_mail'], $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_email, $technicien_nom, $technicien_prenom, $new_pret_info,$pret_etat, true);
+    sendPretCreationEmail($membre_id, $client_info['membre_mail'], $client_info['membre_nom'], $client_info['membre_prenom'], $technicien_email, $technicien_nom, $technicien_prenom, $new_pret_info,$pret_etat, false);
 
 
 
@@ -118,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 // Fonction pour envoyer un e-mail de création de prêt
-function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_prenom, $technicien_email, $technicien_nom, $technicien_prenom, $pret_info, $is_client) {
+function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_prenom, $technicien_email, $technicien_nom, $technicien_prenom, $pret_info,$pret_etat, $is_client) {
     try {
         // Composez le contenu de l'e-mail
         $subject = "Création de prêt - Notification";
@@ -127,6 +127,12 @@ function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_p
         if ($is_client) {
             $body .= "pour vous :\n\n";
             $body .= "Technicien responsable : $technicien_nom $technicien_prenom\n\n";
+            $body .= "État du prêt : ";
+            if ($pret_etat == 1) {
+                $body .= "En cours\n";
+            } else {
+                $body .= "Terminé\n";
+            }
             $body .= "Détails du prêt :\n";
             $body .= "Matériel : {$pret_info['pret_materiel']}\n";
             $body .= "Valeur du matériel : {$pret_info['valeurMat']}\n";
@@ -136,6 +142,12 @@ function sendPretCreationEmail($membre_id, $client_email, $client_nom, $client_p
             $body .= "Commentaire : {$pret_info['commentaire']}\n\n";
         } else {
             $body .= "pour le client $client_nom $client_prenom :\n\n";
+            $body .= "État du prêt : ";
+            if ($pret_etat == 1) {
+                $body .= "En cours\n";
+            } else {
+                $body .= "Terminé\n";
+            }
             $body .= "Détails du prêt :\n";
             $body .= "Matériel : {$pret_info['pret_materiel']}\n";
             $body .= "Valeur du matériel : {$pret_info['valeurMat']}\n";
