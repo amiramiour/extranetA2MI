@@ -133,11 +133,14 @@ if ($commande['type_cmd_devis'] == '1') {
                 <fieldset><legend>Photos <small></small></legend>
                     <div id="photos">
                         <?php 
-                        $i=0;
-                        foreach ($photos as $photo) { $i++; ?>
+                        foreach ($photos as $i => $photo) { ?>
                             <div class="photo">
-                                <label><b>Photo n°<?php echo $i ?></b></label><br>
-                                <img src="<?php echo DEVIS_IMAGE_PATH . $photo['photo']; ?>" alt="photo" style="width: 100px; height: 100px;">
+                            <label><b><?php echo (pathinfo($photo['photo'], PATHINFO_EXTENSION) === 'pdf') ? 'PDF' : 'Photo'; ?> n°<?php echo $i + 1; ?></b></label><br>
+                                <?php if (pathinfo($photo['photo'], PATHINFO_EXTENSION) === 'pdf') { ?>
+                                    <a href="<?php echo DEVIS_IMAGE_PATH . $photo['photo']; ?>" download><?php echo basename($photo['photo']); ?></a>
+                                <?php } else { ?>
+                                    <img src="<?php echo DEVIS_IMAGE_PATH . $photo['photo']; ?>" alt="photo" style="width: 100px; height: 100px;">
+                                <?php } ?>
                             </div> 
                         <?php } ?>
                     </div>
@@ -163,12 +166,8 @@ if ($commande['type_cmd_devis'] == '1') {
             <label class="float">Date de livraison souhaitée</label>
             <input type="date" name="dateS" value="<?php echo date('Y-m-d', $commande['cmd_devis_dateSouhait']) ?>" required autofocus readonly><br>
 
-            <label for="etat" class="float" >Statut commande </label>
-            <select name="etatC" required>
-                <?php foreach ($cmd_devis_etats as $etat) { ?>
-                    <option value="<?php echo $etat['id_etat_cmd_devis']; ?>"><?php echo $etat['cmd_devis_etat']; ?></option>
-                <?php } ?>
-            </select>
+            <label for="etat" class="float" >Statut * </label>         
+            <select name="etatC" id="etatC" required></select><br>
 
             <br><br>
             <label for="reference" class="float">Total HT </label>
@@ -368,9 +367,42 @@ if ($commande['type_cmd_devis'] == '1') {
             var divPhotos = document.getElementById('photos');
             var nouveauChamp = document.createElement('div');
             nouveauChamp.innerHTML = '<label for="picture">Prendre une photo :</label>' +
-                                    '<input type="file" accept="image/*" id="picture" capture="environment" name="photos[]" multiple>';
+                                    '<input type="file" accept="image/*, .pdf" id="picture" capture="environment" name="photos[]" multiple>';
             divPhotos.appendChild(nouveauChamp);
         }
+
+        // Stocker le type de commande dans une variable JavaScript
+var typeCommande = "<?php echo $commande['type_cmd_devis']; ?>";
+
+function filtrerEtats() {
+    var selectEtat = document.getElementById('etatC');
+
+    // Supprimer toutes les options existantes
+    selectEtat.innerHTML = '';
+
+    if (typeCommande === '2') {  // Devis
+        var optionEnAttente = document.createElement('option');
+        optionEnAttente.value = '2'; 
+        optionEnAttente.textContent = 'En attente';
+        selectEtat.appendChild(optionEnAttente);
+
+        var optionTermine = document.createElement('option');
+        optionTermine.value = '6'; 
+        optionTermine.textContent = 'Terminé';
+        selectEtat.appendChild(optionTermine);
+    } else { // Commande
+        <?php foreach ($cmd_devis_etats as $etat) { ?>
+            var option<?php echo $etat['id_etat_cmd_devis']; ?> = document.createElement('option');
+            option<?php echo $etat['id_etat_cmd_devis']; ?>.value = '<?php echo $etat['id_etat_cmd_devis']; ?>';
+            option<?php echo $etat['id_etat_cmd_devis']; ?>.textContent = '<?php echo $etat['cmd_devis_etat']; ?>';
+            selectEtat.appendChild(option<?php echo $etat['id_etat_cmd_devis']; ?>);
+        <?php } ?>
+    }
+}
+
+// Appeler la fonction filtrerEtats au chargement de la page
+filtrerEtats();
+
 </script>
 </body>
 </html>
