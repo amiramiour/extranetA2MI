@@ -31,6 +31,25 @@ if (isset($_GET['membre_id'])) {
         try {
             $db = connexionbdd();
 
+
+// Récupération du nom et du prénom du technicien à partir de son ID
+            $query_technicien_info = "SELECT membre_nom, membre_prenom FROM membres WHERE membre_id = :technicien_id";
+            $stmt_technicien_info = $db->prepare($query_technicien_info);
+            $stmt_technicien_info->bindParam(':technicien_id', $technicien_id);
+            $stmt_technicien_info->execute();
+            $technicien_info = $stmt_technicien_info->fetch(PDO::FETCH_ASSOC);
+
+            // Vérification si les informations du technicien ont été récupérées avec succès
+            if ($technicien_info) {
+                // Assignation du nom et du prénom du technicien
+                $technicien_nom = $technicien_info['membre_nom'];
+                $technicien_prenom = $technicien_info['membre_prenom'];
+            } else {
+                // Gestion de l'erreur si les informations du technicien ne sont pas disponibles
+                echo "Erreur : Impossible de récupérer les informations du technicien.";
+                exit();
+            }
+
             // Récupérer les informations du client
             $query_client = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :membre_id";
             $stmt_client = $db->prepare($query_client);
@@ -54,9 +73,20 @@ if (isset($_GET['membre_id'])) {
                 $envoi = 'mail';
             }
 
+            // Récupération de la date de facturation si elle est différée
             $facturation = $_POST['facturation'];
-            $dateFacturation = ($facturation === 'differee') ? $_POST['date_differee'] : null;
+            $dateFacturation = null;
+
+            if ($facturation === 'differee' && isset($_POST['date_differee'])) {
+                // Récupérer la date depuis le formulaire
+                $date_differee = $_POST['date_differee'];
+                // Convertir la date en timestamp UNIX
+                $dateFacturation = strtotime($date_differee);
+            }
+
+
             $paiement = $_POST['paiement'];
+
             $heureArrive = $_POST['heure_arrive'];
             $heureDepart = $_POST['heure_depart'];
             $commentaire = $_POST['commentaire'];
@@ -85,13 +115,23 @@ if (isset($_GET['membre_id'])) {
             // Récupérer l'ID du bon d'intervention inséré
             $bi_id = $db->lastInsertId();
 
+            // Récupération des détails du BI
+            // Récupérer les informations du bon d'intervention après insertion
+            $query_bi_details = $db->prepare("SELECT * FROM bi WHERE bi_id = :bi_id");
+            $query_bi_details->bindParam(':bi_id', $bi_id);
+            $query_bi_details->execute();
+            $bi_details = $query_bi_details->fetch(PDO::FETCH_ASSOC);
+
+
             // Insérer les données dans la table `intervention`
             $selectedIntervention = $_POST['selectedIntervention'];
             $nbPieces = $_POST['nb_pieces'];
             $prixUnitaire = $_POST['prixUn'];
 
             $total = $nbPieces * $prixUnitaire; // Calculer le total
-
+            if ($paiement==='cheque'){
+            $total=$total+1;
+            }
             // Insertion dans la table `intervention`
             $query_intervention = $db->prepare("INSERT INTO intervention (inter_intervention, inter_nbpiece, inter_prixunit, inter_total, bi_id) 
             VALUES (:selectedIntervention, :nbPieces, :prixUnitaire , :total, :bi_id)");
@@ -104,21 +144,31 @@ if (isset($_GET['membre_id'])) {
 
             $query_intervention->execute();
 
+            $inter_details = $db->lastInsertId();
+            // Récupération des détails de l'intervention
+            $query_intervention_details = $db->prepare("SELECT * FROM intervention WHERE inter_id = :inter_id");
+            $query_intervention_details->bindParam(':inter_id', $inter_details);
+            $query_intervention_details->execute();
+            $intervention_details = $query_intervention_details->fetch(PDO::FETCH_ASSOC);
+
+
+
             // Compteur de succès et d'erreurs
             $success_count = 0;
             $error_count = 0;
 
             // Envoi d'e-mails de confirmation au client et au technicien
-            if (sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_email, $total, $client_info['membre_nom'], $client_info['membre_prenom'], true)) {
+            if (sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_email, $total, $client_info['membre_nom'], $client_info['membre_prenom'], $bi_details, $intervention_details, true, $technicien_nom, $technicien_prenom)) {
                 $success_count++;
             } else {
                 $error_count++;
             }
-            if (sendBiCreationEmail($technicien_id, $selectedIntervention, $technicien_email, $total, $client_info['membre_nom'], $client_info['membre_prenom'], false)) {
+            if (sendBiCreationEmail($technicien_id, $selectedIntervention, $technicien_email, $total, $client_info['membre_nom'], $client_info['membre_prenom'], $bi_details, $intervention_details, false, $technicien_nom, $technicien_prenom)) {
                 $success_count++;
             } else {
                 $error_count++;
             }
+
 
             // Affichage du résultat
             if ($success_count > 0 && $error_count == 0) {
@@ -144,31 +194,71 @@ if (isset($_GET['membre_id'])) {
 }
 
 // Fonction pour envoyer un e-mail de création de bon d'intervention
-function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_email, $total, $client_nom, $client_prenom, $is_client) {
+function sendBiCreationEmail($membre_id, $selectedIntervention, $technicien_email, $total, $client_nom, $client_prenom, $bi_details, $intervention_details, $is_client, $technicien_nom, $technicien_prenom){
     // Récupérer l'adresse e-mail du client depuis la base de données
-    $connexion = connexionbdd();
-    $query = $connexion->prepare("SELECT membre_mail, bi_datein FROM membres INNER JOIN bi ON membres.membre_id = bi.membre_id WHERE membres.membre_id = ?");
+    $db = connexionbdd();
+    $query = $db->prepare("SELECT membre_mail, bi_datein FROM membres INNER JOIN bi ON membres.membre_id = bi.membre_id WHERE membres.membre_id = ?");
     $query->execute([$membre_id]);
     $result = $query->fetch(PDO::FETCH_ASSOC);
 
+// Composition du contenu de l'e-mail
+
     $client_email = $result['membre_mail'];
     $bi_datein = date('d/m/Y');
+
 
     // Composition du contenu de l'e-mail
     $subject = "=?UTF-8?B?" . base64_encode("Création d'un Bon d'intervention") . "?=";
     $body = "Bonjour,\n\n";
     if ($is_client) {
         $body .= "Un Bon d'intervention a été créé pour vous :\n\n";
-        $body .= "Intervention : $selectedIntervention\n";
-        $body .= "Date de création du bon : $bi_datein\n";
-        $body .= "Prix total : $total euros\n";
-        $body .= "Cordialement,\nVotre société";
+        $body .= "Technicien responsable : $technicien_nom $technicien_prenom\n\n";
+        $body .= "Details du bon d'intervention : \n";
+        $body .= "BI n° unique : " . $bi_details['bi_id'] . "\n";
+        $body .= "Facturer : " . ucfirst($bi_details['bi_facture']) . "\n";
+        $body .= "Garantie : " . ucfirst($bi_details['bi_garantie']) . "\n";
+        $body .= "Contrat/Pack : " . ucfirst($bi_details['bi_contrat']) . "\n";
+        $body .= "Service à la personne : " . ucfirst($bi_details['bi_service']) . "\n";
+        $body .= "Envoyer facture par : " . ucfirst($bi_details['bi_envoi']) . "\n";
+        $body .= "Facturation : " . $bi_details['bi_facturation'] . ", le : " . date('Y/m/d', $bi_details['bi_datefacturation'] ).  "\n";
+        $body .= "Type de paiement : " . ucfirst($bi_details['bi_paiement']) . "\n";
+        $body .= "Date d'entrée : " . date('Y/m/d', $bi_details['bi_datein']) . "\n";
+        $body .= "Heure d'arrivée : " . $bi_details['bi_heurearrive'] . "\n";
+        $body .= "Heure de départ : " . $bi_details['bi_heuredepart'] . "\n";
+        $body .= "Commentaire : " . $bi_details['bi_commentaire'] . "\n\n";
+        $body .= "Intervention :\n";
+        $body .= "Intervention : " . $intervention_details['inter_intervention'] . "\n";
+        $body .= "Nb pièces : " . $intervention_details['inter_nbpiece'] . " | Prix/pièce : " . number_format($intervention_details['inter_prixunit'], 2) . "€ | Prix total : " . number_format($intervention_details['inter_total'], 2) . "€\n\n";
+        $body .= "Coût total HT : " . number_format($intervention_details['inter_total'], 2) . "€\n";
+        // Calculer le coût total TTC
+        $tauxTVA = 0.20; // Exemple : taux de TVA à 20%
+        $totalTTC = $intervention_details['inter_total'] * (1 + $tauxTVA);
+        $body .= "Coût total TTC : " . number_format($totalTTC, 2) . "€\n";
+        $body .= "Cordialement,\nA2MI INFORMATIQUE";
+
     } else {
         $body .= "Un Bon d'intervention a été créé pour $client_nom $client_prenom :\n\n";
-        $body .= "Intervention : $selectedIntervention\n\n";
-        $body .= "Date de création du bon : $bi_datein\n\n";
-        $body .= "Prix total : $total euros\n\n";
-        $body .= "Cordialement,\n\nVotre société";
+        $body .= "Details du bon d'intervention : \n";
+        $body .= "BI n° unique : " . $bi_details['bi_id'] . "\n";
+        $body .= "Facturer : " . ucfirst($bi_details['bi_facture']) . "\n";
+        $body .= "Garantie : " . ucfirst($bi_details['bi_garantie']) . "\n";
+        $body .= "Contrat/Pack : " . ucfirst($bi_details['bi_contrat']) . "\n";
+        $body .= "Service à la personne : " . ucfirst($bi_details['bi_service']) . "\n";
+        $body .= "Envoyer facture par : " . ucfirst($bi_details['bi_envoi']) . "\n";
+        $body .= "Facturation : " . $bi_details['bi_facturation'] . ", le : " . date('Y/m/d', $bi_details['bi_datefacturation'] ).  "\n";
+        $body .= "Type de paiement : " . ucfirst($bi_details['bi_paiement']) . "\n";
+        $body .= "Date d'entrée : " . date('Y/m/d', $bi_details['bi_datein']) . "\n";
+        $body .= "Heure d'arrivée : " . $bi_details['bi_heurearrive'] . "\n";
+        $body .= "Heure de départ : " . $bi_details['bi_heuredepart'] . "\n";
+        $body .= "Commentaire : " . $bi_details['bi_commentaire'] . "\n\n";
+        $body .= "Intervention :\n";
+        $body .= "Intervention : " . $intervention_details['inter_intervention'] . "\n";
+        $body .= "Nb pièces : " . $intervention_details['inter_nbpiece'] . " | Prix/pièce : " . number_format($intervention_details['inter_prixunit'], 2) . "€ | Prix total : " . number_format($intervention_details['inter_total'], 2) . "€\n\n";
+        $body .= "Coût total HT : " . number_format($intervention_details['inter_total'], 2) . "€\n";
+        // Calculer le coût total TTC
+        $tauxTVA = 0.20; // Exemple : taux de TVA à 20%
+        $totalTTC = $intervention_details['inter_total'] * (1 + $tauxTVA);
+        $body .= "Coût total TTC : " . number_format($totalTTC, 2) . "€\n";
     }
 
     try {
