@@ -4,7 +4,7 @@ require_once '../config.php';
 include "../gestion_session.php";
 
 include '../ConnexionBD.php';
-$pdo = connexionbdd();
+$db = connexionbdd();
 
 require '../vendor/autoload.php';
 
@@ -24,7 +24,7 @@ else  {
 }
 
 //récupérer les informations du client
-$query = $pdo->prepare("SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :id_client");
+$query = $db->prepare("SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :id_client");
 $query->bindParam(':id_client', $id_client, PDO::PARAM_INT);
 $query->execute();
 $client = $query->fetch(PDO::FETCH_ASSOC);
@@ -32,7 +32,7 @@ $client = $query->fetch(PDO::FETCH_ASSOC);
 //récupérer les information du technicien qui a effectué la commande
 $id_technicien = $_SESSION['user_id'];
 //var_dump($id_technicien);
-$query = $pdo->prepare("SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :id_technicien");
+$query = $db->prepare("SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :id_technicien");
 $query->bindParam(':id_technicien', $id_technicien, PDO::PARAM_INT);
 $query->execute();
 $technicien = $query->fetch(PDO::FETCH_ASSOC);
@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $dateS = strtotime($date_souhait);
     $dateActuelle = time();
 
-    $query = $pdo->prepare("SELECT cmd_devis_etat FROM cmd_devis_etats WHERE id_etat_cmd_devis = :etatC");
+    $query = $db->prepare("SELECT cmd_devis_etat FROM cmd_devis_etats WHERE id_etat_cmd_devis = :etatC");
     $query->bindParam(':etatC', $etatC, PDO::PARAM_INT);
     $query->execute();
     $etat_commande = $query->fetchColumn();
@@ -65,13 +65,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         $commentaire = $_POST['commentaire'];
 
-        $stmt = $pdo->prepare("INSERT INTO commande_devis (cmd_devis_reference, cmd_devis_designation, cmd_devis_datein, cmd_devis_dateout, 
+        $stmt = $db->prepare("INSERT INTO commande_devis (cmd_devis_reference, cmd_devis_designation, cmd_devis_datein, cmd_devis_dateout, 
                         membre_id, cmd_devis_prixventettc, cmd_devis_technicien, cmd_devis_dateSouhait, cmd_devis_etat, 
                         cmd_devis_prixHT, cmd_devis_margeT, type_cmd_devis, commentaire) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?,?)");
         $stmt->execute([$nomC, $designation, $dateActuelle, $dateP, $id_client, $totalTTC,$id_technicien, 
                         $dateS, $etatC, $totalHT, $totalMarge, $type, $commentaire]);
 
-        $id_commande_devis = $pdo->lastInsertId();
+        $id_commande_devis = $db->lastInsertId();
 
         
         // On vérifie d'abord si des photos ont été ajoutées
@@ -91,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Déplacer le fichier téléchargé vers le dossier de destination
                 if (move_uploaded_file($file_tmp, $file_destination)) {
                     // Insertion de l'image dans la base de données
-                    $stmt = $pdo->prepare("INSERT INTO photos_devis (photo, id_devis) VALUES (?, ?)");
+                    $stmt = $db->prepare("INSERT INTO photos_devis (photo, id_devis) VALUES (?, ?)");
                     $stmt->execute([$new_filename, $id_commande_devis]);
                 }
             }
@@ -110,19 +110,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $etatProduit = $produit[8];
             //var_dump($produit);
 
-            $stmt = $pdo->prepare("INSERT INTO devis_produit (reference, designation, paHT, marge, pvHT, pvTTC, id_devis, fournisseur, etat) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $db->prepare("INSERT INTO devis_produit (reference, designation, paHT, marge, pvHT, pvTTC, id_devis, fournisseur, etat) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([$reference, $designation, $paHT, $marge, $pvHT, $pvTTC, $id_commande_devis, $fournisseur, $etatProduit]);
 
         }
  
     }else{ //commande
-        $stmt = $pdo->prepare("INSERT INTO commande_devis (cmd_devis_reference, cmd_devis_designation, cmd_devis_datein, cmd_devis_dateout, 
+        $stmt = $db->prepare("INSERT INTO commande_devis (cmd_devis_reference, cmd_devis_designation, cmd_devis_datein, cmd_devis_dateout, 
                         membre_id, cmd_devis_prixventettc, cmd_devis_technicien, cmd_devis_dateSouhait, cmd_devis_etat, 
                         cmd_devis_prixHT, cmd_devis_margeT, type_cmd_devis) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?)");
         $stmt->execute([$nomC, $designation, $dateActuelle, $dateP, $id_client, $totalTTC,$id_technicien, 
                         $dateS, $etatC, $totalHT, $totalMarge, $type]);
 
-        $id_commande_devis = $pdo->lastInsertId();
+        $id_commande_devis = $db->lastInsertId();
 
         //On insère les produits dans commande_produit
         foreach ($_POST['dynamic'] as $produit) {
@@ -137,12 +137,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             //var_dump($produit);
 
-            $stmt = $pdo->prepare("INSERT INTO commande_produit (reference, designation, paHT, marge, pvHT, pvTTC, etat, id_commande, fournisseur) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $db->prepare("INSERT INTO commande_produit (reference, designation, paHT, marge, pvHT, pvTTC, etat, id_commande, fournisseur) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([$reference, $designation, $paHT, $marge, $pvHT, $pvTTC, $etatProduit, $id_commande_devis, $fournisseur]);
         }
     }
 
-    $stmt = $pdo->prepare("INSERT INTO sauvgarde_etat_info_commande 
+    $stmt = $db->prepare("INSERT INTO sauvgarde_etat_info_commande 
                            (commande_id, sauvgarde_etat, created_by, date_creation, updated_by, date_update)
                            VALUES
                            (:commande_id, :sauvegarde_etat, :id_technicienC , NOW(), :id_technicienU, NOW())");

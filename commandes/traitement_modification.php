@@ -3,7 +3,7 @@ require_once '../config.php';
 include "../gestion_session.php";
 
 include '../ConnexionBD.php';
-$pdo = connexionbdd();
+$db = connexionbdd();
 
 
 require '../vendor/autoload.php';

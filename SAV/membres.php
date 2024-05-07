@@ -3,10 +3,10 @@
 include '../ConnexionBD.php';
 include "../gestion_session.php";
 
-$pdo = connexionbdd();
+$db = connexionbdd();
 
 // Récupérer les informations des membres depuis la base de données
-$query = $pdo->query("SELECT membre_id as client_id, membre_entreprise, membre_nom, membre_prenom, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_mail, membre_type FROM membres");
+$query = $db->query("SELECT membre_id as client_id, membre_entreprise, membre_nom, membre_prenom, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_mail, membre_type FROM membres");
 $membres = $query->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>

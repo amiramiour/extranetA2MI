@@ -1,21 +1,20 @@
 <?php
 include "../gestion_session.php";
 include '../ConnexionBD.php';
-include('../navbar.php');
 
 
-$pdo = connexionbdd();
+$db = connexionbdd();
 
 $id_client = $_GET['id'];
 
 //requete pour recupérer le nom prénom du client
-$query = $pdo->prepare("SELECT membre_nom, membre_prenom FROM membres WHERE membre_id = :id_client");
+$query = $db->prepare("SELECT membre_nom, membre_prenom FROM membres WHERE membre_id = :id_client");
 $query->bindParam(':id_client', $id_client, PDO::PARAM_INT);
 $query->execute();
 $client = $query->fetch();
 //var_dump($client);
 
-$query = $pdo->prepare("SELECT c.membre_id, m.membre_nom AS nom_client , 
+$query = $db->prepare("SELECT c.membre_id, m.membre_nom AS nom_client , 
                       m.membre_prenom, c.cmd_devis_id, c.cmd_devis_reference, c.cmd_devis_designation, 
                       c.cmd_devis_datein, c.cmd_devis_dateout, c.cmd_devis_prixventettc, 
                       l.membre_nom AS nom_technicien, 
@@ -32,7 +31,7 @@ $commandes_client = $query->fetchAll();
 //var_dump($commandes_client);
 
 //requete pour récupréer les états des commandes
-$req = $pdo->prepare("SELECT cmd_devis_etat FROM cmd_devis_etats");
+$req = $db->prepare("SELECT cmd_devis_etat FROM cmd_devis_etats");
 $req->execute();
 $commande_etat = $req->fetchAll();
 //var_dump($commandes_client);
@@ -46,6 +45,8 @@ $commande_etat = $req->fetchAll();
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+<!-- Inclure le navbar -->
+<?php include('../navbar.php'); ?>
     <div class="container">
         <h2>Liste des commandes de <?= $client['membre_nom'] . ' ' . $client['membre_prenom'] ?></h2>
         <a href="commandes_devis.php" class="btn btn-primary mb-3">Retour</a>

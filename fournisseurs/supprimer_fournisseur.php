@@ -3,7 +3,7 @@ include "../gestion_session.php";
 
 // Inclusion du fichier de connexion à la base de données
 require_once '../ConnexionBD.php';
-$connexion = connexionbdd();
+$db = connexionbdd();
 
 // Traitement du formulaire de suppression de fournisseur
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])) {
@@ -11,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])) {
 
     // Requête pour désactiver le fournisseur
     $query = "UPDATE fournisseur SET active = 0 WHERE idFournisseur = :fournisseur_id";
-    $stmt = $connexion->prepare($query);
+    $stmt = $db->prepare($query);
     $stmt->bindParam(':fournisseur_id', $fournisseur_id);
 
     // Exécution de la requête
@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])) {
 
 // Requête pour récupérer les fournisseurs actifs
 $query = "SELECT idFournisseur, nomFournisseur FROM fournisseur WHERE active = 1 ORDER BY nomFournisseur";
-$stmt = $connexion->prepare($query);
+$stmt = $db->prepare($query);
 $stmt->execute();
 $fournisseurs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -79,5 +79,5 @@ $fournisseurs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <?php
 // Fermeture de la connexion à la base de données
-$connexion = null;
+$db = null;
 ?>

@@ -16,8 +16,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 include '../ConnexionBD.php';
-include '../navbar.php';
-$pdo = connexionbdd();
+$db = connexionbdd();
 
 if(isset($_POST['submit'])) {
     $entreprise = $_POST['entreprise'];
@@ -37,7 +36,7 @@ if(isset($_POST['submit'])) {
         $type = 'danger';
     } else {
         // Vérifier si un compte avec la même adresse e-mail existe déjà
-        $query = $pdo->prepare("SELECT * FROM membres WHERE membre_mail = ?");
+        $query = $db->prepare("SELECT * FROM membres WHERE membre_mail = ?");
         $query->execute([$mail]);
         $existing_account = $query->fetch();
 
@@ -60,7 +59,7 @@ if(isset($_POST['submit'])) {
                     // Déplacer le fichier vers le dossier de destination
                     if(move_uploaded_file($logo_tmp_name, $logo_destination)) {
                         // Insérer les informations du client dans la base de données avec le nom du logo
-                        $query = $pdo->prepare("INSERT INTO membres (membre_entreprise, membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_telfixe, membre_inscription, membre_mail, membre_type, membre_logo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, ?, ?)");
+                        $query = $db->prepare("INSERT INTO membres (membre_entreprise, membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_telfixe, membre_inscription, membre_mail, membre_type, membre_logo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, ?, ?)");
                         $query->execute([$entreprise, $nom, $prenom, password_hash($password, PASSWORD_BCRYPT), $adresse, $adresse_comp, $cp, $ville, $tel, $tel_fix, $mail, $type, $logo_name]);
                         // Envoi de l'email au client
                         sendEmailToClient($mail, $nom, $prenom,$password);
@@ -78,7 +77,7 @@ if(isset($_POST['submit'])) {
                 }
             } else {
                 // Si aucun fichier n'a été téléchargé, exécuter la requête sans le logo
-                $query = $pdo->prepare("INSERT INTO membres (membre_entreprise, membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_telfixe, membre_inscription, membre_mail, membre_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, ?)");
+                $query = $db->prepare("INSERT INTO membres (membre_entreprise, membre_nom, membre_prenom, membre_mdp, membre_adresse, membre_adresse_comp, membre_cp, membre_ville, membre_tel, membre_telfixe, membre_inscription, membre_mail, membre_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), ?, ?)");
                 $query->execute([$entreprise, $nom, $prenom, password_hash($password, PASSWORD_BCRYPT), $adresse, $adresse_comp, $cp, $ville, $tel, $tel_fix, $mail, $type]);
 
                 // Envoi de l'email au client
@@ -154,6 +153,8 @@ function generateRandomString($length = 8) {
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+<!-- Inclure le navbar -->
+<?php include('../navbar.php'); ?>
 <div class="container">
     <h2>Création de compte client</h2>
     <form action="create_account.php" method="post" enctype="multipart/form-data">

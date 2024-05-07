@@ -15,12 +15,12 @@ $error_count = 0;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
-        $connexion = connexionbdd();
+        $db = connexionbdd();
 
         // Récupération de l'ID du client depuis le formulaire
         $membre_id = $_POST['client_id'];
         $query_client = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :membre_id";
-        $stmt_client = $connexion->prepare($query_client);
+        $stmt_client = $db->prepare($query_client);
         $stmt_client->bindParam(':membre_id', $membre_id);
         $stmt_client->execute();
         $client_info = $stmt_client->fetch(PDO::FETCH_ASSOC);
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Récupération des informations du technicien
         $query_technicien = "SELECT membre_nom, membre_prenom, membre_mail FROM membres WHERE membre_id = :sav_technicien_id";
-        $stmt_technicien = $connexion->prepare($query_technicien);
+        $stmt_technicien = $db->prepare($query_technicien);
         $stmt_technicien->bindParam(':sav_technicien_id', $sav_technicien_id);
         $stmt_technicien->execute();
         $technicien_info = $stmt_technicien->fetch(PDO::FETCH_ASSOC);
@@ -118,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Récupérer l'ID de l'état à partir de son libellé
         $query_etat = "SELECT id_etat_sav FROM sav_etats WHERE etat_intitule = :etat_intitule";
-        $stmt_etat = $connexion->prepare($query_etat);
+        $stmt_etat = $db->prepare($query_etat);
         $stmt_etat->bindParam(':etat_intitule', $etat_intitule);
         $stmt_etat->execute();
         $etat_row = $stmt_etat->fetch(PDO::FETCH_ASSOC);
@@ -128,7 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sql = "INSERT INTO sav (membre_id, sav_accessoire, sav_datein, sav_dateout, sav_envoi,  sav_etats, sav_forfait, sav_garantie, sav_maindoeuvreht, sav_maindoeuvrettc, sav_mdpclient, sav_probleme, sav_regle, sav_tarifmaterielht, sav_tarifmaterielttc, sav_typemateriel, sav_technicien,sav_image) 
 VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, :etat_id, :forfait, :garantie, :maindoeuvreht, :maindoeuvrettc, :mdpclient, :probleme, :facture_reglee, :tarifmaterielht, :tarifmaterielttc, :typemateriel, :sav_technicien_id,:photo_nom)";
 
-        $stmt = $connexion->prepare($sql);
+        $stmt = $db->prepare($sql);
         $stmt->bindParam(':membre_id', $membre_id);
         $stmt->bindParam(':sav_technicien_id', $sav_technicien_id);
         $stmt->bindParam(':accessoires', $accessoires);
@@ -152,12 +152,12 @@ VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, :
         $stmt->execute();
 
 // Récupérer l'ID du SAV nouvellement inséré
-        $sav_id = $connexion->lastInsertId();
+        $sav_id = $db->lastInsertId();
         // Récupération des détails du SAV
         $query_sav_details = "SELECT sav_datein, sav_dateout, sav_probleme, sav_typemateriel, sav_accessoire, 
                       sav_garantie, sav_maindoeuvrettc, sav_tarifmaterielttc 
                       FROM sav WHERE sav_id = :sav_id";
-        $stmt_sav_details = $connexion->prepare($query_sav_details);
+        $stmt_sav_details = $db->prepare($query_sav_details);
         $stmt_sav_details->bindParam(':sav_id', $sav_id);
         $stmt_sav_details->execute();
         $sav_details = $stmt_sav_details->fetch(PDO::FETCH_ASSOC);
@@ -181,7 +181,7 @@ VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, :
                 $sql_materiel = "INSERT INTO sav_materiel (materiel_utilise, sav_id, quantite, coutUnitaire) 
                 VALUES (:materiel_utilise, :sav_id, :quantite, :cout_unitaire)";
 
-                $stmt_materiel = $connexion->prepare($sql_materiel);
+                $stmt_materiel = $db->prepare($sql_materiel);
                 $stmt_materiel->bindParam(':materiel_utilise', $materiel_utilise);
                 $stmt_materiel->bindParam(':sav_id', $sav_id);
                 $stmt_materiel->bindParam(':quantite', $quantite);
@@ -201,7 +201,7 @@ VALUES (:membre_id, :accessoires, :date_recu, :date_livraison, :envoi_facture, :
         try {
             $query_insert_sav_history = "INSERT INTO sauvgarde_etat_info (sav_id, sauvgarde_etat, sauvgarde_avancement, date_creation, date_update, created_by, updated_by) 
     VALUES (:sav_id, :sauvgarde_etat, 'Création de SAV', NOW(), NOW(), :created_by, :updated_by)";
-            $stmt_insert_sav_history = $connexion->prepare($query_insert_sav_history);
+            $stmt_insert_sav_history = $db->prepare($query_insert_sav_history);
             $stmt_insert_sav_history->bindParam(':sav_id', $sav_id, PDO::PARAM_INT);
             $stmt_insert_sav_history->bindParam(':sauvgarde_etat', $etat_id, PDO::PARAM_INT);
             $stmt_insert_sav_history->bindParam(':created_by', $created_by, PDO::PARAM_INT); // Utilisation de l'ID de session

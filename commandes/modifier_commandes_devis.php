@@ -2,9 +2,6 @@
 require_once '../config.php';
 include "../gestion_session.php";
 include '../ConnexionBD.php';
-$pdo = connexionbdd();
-
-include '../navbar.php';
 
 $db = connexionbdd();
 
@@ -69,6 +66,8 @@ if ($commande['type_cmd_devis'] == '1') {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+<!-- Inclure le navbar -->
+<?php include('../navbar.php'); ?>
     <div class="container">
         <h2>Modifier une commande / Devis</h2>
         <form action="traitement_modification.php?idcommande=<?php echo $idCommande ?>&idclient=<?php echo $commande['membre_id']?>" method="post" enctype="multipart/form-data">

@@ -2,9 +2,9 @@
 include '../ConnexionBD.php';
 include "../gestion_session.php";
 
-$pdo = connexionbdd();
+$db = connexionbdd();
 
-$stmt = $pdo->query("SELECT * FROM sauvgarde_etat_info_commande");
+$stmt = $db->query("SELECT * FROM sauvgarde_etat_info_commande");
 $sauvegardes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -16,6 +16,8 @@ $sauvegardes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Test de Sauvegarde Commande</title>
 </head>
 <body>
+<!-- Inclure le navbar -->
+<?php include('../navbar.php'); ?>
 <h1>Enregistrements dans la table sauvegarde_etat_info_commande</h1>
 <table border="1">
     <thead>

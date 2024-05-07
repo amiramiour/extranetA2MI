@@ -3,11 +3,11 @@ include "../gestion_session.php";
 
 // Inclusion du fichier de connexion à la base de données
 require_once '../ConnexionBD.php';
-$connexion = connexionbdd();
+$db = connexionbdd();
 
 // Requête pour récupérer la liste des fournisseurs
 $query = "SELECT idFournisseur, nomFournisseur FROM fournisseur WHERE active = 1 ORDER BY nomFournisseur";
-$stmt = $connexion->prepare($query);
+$stmt = $db->prepare($query);
 $stmt->execute();
 $fournisseurs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -70,5 +70,5 @@ $nbFournisseurs = count($fournisseurs);
 
 <?php
 // Fermeture de la connexion à la base de données
-$connexion = null;
+$db = null;
 ?>
