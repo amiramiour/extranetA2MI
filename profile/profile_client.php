@@ -171,7 +171,7 @@ try {
                 echo "<p>Heure d'arrivée : " . $bi['bi_heurearrive'] . "</p>";
                 echo "<p>Heure de départ : " . $bi['bi_heuredepart'] . "</p>";
                 // Bouton pour modifier le bon d'intervention
-                if ($_SESSION['user_type'] === 'admin' || $_SESSION['user_type'] === 'sousadmin') {
+                if ($_SESSION['user_type'] === 'admin') {
                     echo "<a href='../bi/modification_bi.php?bi_id=" . $bi['bi_id'] . "' class='btn btn-primary custom-btn'>Modifier</a>";
                     echo "<button type='button' class='btn btn-danger btn-supprimer' data-bi-id='" . $bi['bi_id'] . "'>Supprimer</button>"; // Correction
                 }
