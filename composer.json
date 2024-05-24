@@ -1,0 +1,7 @@
+{
+    "require": {
+        "payplug/payplug-php": "^3.5",
+ 	"phpmailer/phpmailer": "^6.9",
+        "dompdf/dompdf": "^3.0"
+    }
+}
