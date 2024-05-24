@@ -122,9 +122,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin' && isset($_SESSION[
 <!-- END page-cover -->
 
 <!-- BEGIN #loader -->
-<div id="loader" class="app-loader">
-    <span class="spinner"></span>
-</div>
+
 <!-- END #loader -->
 
 <!-- BEGIN #app -->
@@ -236,7 +234,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin' && isset($_SESSION[
                                     <td><?= htmlspecialchars($pret['pret_caution']) ?></td>
                                     <td><?= htmlspecialchars($pret['pret_mode']) ?></td>
                                     <td><?= htmlspecialchars(date('d/m/Y', strtotime($pret['pret_datein']))) ?></td>
-                                    <td><?= htmlspecialchars(date('d/m/Y', $pret['pret_dateout'])) ?></td>
+                                    <td><?= htmlspecialchars(date('d/m/Y', strtotime($pret['pret_dateout']))) ?></td>
                                     <td><?= htmlspecialchars($technicien['users_name'] . ' ' . $technicien['users_firstname']) ?></td>
                                     <td><?= htmlspecialchars($pret['commentaire']) ?></td>
                                     <td><?= htmlspecialchars($pret['etat_intitule']) ?></td>
